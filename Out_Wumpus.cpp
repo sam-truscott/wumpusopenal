@@ -383,12 +383,14 @@ namespace WinampOpenALOut {
 		c_bufferLength = ConfigFile::ReadInteger(CONF_BUFFER_LENGTH);
 		if(c_bufferLength == ERROR_BUFFER) {
 			c_bufferLength = DEFC_BUFFER_LENGTH;
+			ConfigFile::WriteInteger(CONF_BUFFER_LENGTH, c_bufferLength);
 		}
 
 		// read in the current device to use
 		int currentDevice = ConfigFile::ReadInteger(CONF_DEVICE);
 		if(currentDevice == -1) {
 			currentDevice = DEFC_DEVICE;
+			ConfigFile::WriteInteger(CONF_DEVICE, currentDevice);
 		}
 
 		/*

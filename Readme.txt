@@ -1,7 +1,7 @@
 Wumpus Out OpenAL is copyright (c) 2008 by Sam Truscott.
 =======================================================
 
-Wumpus Out OpenAL v0.7.2
+Wumpus Out OpenAL v0.7.3
 ========================
 
 Install
@@ -26,6 +26,10 @@ Known Issues
 
 Change Log
 ==========
+
+v0.7.3
+======
+* Fixed bug if Winamp.ini had invalid values or didnt exist
 
 v0.7.2
 ======
