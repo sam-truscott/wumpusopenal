@@ -1,0 +1,20 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 9.00
+# Visual Studio 2005
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "out_wumpus", "out_wumpus.vcproj", "{3B29D613-DE3B-43B1-A9AD-77A81D3C744D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debugging|Win32 = Debugging|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3B29D613-DE3B-43B1-A9AD-77A81D3C744D}.Debugging|Win32.ActiveCfg = Debugging|Win32
+		{3B29D613-DE3B-43B1-A9AD-77A81D3C744D}.Debugging|Win32.Build.0 = Debugging|Win32
+		{3B29D613-DE3B-43B1-A9AD-77A81D3C744D}.Release|Win32.ActiveCfg = Release|Win32
+		{3B29D613-DE3B-43B1-A9AD-77A81D3C744D}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
