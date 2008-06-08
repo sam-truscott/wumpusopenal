@@ -2,7 +2,7 @@
 #include "Time.h"
 #include "Constants.h"
 
-#define Time_Type DWORD//__time64_t
+#define Time_Type DWORD
 
 #ifndef C_CLOCK
 #define C_CLOCK

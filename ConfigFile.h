@@ -10,6 +10,8 @@ namespace WinampOpenALOut {
 #define CONF_EFX "EffectsEnabled"
 #define CONF_BUFFER_LENGTH "BufferLength"
 #define DEFC_BUFFER_LENGTH 2000
+#define CONF_BUFFER_LENGTH_MIN 1000
+#define CONF_BUFFER_LENGTH_MAX 4000
 
 #ifndef SSE_BUILD
 	public class ConfigFile {
@@ -20,7 +22,7 @@ namespace WinampOpenALOut {
 	private:
 		static char INI_FILE[MAX_PATH];
 	public:
-		static void Initialise();
+		static void Initialise(HWND hMainWindow);
 
 		static void ReadString(char *name,char *data, int mlen);
 		static void WriteString(char *name,char *data);

@@ -313,16 +313,16 @@ private: System::ComponentModel::IContainer^  components;
 			// 
 			// trackBufferLength
 			// 
-			this->trackBufferLength->LargeChange = 1000;
+			this->trackBufferLength->LargeChange = CONF_BUFFER_LENGTH_MIN;
 			this->trackBufferLength->Location = System::Drawing::Point(15, 50);
-			this->trackBufferLength->Maximum = 4000;
-			this->trackBufferLength->Minimum = 1000;
+			this->trackBufferLength->Maximum = CONF_BUFFER_LENGTH_MAX;
+			this->trackBufferLength->Minimum = CONF_BUFFER_LENGTH_MIN;
 			this->trackBufferLength->Name = L"trackBufferLength";
 			this->trackBufferLength->Size = System::Drawing::Size(369, 45);
 			this->trackBufferLength->SmallChange = 500;
 			this->trackBufferLength->TabIndex = 10;
 			this->trackBufferLength->TickFrequency = 256;
-			this->trackBufferLength->Value = 2000;
+			this->trackBufferLength->Value = DEFC_BUFFER_LENGTH;
 			this->trackBufferLength->Scroll += gcnew System::EventHandler(this, &Config::trackBufferLength_Scroll);
 			// 
 			// checkBoxEffectsEnabled

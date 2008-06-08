@@ -14,6 +14,15 @@ namespace WinampOpenALOut {
 
 	void EffectsModule::SetEffectsEnabled(bool effectsOn) {
 
+		/*
+			return regardless, this isn't implemented yet
+			and probably won't be until the rest is working
+			properly.
+		*/
+		return;
+
+		/*
+
 		bool delta = effectsEnabled != effectsOn ? true : false;
 
 		// backup state so we can re-enable auto later
@@ -76,6 +85,7 @@ namespace WinampOpenALOut {
 				ptrOw->Flush(currentPosition);
 			}
 		}
+		*/
 	}
 
 	void EffectsModule::SourceDetermined(ALuint src) {
@@ -84,7 +94,13 @@ namespace WinampOpenALOut {
 			return;
 		}
 
+		/*
+			return regardless, this isn't implemented yet
+			and probably won't be until the rest is working
+			properly.
+		*/
 		return;
+		/*
 
 		ALenum err;
 		this->uiSource = src;
@@ -197,7 +213,7 @@ namespace WinampOpenALOut {
 		}
 
 		alSourcef(uiSource, AL_CONE_OUTER_GAINHF, 0.5f);
-		alListenerf(AL_METERS_PER_UNIT, 0.3f);
+		alListenerf(AL_METERS_PER_UNIT, 0.3f);*/
 
 	}
 

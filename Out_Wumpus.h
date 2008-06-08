@@ -15,7 +15,7 @@ namespace WinampOpenALOut {
 		~Output_Wumpus();
 		void Config(HWND hwnd);
 		void About(HWND hwnd);
-		void Initialise();
+		void Initialise(HWND window);
 		void Quit();
 		int	Open(int samplerate, int numchannels, int bitspersamp, int bufferlenms, int prebufferms);
 		void Close();

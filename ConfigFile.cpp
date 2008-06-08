@@ -1,6 +1,9 @@
 #include <windows.h>
 #include "ConfigFile.h"
 
+#define WM_WA_IPC WM_USER
+#define IPC_GETINIFILE 334
+
 #ifndef SSE_BUILD
 namespace WinampOpenALOut {
 #endif
@@ -38,12 +41,21 @@ namespace WinampOpenALOut {
 		return retVal;
 	}
 
-	void ConfigFile::Initialise(){
-		char *p=INI_FILE;
-		GetModuleFileName(NULL,INI_FILE,sizeof(INI_FILE));
-		while (*p) p++;
-		while (p >= INI_FILE && *p != '.') p--;
-		strcpy_s(p+1, MAX_PATH, "ini");
+	void ConfigFile::Initialise(HWND hMainWindow){
+		char *p;
+		if (hMainWindow 
+		   && (p = (char *)SendMessage(hMainWindow, WM_WA_IPC, 0, IPC_GETINIFILE))
+		   &&  p!= (char *)1){
+			strcpy(INI_FILE, p);
+		}else{
+			GetModuleFileName(NULL, INI_FILE, sizeof(INI_FILE));
+			p = INI_FILE + strlen(INI_FILE);
+			while (p >= INI_FILE && *p != '.') {
+				p--;
+			}
+			strcpy(++p, "ini");
+		}
+		int i=0;
 	}
 
 	void ConfigFile::WriteString(char *name, char *data) {

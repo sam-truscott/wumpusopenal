@@ -7,8 +7,6 @@ namespace WinampOpenALOut {
 	Time_Type Clock::initialTime = 0;
 
 	void Clock::Initialise() {
-		//initialTime = 0;
-		//initialTime = GetTime();
 		initialTime = GetTickCount();
 	}
 

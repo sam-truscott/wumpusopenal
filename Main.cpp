@@ -1,4 +1,4 @@
-#include <windows.h>
+#include "Main.h"
 #include "Out_Openal.h"
 #include "Out_Wumpus.h"
 #include "Version.h"
@@ -12,6 +12,32 @@ WinampOpenALOut::Output_Wumpus *outputWumpus = 0;
 #else
 Output_Wumpus* outputWumpus = 0;
 #endif
+
+/*
+	point to the correct procedures
+*/
+Out_Module out = {
+	OUT_VER,
+	TITLE, 
+	800005,
+	0, // hmainwindow
+	0, // hdllinstance
+	_Config,
+	_About,
+	_Initialise,
+	_Quit,
+	_Open,
+	_Close,
+	_Write,
+	_CanWrite,
+	_IsPlaying,
+	_Pause,
+	_SetVolume,
+	_SetPan,
+	_Flush,
+	_GetOutputTime,
+	_GetWrittenTime
+};
 
 void _Config(HWND hwndParent) {
 	outputWumpus->Config(hwndParent);
@@ -27,13 +53,6 @@ void _Initialise() {
 	_CrtSetBreakAlloc(203);
 	_CrtSetBreakAlloc(194);*/
 
-	//_CrtSetBreakAlloc(229);
-	//_CrtSetBreakAlloc(204);
-	//_CrtSetBreakAlloc(195);
-
-	//_CrtSetBreakAlloc(230);
-	//_CrtSetBreakAlloc(205);
-
 	if(outputWumpus) {
 		outputWumpus->Quit();
 		delete outputWumpus;
@@ -45,7 +64,7 @@ void _Initialise() {
 	outputWumpus = new Output_Wumpus();
 #endif
 	if(outputWumpus) {
-		outputWumpus->Initialise();
+		outputWumpus->Initialise(out.hMainWindow);
 	}
 }
 
@@ -142,32 +161,6 @@ int _GetWrittenTime() {
 	}
 	return 0;
 }
-
-/*
-	point to the correct procedures
-*/
-Out_Module out = {
-	OUT_VER,
-	TITLE, 
-	800005,
-	0, // hmainwindow
-	0, // hdllinstance
-	_Config,
-	_About,
-	_Initialise,
-	_Quit,
-	_Open,
-	_Close,
-	_Write,
-	_CanWrite,
-	_IsPlaying,
-	_Pause,
-	_SetVolume,
-	_SetPan,
-	_Flush,
-	_GetOutputTime,
-	_GetWrittenTime
-};
 
 extern "C" {
 

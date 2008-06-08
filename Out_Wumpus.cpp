@@ -80,13 +80,11 @@ namespace WinampOpenALOut {
 	int Output_Wumpus::get_current_output_time(__int64 currentOutputTime, unsigned int sampleRate)//this ignores high 32bits of total_written
 	{
 		return MulDiv( (int)(currentOutputTime & THIRTY_TWO_BIT_BIT_MASK),ONE_SECOND_IN_MS,sampleRate);
-		//return (int)((currentOutputTime * ONE_SECOND_IN_MS) / sampleRate);
 	}
 
 	int Output_Wumpus::get_current_written_time(__int64 currentWrittenTime, unsigned int sampleRate)//this ignores high 32bits of total_written
 	{
 		return MulDiv( (int)(currentWrittenTime & THIRTY_TWO_BIT_BIT_MASK),ONE_SECOND_IN_MS,sampleRate);
-		//return (int)((currentWrittenTime * ONE_SECOND_IN_MS) / sampleRate);
 	}
 
 	void Output_Wumpus::onError() {
@@ -220,7 +218,6 @@ namespace WinampOpenALOut {
 				 in get_output_time */
 				total_played += bufferSizes[selectedBuffer];
 #ifdef _DEBUG
-				//fprintf(file, "CheckProcessedBuffers [%d%dms]\n", Clock::GetTime());
 				fprintf(file, "\tIndex->%d, OpenAL ID->%d\n", selectedBuffer, uiBuffers[selectedBuffer]);
 #endif
 
@@ -339,7 +336,7 @@ namespace WinampOpenALOut {
 
 		this procedure is called when the plugin is initialised
 	*/
-	void Output_Wumpus::Initialise() {
+	void Output_Wumpus::Initialise(HWND window) {
 
 		InitializeCriticalSection(&criticalSection);
 
@@ -378,10 +375,13 @@ namespace WinampOpenALOut {
 		}
 
 		// load the config up
-		ConfigFile::Initialise();
+		ConfigFile::Initialise(window);
 
 		c_bufferLength = ConfigFile::ReadInteger(CONF_BUFFER_LENGTH);
-		if(c_bufferLength == ERROR_BUFFER) {
+		if(c_bufferLength == ERROR_BUFFER
+			|| c_bufferLength > CONF_BUFFER_LENGTH_MAX
+			|| c_bufferLength < CONF_BUFFER_LENGTH_MIN) {
+
 			c_bufferLength = DEFC_BUFFER_LENGTH;
 			ConfigFile::WriteInteger(CONF_BUFFER_LENGTH, c_bufferLength);
 		}
