@@ -27,7 +27,7 @@ Known Issues
 Change Log
 ==========
 
-v0.7.4 (in dev)
+v0.7.4
 ======
 * Fixed - use correct Winamp.ini file
 * Fixed - validates buffer length is within bounds
