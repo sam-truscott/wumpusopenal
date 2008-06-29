@@ -74,6 +74,9 @@ namespace WinampOpenALOut {
 			// update their captions with values
 			labelBufferLength->Text = "Buffer Length (" + trackBufferLength->Value + "ms)";
 
+			checkBoxExpandMono->Checked = ptrOw->IsMonoExpanded();
+			checkBoxExpandStereo->Checked = ptrOw->IsStereoExpanded();
+
 			ShowDeviceDetails();
 		}
 
@@ -139,6 +142,10 @@ private: System::Windows::Forms::Button^  buttonApply;
 
 private: System::Windows::Forms::Button^  buttonReset;
 private: System::Windows::Forms::Label^  label4;
+private: System::Windows::Forms::CheckBox^  checkBoxExpandStereo;
+
+private: System::Windows::Forms::CheckBox^  checkBoxExpandMono;
+
 
 
 
@@ -245,6 +252,8 @@ private: System::ComponentModel::IContainer^  components;
 			this->label8 = (gcnew System::Windows::Forms::Label());
 			this->lblPlayedTime = (gcnew System::Windows::Forms::Label());
 			this->label6 = (gcnew System::Windows::Forms::Label());
+			this->checkBoxExpandMono = (gcnew System::Windows::Forms::CheckBox());
+			this->checkBoxExpandStereo = (gcnew System::Windows::Forms::CheckBox());
 			this->tabControl1->SuspendLayout();
 			this->tabPageConfig->SuspendLayout();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->trackBufferLength))->BeginInit();
@@ -263,6 +272,8 @@ private: System::ComponentModel::IContainer^  components;
 			// 
 			// tabPageConfig
 			// 
+			this->tabPageConfig->Controls->Add(this->checkBoxExpandStereo);
+			this->tabPageConfig->Controls->Add(this->checkBoxExpandMono);
 			this->tabPageConfig->Controls->Add(this->label4);
 			this->tabPageConfig->Controls->Add(this->buttonReset);
 			this->tabPageConfig->Controls->Add(this->labelBufferLength);
@@ -313,16 +324,16 @@ private: System::ComponentModel::IContainer^  components;
 			// 
 			// trackBufferLength
 			// 
-			this->trackBufferLength->LargeChange = CONF_BUFFER_LENGTH_MIN;
+			this->trackBufferLength->LargeChange = 500;
 			this->trackBufferLength->Location = System::Drawing::Point(15, 50);
-			this->trackBufferLength->Maximum = CONF_BUFFER_LENGTH_MAX;
-			this->trackBufferLength->Minimum = CONF_BUFFER_LENGTH_MIN;
+			this->trackBufferLength->Maximum = 4000;
+			this->trackBufferLength->Minimum = 1000;
 			this->trackBufferLength->Name = L"trackBufferLength";
 			this->trackBufferLength->Size = System::Drawing::Size(369, 45);
-			this->trackBufferLength->SmallChange = 500;
+			this->trackBufferLength->SmallChange = 100;
 			this->trackBufferLength->TabIndex = 10;
 			this->trackBufferLength->TickFrequency = 256;
-			this->trackBufferLength->Value = DEFC_BUFFER_LENGTH;
+			this->trackBufferLength->Value = 2000;
 			this->trackBufferLength->Scroll += gcnew System::EventHandler(this, &Config::trackBufferLength_Scroll);
 			// 
 			// checkBoxEffectsEnabled
@@ -529,6 +540,26 @@ private: System::ComponentModel::IContainer^  components;
 			this->label6->TabIndex = 4;
 			this->label6->Text = L"Played Time";
 			// 
+			// checkBoxExpandMono
+			// 
+			this->checkBoxExpandMono->AutoSize = true;
+			this->checkBoxExpandMono->Location = System::Drawing::Point(15, 189);
+			this->checkBoxExpandMono->Name = L"checkBoxExpandMono";
+			this->checkBoxExpandMono->Size = System::Drawing::Size(122, 17);
+			this->checkBoxExpandMono->TabIndex = 14;
+			this->checkBoxExpandMono->Text = L"Expand Mono to 4.0";
+			this->checkBoxExpandMono->UseVisualStyleBackColor = true;
+			// 
+			// checkBoxExpandStereo
+			// 
+			this->checkBoxExpandStereo->AutoSize = true;
+			this->checkBoxExpandStereo->Location = System::Drawing::Point(15, 212);
+			this->checkBoxExpandStereo->Name = L"checkBoxExpandStereo";
+			this->checkBoxExpandStereo->Size = System::Drawing::Size(126, 17);
+			this->checkBoxExpandStereo->TabIndex = 15;
+			this->checkBoxExpandStereo->Text = L"Expand Stereo to 4.0";
+			this->checkBoxExpandStereo->UseVisualStyleBackColor = true;
+			// 
 			// Config
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
@@ -575,6 +606,17 @@ private: System::ComponentModel::IContainer^  components;
 				ptrOw->SetEffectsSupported(Framework::getInstance()->ALFWIsEFXSupported() == AL_TRUE ? true : false);
 				ptrOw->SetEffectsEnabled(checkBoxEffectsEnabled->Checked);
 				ConfigFile::WriteBoolean(CONF_EFX, checkBoxEffectsEnabled->Checked);
+
+				if(ptrOw->IsMonoExpanded() != checkBoxExpandMono->Checked
+					|| ptrOw->IsStereoExpanded() != checkBoxExpandStereo->Checked) {
+						
+						ptrOw->SetStereoExpanded(checkBoxExpandStereo->Checked);
+						ptrOw->SetMonoExpanded(checkBoxExpandMono->Checked);
+						ptrOw->SwitchOutputDevice(currentDevice);
+				}
+
+				ConfigFile::WriteBoolean(CONF_MONO_EXPAND, checkBoxExpandMono->Checked);
+				ConfigFile::WriteBoolean(CONF_STEREO_EXPAND, checkBoxExpandStereo->Checked);
 				
 				ShowDeviceDetails();
 			 }

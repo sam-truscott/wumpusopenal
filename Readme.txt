@@ -1,7 +1,7 @@
 Wumpus Out OpenAL is copyright (c) 2008 by Sam Truscott.
 =======================================================
 
-Wumpus Out OpenAL v0.7.4
+Wumpus Out OpenAL v0.8.0
 ========================
 
 Install
@@ -26,6 +26,16 @@ Known Issues
 
 Change Log
 ==========
+
+v0.8.0 [beta]
+======
+* [b1] Added - Stereo expansion
+	> Enabled by default (in this beta)
+* [b2] Added - Mono expansion
+	> Enabled by default (in this beta)
+* [b3] Added - GUI bits to control Mono/Stereo expansion
+* [b4] Fixed - Expansion Fixed (no static)
+* [b4] Fixed - GUI changes for expansion actioned instantly, not after Winamp restart
 
 v0.7.4
 ======

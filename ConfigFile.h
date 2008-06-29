@@ -6,12 +6,10 @@ namespace WinampOpenALOut {
 #define CONF_FALSE "false"
 
 #define CONF_DEVICE "DefaultDevice"
-#define DEFC_DEVICE 0
 #define CONF_EFX "EffectsEnabled"
 #define CONF_BUFFER_LENGTH "BufferLength"
-#define DEFC_BUFFER_LENGTH 2000
-#define CONF_BUFFER_LENGTH_MIN 1000
-#define CONF_BUFFER_LENGTH_MAX 4000
+#define CONF_MONO_EXPAND "MonoExpansion"
+#define CONF_STEREO_EXPAND "StereoExpansion"
 
 #ifndef SSE_BUILD
 	public class ConfigFile {

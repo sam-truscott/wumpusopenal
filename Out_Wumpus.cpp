@@ -77,6 +77,16 @@ namespace WinampOpenALOut {
 		memcpy_s(ptr, MAXIMUM_BUFFER_SIZE, src, size);
 	}
 
+	inline void Output_Wumpus::fmemcpy(char* dest, int destPos, char* src, int srcPos, int size) {
+		
+		// get a pointer to the memory data with an offset
+		void* ptr = (void*)&dest[destPos];
+		void* ptrSrc = (void*)&src[srcPos];
+
+		// now copy from this position onwards
+		memcpy_s(ptr, MAXIMUM_BUFFER_SIZE, ptrSrc, size);
+	}
+
 	int Output_Wumpus::get_current_output_time(__int64 currentOutputTime, unsigned int sampleRate)//this ignores high 32bits of total_written
 	{
 		return MulDiv( (int)(currentOutputTime & THIRTY_TWO_BIT_BIT_MASK),ONE_SECOND_IN_MS,sampleRate);
@@ -416,6 +426,9 @@ namespace WinampOpenALOut {
 			ConfigFile::WriteBoolean(CONF_EFX, false);
 		}
 
+		this->monoExpand = ConfigFile::ReadBoolean(CONF_MONO_EXPAND);
+		this->stereoExpand = ConfigFile::ReadBoolean(CONF_STEREO_EXPAND);
+
 		SYNC_END;
 
 	}
@@ -476,7 +489,7 @@ namespace WinampOpenALOut {
 		
 		SYNC_START;
 
-		if(bitspersamp > 16) {
+		if(bitspersamp > SIXTEEN_BIT_PER_SAMPLE) {
 			canWrite = false;
 			MessageBoxA(NULL, "This Plug-In only supports 8 and 16bit audio, please disable 24bit audio in Winamp", "Whoops", MB_OK);
 			SYNC_END;
@@ -488,13 +501,29 @@ namespace WinampOpenALOut {
 		numberOfChannels = numchannels;
 		bitsPerSample = bitspersamp;
 
+		bool tmpStereoExpand = stereoExpand;
+		bool tmpMonoExpand = monoExpand;
+
+		stereoExpand = false;
+		monoExpand = false;
+
 		// determine the format to output in
 		switch(numberOfChannels) {
 			case 1:
-				ulFormat = bitsPerSample == 8 ? alGetEnumValue("AL_FORMAT_MONO8") : alGetEnumValue("AL_FORMAT_MONO16");
+				if(tmpMonoExpand) {
+					ulFormat = alGetEnumValue("AL_FORMAT_QUAD16");
+					monoExpand = true;
+				}else{
+					ulFormat = bitsPerSample == 8 ? alGetEnumValue("AL_FORMAT_MONO8") : alGetEnumValue("AL_FORMAT_MONO16");
+				}
 				break;
 			case 2:
-				ulFormat = bitsPerSample == 8 ? alGetEnumValue("AL_FORMAT_STEREO8") : alGetEnumValue("AL_FORMAT_STEREO16");
+				if(tmpStereoExpand) {
+					ulFormat = alGetEnumValue("AL_FORMAT_QUAD16");
+					stereoExpand = true;
+				}else{
+					ulFormat = bitsPerSample == 8 ? alGetEnumValue("AL_FORMAT_STEREO8") : alGetEnumValue("AL_FORMAT_STEREO16");
+				}
 				break;
 			case 4:
 				ulFormat = alGetEnumValue("AL_FORMAT_QUAD16");
@@ -517,6 +546,10 @@ namespace WinampOpenALOut {
 
 		// determine the size of the buffer
 		bytesPerSampleChannel = ((bitsPerSample >> SHIFT_BITS_TO_BYTES)*numberOfChannels);
+
+		if (stereoExpand) { bytesPerSampleChannel *= 2; }
+		if (monoExpand) { bytesPerSampleChannel *=4;}
+
 		unsigned int bufferSize = (bytesPerSampleChannel * (sampleRate / ONE_SECOND_IN_MS)) * c_bufferLength;
 
 		//noBuffers = MAX_NO_BUFFERS;
@@ -755,6 +788,92 @@ namespace WinampOpenALOut {
 				return -1;
 			}
 
+			// ############## MONO EXPANSION
+
+			if(monoExpand) {
+				// we're writing out four as much data so
+				// increase this value by three more times
+				total_written += (tmpBufferSize*3);
+
+				// expand buffer here
+				char* newBuffer = new char[MAXIMUM_BUFFER_SIZE * 4];
+
+				unsigned int nPos = 0;
+				
+				/* expand the samples out */
+				for(unsigned int pos=0; pos < tmpBufferSize; pos++) {
+					newBuffer[nPos++] = tmpBuffer[pos];
+					newBuffer[nPos++] = tmpBuffer[pos];
+					newBuffer[nPos++] = tmpBuffer[pos];
+					newBuffer[nPos++] = tmpBuffer[pos];
+				}
+
+#ifdef _DEBUG
+				if(nPos != tmpBufferSize * 2) {
+					fprintf(file, "\tWriting abnormal amount for stereo expansion\n");
+				}
+#endif
+
+				// delete old buffer
+				delete tmpBuffer;
+				// switch em over
+				tmpBuffer = newBuffer;
+				// increase the size by four
+				tmpBufferSize *= 4;
+			}
+
+			// ############## END MONO EXPANSION
+
+			// ############## STEREO EXPANSION
+
+			if(stereoExpand) {
+
+				// we're writing out twice as much data so
+				// increase this value again
+				total_written += tmpBufferSize;
+
+				// expand buffer here
+				char* newBuffer = new char[MAXIMUM_BUFFER_SIZE * 2];
+
+				unsigned int nPos = 0;
+				unsigned char sampleSize = bitsPerSample == 8 ? TWO_BYTE_SAMPLE : FOUR_BYTE_SAMPLE;
+				
+				/* expand the samples out */
+				for(unsigned int pos=0; pos < tmpBufferSize;) {
+					// copy the front left and right
+					fmemcpy(/*dst	*/	newBuffer,
+							/*dstPos*/	nPos,
+							/*src	*/	tmpBuffer, 
+							/*srcPos*/	pos, 
+							/*size	*/	sampleSize);
+					nPos+=sampleSize;
+
+					// copy the rear left and right
+					fmemcpy(/*dst	*/	newBuffer,
+							/*dstPos*/	nPos,
+							/*src	*/	tmpBuffer,
+							/*srcPos*/	pos,
+							/*size	*/	sampleSize);
+					nPos+=sampleSize;
+					pos+=sampleSize;
+				}
+
+#ifdef _DEBUG
+				if(nPos != tmpBufferSize * 2) {
+					fprintf(file, "\tWriting abnormal amount for stereo expansion\n");
+				}
+#endif
+
+				// delete old buffer
+				delete tmpBuffer;
+				// switch em over
+				tmpBuffer = newBuffer;
+				// increase the size by two
+				tmpBufferSize *= 2;
+			}
+
+			// ############## END STEREO EXPANSION
+
 #ifdef _DEBUG
 			fprintf(file, "\tWriting to OpenALBuffer\n");
 			fprintf(file, "\t\tBuffer: Index->%d, OpenAL ID->%d\n", selectedBuffer, uiBuffers[selectedBuffer]);
@@ -766,8 +885,8 @@ namespace WinampOpenALOut {
 			// buffer the data with the correct format
 			alGetError();
 			alBufferData(uiNextBuffer, ulFormat, tmpBuffer, tmpBufferSize, sampleRate);
-			err = alGetError();
 #ifdef _DEBUG
+			err = alGetError();
 			if( err != AL_NO_ERROR) {
 				
 				if(err == AL_OUT_OF_MEMORY) {
@@ -790,8 +909,8 @@ namespace WinampOpenALOut {
 			// add the buffer to the source queue
 			alGetError();
 			alSourceQueueBuffers(uiSource, 1, &uiNextBuffer);
-			err = alGetError();
 #ifdef _DEBUG
+			err = alGetError();
 			if( err != AL_NO_ERROR) {
 				
 				if(err == AL_INVALID_NAME) {

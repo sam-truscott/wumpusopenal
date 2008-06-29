@@ -53,6 +53,12 @@ namespace WinampOpenALOut {
 		inline int GetConfBufferLength() { return c_bufferLength;}
 		inline void SetConfBufferLength( unsigned int i) { c_bufferLength = i;}
 
+		inline bool IsStereoExpanded() { return stereoExpand;}
+		inline void SetStereoExpanded(bool expanded) { stereoExpand = expanded;}
+
+		inline bool IsMonoExpanded() { return monoExpand;}
+		inline void SetMonoExpanded(bool expanded) {monoExpand = expanded;}
+
 	protected:
 
 		inline void onError();
@@ -136,6 +142,9 @@ namespace WinampOpenALOut {
 		// used to store the configuration buffer length
 		unsigned int	c_bufferLength;
 
+		bool			stereoExpand;
+		bool			monoExpand;
+
 		// TODO used for 3D Position and Panning
 		//ALfloat posX;
 		//ALfloat posY;
@@ -147,6 +156,7 @@ namespace WinampOpenALOut {
 
 	private:
 		inline void fmemcpy(char* dest, int destPos, char* src, int size);
+		inline void fmemcpy(char* dest, int destPos, char* src, int srcPos, int size);
 	};
 #ifndef SSE_BUILD
 }

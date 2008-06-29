@@ -34,7 +34,7 @@ namespace WinampOpenALOut {
 		ConfigFile::ReadString(name, buf, 6);
 
 		bool retVal = false;
-		if(strcmp(buf, CONF_TRUE)) {
+		if(strcmp(buf, CONF_TRUE)==0) {
 			retVal = true;
 		}
 
@@ -46,16 +46,15 @@ namespace WinampOpenALOut {
 		if (hMainWindow 
 		   && (p = (char *)SendMessage(hMainWindow, WM_WA_IPC, 0, IPC_GETINIFILE))
 		   &&  p!= (char *)1){
-			strcpy(INI_FILE, p);
+			strcpy_s(INI_FILE,MAX_PATH, p);
 		}else{
 			GetModuleFileName(NULL, INI_FILE, sizeof(INI_FILE));
 			p = INI_FILE + strlen(INI_FILE);
 			while (p >= INI_FILE && *p != '.') {
 				p--;
 			}
-			strcpy(++p, "ini");
+			strcpy_s(++p,MAX_PATH, "ini");
 		}
-		int i=0;
 	}
 
 	void ConfigFile::WriteString(char *name, char *data) {
