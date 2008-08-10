@@ -102,10 +102,15 @@ namespace WinampOpenALOut {
 	}
 
 	void Output_Wumpus::SwitchOutputDevice(int device) {
+		this->Relocate(device, GetOutputTime());
+	}
+
+	void Output_Wumpus::Relocate(int device, int currentPosition) {
+
+		SYNC_START;
 
 		// grab some temporary data for where we are now
 		// and the format of the data
-		int currentPosition = GetOutputTime();
 		unsigned int tempSampleRate = sampleRate;
 		unsigned int tempBitsPerSample = bitsPerSample;
 		unsigned int tempNumberOfChannels = numberOfChannels;
@@ -113,26 +118,16 @@ namespace WinampOpenALOut {
 		// shut down the thread and wait for it to shutdown
 		bool tempStreamOpen = streamOpen;
 		this->Close();
-
-		SYNC_START;
 		
-		// make sure the source is stopped
-		alSourceStop(uiSource);
+		if(device != Framework::getInstance()->GetCurrentDevice()) {
 
-		// detach all the buffers from the source
-		alSourcei(uiSource, AL_BUFFER, NO_BUFFERS);
+			// only switch devices if we have to
 
-		// delete all the buffers
-		alDeleteBuffers( noBuffers, uiBuffers );
-
-#ifndef SSE_BUILD
-		effectsModule->SourceRemoved();
-#endif
-
-		// shutdown openal
-		Framework::getInstance()->ALFWShutdownOpenAL();
-		// re-initialise openal
-		Framework::getInstance()->ALFWInitOpenAL(device);
+			// shutdown openal
+			Framework::getInstance()->ALFWShutdownOpenAL();
+			// re-initialise openal
+			Framework::getInstance()->ALFWInitOpenAL(device);
+		}
 
 		// make all the buffers available
 		for(unsigned int i=0;i<MAX_NO_BUFFERS;i++) {
@@ -143,9 +138,10 @@ namespace WinampOpenALOut {
 		if(tempStreamOpen) {
 			// re-initialise everything
 			this->Open(tempSampleRate, tempNumberOfChannels, tempBitsPerSample, 0,0);
-			currentOutputTime = currentPosition;
+						
 			// reset back to the current position
-			this->Flush(currentPosition);
+			this->SetBufferTime(currentPosition);
+
 			// reset the volume
 			alSourcef(uiSource,AL_GAIN, volume);
 		}
@@ -255,6 +251,13 @@ namespace WinampOpenALOut {
 		alGetError();
 		alGetSourcei(uiSource, AL_SOURCE_STATE, &iState);
 
+		err = alGetError();
+		
+#ifdef _DEBUG
+		if(err !=AL_NO_ERROR) {
+			this->Close();
+		}
+#endif
 		if (iState == AL_PLAYING) {
 			// if the source is playing then we record that
 			isPlaying = true;
@@ -289,6 +292,12 @@ namespace WinampOpenALOut {
 
 				// if any buffers are queued and we're not playing - play!
 				if(!lastPause) {
+					//alSource3f(uiSource, AL_POSITION, listenerPos);
+					alGetError();
+					alListenerfv(AL_POSITION,listenerPos);
+					err = alGetError();
+					//alSourcefv(uiSource, AL_POSITION, listenerPos);
+					//err = alGetError();
 					alSourcePlay(uiSource);
 					isPlaying = true;
 				}
@@ -376,9 +385,20 @@ namespace WinampOpenALOut {
 		lastWrittenTime = ZERO_TIME;
 
 		// TODO used for 3D Position and Panning
-		//posX = 1.0;
-		//posY = 1.0;
-		//posZ = 1.0;
+		listenerPos[0]=0.0; // X - Left and Right
+		listenerPos[1]=0.0; // Y - Up and Down
+		listenerPos[2]=0.0; // Z - Forward and Back
+
+		listenerVel[0]=0.0;	// X vel
+		listenerVel[1]=0.0;	// Y vel
+		listenerVel[2]=0.0;	// Z vel
+
+		listenerOri[0]=0.0; // X target
+		listenerOri[1]=0.0; // Y target
+		listenerOri[2]=0.0; // Z target
+		listenerOri[3]=0.0; // 
+		listenerOri[4]=0.0;
+		listenerOri[5]=0.0;
 
 		for(int i=0;i<MAX_NO_BUFFERS;i++) {
 			bufferSizes[i] = EMPTY_THE_BUFFER;
@@ -410,6 +430,10 @@ namespace WinampOpenALOut {
 		if (!Framework::getInstance()->ALFWInitOpenAL(currentDevice)) {
 			MessageBoxA(NULL, "Could not initialise OpenAL", "Error", MB_OK);
 		}
+
+		alListenerfv(AL_POSITION,listenerPos);
+		alListenerfv(AL_VELOCITY,listenerVel);
+		alListenerfv(AL_ORIENTATION,listenerOri);
 
 #ifdef _DEBUG
 		fprintf(file, "Initialise!\n\tBuffer Length: %d\n\tCurrent Device: %d\n", c_bufferLength, currentDevice);
@@ -686,6 +710,17 @@ namespace WinampOpenALOut {
 
 		// stop the source
 		alSourceStop(uiSource);
+
+		ALint iState;
+		unsigned int timeout = 0;
+		// query the state of the source and wait for it to stop
+		alGetSourcei(uiSource, AL_SOURCE_STATE, &iState);
+		while(iState != AL_STOPPED && iState != AL_INITIAL) {
+			Sleep(10);
+			if(timeout++ > CLOSE_TIMEOUT_COUNT) {
+				break;
+			}
+		}
 
 		// remove all buffers
 		alSourcei(uiSource, AL_BUFFER, 0);
@@ -1011,7 +1046,7 @@ namespace WinampOpenALOut {
 		// clear the error state
 		alGetError();
 		
-		if(streamOpen) {
+		if(streamOpen && !preBuffer) {
 			if(pause) {
 				alSourcePause(uiSource);
 			}else{
@@ -1056,49 +1091,33 @@ namespace WinampOpenALOut {
 		this procedure is invoked by winamp to flush the buffers
 		and start playing from time (t)ms.
 	*/
-	void Output_Wumpus::Flush(int t) {
+	void Output_Wumpus::Flush(int tMs) {
 		SYNC_START;
 
 		// make sure we've stopped playing
 		alSourceStop(uiSource);
 
-		// remove all buffers
-		alSourcei(uiSource, AL_BUFFER, 0);
+		// calculate the number of bytes that will have been
+		// this will relocate to the current device at a set time
+		this->Relocate(Framework::getInstance()->GetCurrentDevice(), tMs);
 
-		// delete all the buffers
-		alDeleteBuffers( noBuffers, uiBuffers );
+		SYNC_END;
+	}
 
-#ifndef SSE_BUILD
-		effectsModule->SourceRemoved();
-#endif
-
-		// re-generate buffers
-		alGenBuffers( noBuffers, uiBuffers );
-
+	int Output_Wumpus::SetBufferTime(int tMs) {
 		// calculate the number of bytes that will have been
 		// processed after (t)ms
-		int calcTime = ((sampleRate / ONE_SECOND_IN_MS) * (bitsPerSample >> SHIFT_BITS_TO_BYTES) * numberOfChannels) * t;
+		int calcTime = (((sampleRate / ONE_SECOND_IN_MS) * (bitsPerSample >> SHIFT_BITS_TO_BYTES)) * numberOfChannels) * tMs;
 
 		// reset played pointers
 		total_written = calcTime;
 		total_played = calcTime;
-		lastOutputTime = t;
-		lastWrittenTime = t;
-		currentOutputTime = t;
-		currentWrittenTime = t;
+		lastOutputTime = tMs;
+		lastWrittenTime = tMs;
+		currentOutputTime = tMs;
+		currentWrittenTime = tMs;
 
-		// make all the buffers available
-		for(unsigned int i=0;i<noBuffers;i++) {
-			avalBuffers[i] = true;
-			bufferSizes[i] = EMPTY_THE_BUFFER;
-		}
-
-		// allow writing
-		canWrite = true;
-		// make sure we prebuffer again
-		preBuffer = true;
-
-		SYNC_END;
+		return calcTime;
 	}
 
 	/*
@@ -1137,8 +1156,6 @@ namespace WinampOpenALOut {
 
 			CheckAvailableBuffers();
 
-			//alSource3f(uiSource, AL_POSITION, posX,posY,posZ);
-
 			// only check the state of the openal buffers
 			// every so often, no need to keep checking them
 			// if we know they're x'ms long
@@ -1147,7 +1164,6 @@ namespace WinampOpenALOut {
 				CheckProcessedBuffers();
 				lastCheckBuffers = currentTime;
 			}
-			//CheckPlayState();
 
 			ALint deltaBytes;
 			alGetError();
@@ -1156,14 +1172,6 @@ namespace WinampOpenALOut {
 
 			// this works it out
 			currentOutputTime = total_played + deltaBytes;
-
-/*#ifdef _DEBUG
-			char dbg[2048] = {'\0'};
-			int delta = deltaBytes;
-			sprintf(dbg, "GetOutputTime Total Bytes=%016u, Delta=%08d, Total=%016u\n", (int)total_played, delta, (int)currentOutputTime);
-			OutputDebugStringA(dbg);
-#endif*/
-
 
 			// this converts bytes to ms and does 32bit part
 			currentOutputTime = get_current_output_time(currentOutputTime, sampleRate) / bytesPerSampleChannel;

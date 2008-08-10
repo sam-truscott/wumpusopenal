@@ -122,6 +122,13 @@ namespace WinampOpenALOut {
 					listBoxBufferSizes->Items[currentBuffer] = "Buffer " + (currentBuffer) + " = " + bufferSize;
 				}
 			}
+
+			ALfloat lx, ly, lz, sx, sy, sz = 0.0;
+
+			alGetListener3f(AL_POSITION, &lx, &ly, &lz);
+			alGetSource3f(ptrOw->GetSource(), AL_POSITION, &sx, &sy, &sz);
+
+			label3->Text = "lx: " + lx + "\nly: " + ly + "\nlz: " + lz + "\nsx: " + sx + "\nsy: " + sy + "\nsz: " + sz;
 		}catch(...) {
 			overRide = true;
 		}

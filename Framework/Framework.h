@@ -48,7 +48,7 @@ class Framework {
 		// Extension Queries 
 		ALboolean ALFWIsXRAMSupported();
 		ALboolean ALFWIsEFXSupported();
-		ALboolean ALFWSwitchDevice(int device);
+		//ALboolean ALFWSwitchDevice(int device);
 	protected:
 		class ALDeviceList *pDeviceList;
 		void *ptrContext;

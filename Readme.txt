@@ -36,6 +36,8 @@ v0.8.0 [beta]
 * [b3] Added - GUI bits to control Mono/Stereo expansion
 * [b4] Fixed - Expansion Fixed (no static)
 * [b4] Fixed - GUI changes for expansion actioned instantly, not after Winamp restart
+* [b5] Fixed - Skipping of FLAC files no longer causes halts/crashes
+* [b5] Added [disabled] - 3D Positioning, doesn't work (yet)
 
 v0.7.4
 ======

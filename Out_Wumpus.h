@@ -30,6 +30,7 @@ namespace WinampOpenALOut {
 		int GetWrittenTime();
 
 		void SwitchOutputDevice(int device);
+		void Relocate(int device, int currentPosition);
 
 		inline bool IsStreamOpen()						{ return streamOpen; }
 
@@ -59,6 +60,8 @@ namespace WinampOpenALOut {
 		inline bool IsMonoExpanded() { return monoExpand;}
 		inline void SetMonoExpanded(bool expanded) {monoExpand = expanded;}
 
+		inline ALuint GetSource() { return uiSource; }
+
 	protected:
 
 		inline void onError();
@@ -66,6 +69,7 @@ namespace WinampOpenALOut {
 		void CheckProcessedBuffers();
 		void CheckPlayState();
 		void inline CheckAvailableBuffers();
+		int SetBufferTime(int tMs);
 
 #ifndef SSE_BUILD
 		class EffectsModule* effectsModule;
@@ -145,10 +149,13 @@ namespace WinampOpenALOut {
 		bool			stereoExpand;
 		bool			monoExpand;
 
-		// TODO used for 3D Position and Panning
+		// used for 3D Position and Panning
 		//ALfloat posX;
 		//ALfloat posY;
 		//ALfloat posZ;
+		ALfloat listenerPos[3];
+		ALfloat listenerVel[3];
+		ALfloat	listenerOri[6];
 
 #ifdef _DEBUG
 		FILE *file;

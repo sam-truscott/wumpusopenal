@@ -127,7 +127,7 @@ ALboolean Framework::ALFWInitOpenAL(int myDevice, ALint attrs[])
 
 	return bReturn;
 }
-
+/*
 ALboolean Framework::ALFWSwitchDevice(int device) {
 	
 	ALboolean bReturn = AL_FALSE;
@@ -152,7 +152,7 @@ ALboolean Framework::ALFWSwitchDevice(int device) {
 	return bReturn;
 
 }
-
+*/
 ALboolean Framework::ALFWShutdownOpenAL()
 {
 	ALCcontext *pContext;

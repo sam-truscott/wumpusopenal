@@ -145,6 +145,15 @@ private: System::Windows::Forms::Label^  label4;
 private: System::Windows::Forms::CheckBox^  checkBoxExpandStereo;
 
 private: System::Windows::Forms::CheckBox^  checkBoxExpandMono;
+private: System::Windows::Forms::TabPage^  tabPage3D;
+private: System::Windows::Forms::VScrollBar^  vScrollBarZ;
+private: System::Windows::Forms::HScrollBar^  hScrollBarX;
+
+
+private: System::Windows::Forms::VScrollBar^  vScrollBarY;
+private: System::Windows::Forms::Label^  label3;
+
+
 
 
 
@@ -227,6 +236,8 @@ private: System::ComponentModel::IContainer^  components;
 		{
 			this->tabControl1 = (gcnew System::Windows::Forms::TabControl());
 			this->tabPageConfig = (gcnew System::Windows::Forms::TabPage());
+			this->checkBoxExpandStereo = (gcnew System::Windows::Forms::CheckBox());
+			this->checkBoxExpandMono = (gcnew System::Windows::Forms::CheckBox());
 			this->label4 = (gcnew System::Windows::Forms::Label());
 			this->buttonReset = (gcnew System::Windows::Forms::Button());
 			this->labelBufferLength = (gcnew System::Windows::Forms::Label());
@@ -239,6 +250,11 @@ private: System::ComponentModel::IContainer^  components;
 			this->label16 = (gcnew System::Windows::Forms::Label());
 			this->comboBoxDevices = (gcnew System::Windows::Forms::ComboBox());
 			this->label1 = (gcnew System::Windows::Forms::Label());
+			this->tabPage3D = (gcnew System::Windows::Forms::TabPage());
+			this->label3 = (gcnew System::Windows::Forms::Label());
+			this->vScrollBarZ = (gcnew System::Windows::Forms::VScrollBar());
+			this->hScrollBarX = (gcnew System::Windows::Forms::HScrollBar());
+			this->vScrollBarY = (gcnew System::Windows::Forms::VScrollBar());
 			this->tabPageStatus = (gcnew System::Windows::Forms::TabPage());
 			this->label2 = (gcnew System::Windows::Forms::Label());
 			this->listBoxBufferSizes = (gcnew System::Windows::Forms::ListBox());
@@ -252,17 +268,18 @@ private: System::ComponentModel::IContainer^  components;
 			this->label8 = (gcnew System::Windows::Forms::Label());
 			this->lblPlayedTime = (gcnew System::Windows::Forms::Label());
 			this->label6 = (gcnew System::Windows::Forms::Label());
-			this->checkBoxExpandMono = (gcnew System::Windows::Forms::CheckBox());
-			this->checkBoxExpandStereo = (gcnew System::Windows::Forms::CheckBox());
 			this->tabControl1->SuspendLayout();
 			this->tabPageConfig->SuspendLayout();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->trackBufferLength))->BeginInit();
+			this->tabPage3D->SuspendLayout();
 			this->tabPageStatus->SuspendLayout();
 			this->SuspendLayout();
 			// 
 			// tabControl1
 			// 
 			this->tabControl1->Controls->Add(this->tabPageConfig);
+			// TODO remove the 3D tab for now, it doesn't work
+			//this->tabControl1->Controls->Add(this->tabPage3D);
 			this->tabControl1->Controls->Add(this->tabPageStatus);
 			this->tabControl1->Location = System::Drawing::Point(12, 12);
 			this->tabControl1->Name = L"tabControl1";
@@ -293,6 +310,26 @@ private: System::ComponentModel::IContainer^  components;
 			this->tabPageConfig->TabIndex = 0;
 			this->tabPageConfig->Text = L"Configuration";
 			this->tabPageConfig->UseVisualStyleBackColor = true;
+			// 
+			// checkBoxExpandStereo
+			// 
+			this->checkBoxExpandStereo->AutoSize = true;
+			this->checkBoxExpandStereo->Location = System::Drawing::Point(15, 212);
+			this->checkBoxExpandStereo->Name = L"checkBoxExpandStereo";
+			this->checkBoxExpandStereo->Size = System::Drawing::Size(126, 17);
+			this->checkBoxExpandStereo->TabIndex = 15;
+			this->checkBoxExpandStereo->Text = L"Expand Stereo to 4.0";
+			this->checkBoxExpandStereo->UseVisualStyleBackColor = true;
+			// 
+			// checkBoxExpandMono
+			// 
+			this->checkBoxExpandMono->AutoSize = true;
+			this->checkBoxExpandMono->Location = System::Drawing::Point(15, 189);
+			this->checkBoxExpandMono->Name = L"checkBoxExpandMono";
+			this->checkBoxExpandMono->Size = System::Drawing::Size(122, 17);
+			this->checkBoxExpandMono->TabIndex = 14;
+			this->checkBoxExpandMono->Text = L"Expand Mono to 4.0";
+			this->checkBoxExpandMono->UseVisualStyleBackColor = true;
 			// 
 			// label4
 			// 
@@ -409,6 +446,59 @@ private: System::ComponentModel::IContainer^  components;
 			this->label1->Name = L"label1";
 			this->label1->Size = System::Drawing::Size(0, 13);
 			this->label1->TabIndex = 0;
+			// 
+			// tabPage3D
+			// 
+			this->tabPage3D->Controls->Add(this->label3);
+			this->tabPage3D->Controls->Add(this->vScrollBarZ);
+			this->tabPage3D->Controls->Add(this->hScrollBarX);
+			this->tabPage3D->Controls->Add(this->vScrollBarY);
+			this->tabPage3D->Location = System::Drawing::Point(4, 22);
+			this->tabPage3D->Name = L"tabPage3D";
+			this->tabPage3D->Padding = System::Windows::Forms::Padding(3);
+			this->tabPage3D->Size = System::Drawing::Size(401, 364);
+			this->tabPage3D->TabIndex = 2;
+			this->tabPage3D->Text = L"3D";
+			this->tabPage3D->UseVisualStyleBackColor = true;
+			// 
+			// label3
+			// 
+			this->label3->AutoSize = true;
+			this->label3->Location = System::Drawing::Point(6, 3);
+			this->label3->Name = L"label3";
+			this->label3->Size = System::Drawing::Size(25, 13);
+			this->label3->TabIndex = 3;
+			this->label3->Text = L"Info";
+			// 
+			// vScrollBarZ
+			// 
+			this->vScrollBarZ->Location = System::Drawing::Point(180, 3);
+			this->vScrollBarZ->Maximum = 255;
+			this->vScrollBarZ->Minimum = -255;
+			this->vScrollBarZ->Name = L"vScrollBarZ";
+			this->vScrollBarZ->Size = System::Drawing::Size(28, 330);
+			this->vScrollBarZ->TabIndex = 2;
+			this->vScrollBarZ->Scroll += gcnew System::Windows::Forms::ScrollEventHandler(this, &Config::vScrollBarZ_Scroll);
+			// 
+			// hScrollBarX
+			// 
+			this->hScrollBarX->Location = System::Drawing::Point(3, 333);
+			this->hScrollBarX->Maximum = 255;
+			this->hScrollBarX->Minimum = -255;
+			this->hScrollBarX->Name = L"hScrollBarX";
+			this->hScrollBarX->Size = System::Drawing::Size(373, 28);
+			this->hScrollBarX->TabIndex = 1;
+			this->hScrollBarX->Scroll += gcnew System::Windows::Forms::ScrollEventHandler(this, &Config::hScrollBarX_Scroll);
+			// 
+			// vScrollBarY
+			// 
+			this->vScrollBarY->Location = System::Drawing::Point(375, 3);
+			this->vScrollBarY->Maximum = 255;
+			this->vScrollBarY->Minimum = -255;
+			this->vScrollBarY->Name = L"vScrollBarY";
+			this->vScrollBarY->Size = System::Drawing::Size(23, 330);
+			this->vScrollBarY->TabIndex = 0;
+			this->vScrollBarY->Scroll += gcnew System::Windows::Forms::ScrollEventHandler(this, &Config::vScrollBarY_Scroll);
 			// 
 			// tabPageStatus
 			// 
@@ -540,26 +630,6 @@ private: System::ComponentModel::IContainer^  components;
 			this->label6->TabIndex = 4;
 			this->label6->Text = L"Played Time";
 			// 
-			// checkBoxExpandMono
-			// 
-			this->checkBoxExpandMono->AutoSize = true;
-			this->checkBoxExpandMono->Location = System::Drawing::Point(15, 189);
-			this->checkBoxExpandMono->Name = L"checkBoxExpandMono";
-			this->checkBoxExpandMono->Size = System::Drawing::Size(122, 17);
-			this->checkBoxExpandMono->TabIndex = 14;
-			this->checkBoxExpandMono->Text = L"Expand Mono to 4.0";
-			this->checkBoxExpandMono->UseVisualStyleBackColor = true;
-			// 
-			// checkBoxExpandStereo
-			// 
-			this->checkBoxExpandStereo->AutoSize = true;
-			this->checkBoxExpandStereo->Location = System::Drawing::Point(15, 212);
-			this->checkBoxExpandStereo->Name = L"checkBoxExpandStereo";
-			this->checkBoxExpandStereo->Size = System::Drawing::Size(126, 17);
-			this->checkBoxExpandStereo->TabIndex = 15;
-			this->checkBoxExpandStereo->Text = L"Expand Stereo to 4.0";
-			this->checkBoxExpandStereo->UseVisualStyleBackColor = true;
-			// 
 			// Config
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
@@ -579,6 +649,8 @@ private: System::ComponentModel::IContainer^  components;
 			this->tabPageConfig->ResumeLayout(false);
 			this->tabPageConfig->PerformLayout();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->trackBufferLength))->EndInit();
+			this->tabPage3D->ResumeLayout(false);
+			this->tabPage3D->PerformLayout();
 			this->tabPageStatus->ResumeLayout(false);
 			this->tabPageStatus->PerformLayout();
 			this->ResumeLayout(false);
@@ -644,6 +716,21 @@ private: System::Void trackBufferLength_Scroll(System::Object^  sender, System::
 private: System::Void buttonReset_Click(System::Object^  sender, System::EventArgs^  e) {
 			 trackBufferLength->Value = DEFC_BUFFER_LENGTH;
 			 labelBufferLength->Text = "Buffer Length (" + trackBufferLength->Value + "ms)";
+		 }
+private: System::Void hScrollBarX_Scroll(System::Object^  sender, System::Windows::Forms::ScrollEventArgs^  e) {
+			// why do none of these work?
+			 //alListener3f(AL_POSITION, 0.0, 0.0, 0.0);
+			//alSource3f(ptrOw->GetSource(), AL_POSITION, hScrollBarX->Value, vScrollBarY->Value, vScrollBarZ->Value);
+			alListener3f(AL_POSITION, hScrollBarX->Value, vScrollBarY->Value, vScrollBarZ->Value);
+			alSource3f(ptrOw->GetSource(), AL_POSITION, 0.0, 0.0, 0.0);
+		 }
+private: System::Void vScrollBarY_Scroll(System::Object^  sender, System::Windows::Forms::ScrollEventArgs^  e) {
+			alListener3f(AL_POSITION, hScrollBarX->Value, vScrollBarY->Value, vScrollBarZ->Value);
+			alSource3f(ptrOw->GetSource(), AL_POSITION, 0.0, 0.0, 0.0);
+		 }
+private: System::Void vScrollBarZ_Scroll(System::Object^  sender, System::Windows::Forms::ScrollEventArgs^  e) {
+			alListener3f(AL_POSITION, hScrollBarX->Value, vScrollBarY->Value, vScrollBarZ->Value);
+			alSource3f(ptrOw->GetSource(), AL_POSITION, 0.0, 0.0, 0.0);
 		 }
 };
 }
