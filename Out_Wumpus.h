@@ -91,6 +91,7 @@ namespace WinampOpenALOut {
 		// boolean for prebuffering state at the start to get as much data
 		// as possible
 		bool			preBuffer;
+		unsigned int	preBufferNumber;
 
 		char*			tmpBuffer;
 		unsigned int	tmpBufferSize;

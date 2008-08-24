@@ -677,6 +677,8 @@ namespace WinampOpenALOut {
 		// start prebuffering
 		preBuffer = true;
 
+		preBufferNumber = NO_BUFFERS_PROCESSED;
+
 		// make all buffers available to write data into
 		for(unsigned int i=0;i<noBuffers;i++) {
 			avalBuffers[i] = true;
@@ -969,7 +971,9 @@ namespace WinampOpenALOut {
 			}
 
 			if(preBuffer) {
-				preBuffer = false;
+				if(preBufferNumber++ == PREBUFFER_LIMIT) {
+					preBuffer = false;
+				}
 			}
 		}
 
