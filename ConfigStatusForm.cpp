@@ -107,14 +107,17 @@ namespace WinampOpenALOut {
 			// update the buffer status[es]
 			int signedNumberOfBuffers = numberOfBuffers;
 
+			// this should handle any new buffers being added
 			while ( listBoxBufferSizes->Items->Count < signedNumberOfBuffers) {
 				listBoxBufferSizes->Items->Add("Buffer " + listBoxBufferSizes->Items->Count + 1);
 			}
 
+			// this should handle any buffers that are no longer valid
 			while( listBoxBufferSizes->Items->Count > signedNumberOfBuffers) {
 				listBoxBufferSizes->Items->RemoveAt(listBoxBufferSizes->Items->Count-1);
 			}
 
+			// this will mark the current buffer as playing
 			if(numberOfBuffers!=0) {
 				if(currentBuffer == cbuff) {
 					listBoxBufferSizes->Items[currentBuffer] = "Buffer " + (currentBuffer) + " = " + bufferSize + " >> PLAYING";

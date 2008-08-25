@@ -294,7 +294,9 @@ namespace WinampOpenALOut {
 				if(!lastPause) {
 					//alSource3f(uiSource, AL_POSITION, listenerPos);
 					alGetError();
-					alListenerfv(AL_POSITION,listenerPos);
+					//alListenerfv(AL_POSITION,listenerPos);
+					alListener3f(AL_POSITION,listenerPos[0],listenerPos[1],listenerPos[2]);
+					alListenerfv(AL_ORIENTATION,listenerOri);
 					err = alGetError();
 					//alSourcefv(uiSource, AL_POSITION, listenerPos);
 					//err = alGetError();
@@ -320,6 +322,7 @@ namespace WinampOpenALOut {
 		for(unsigned int i=0;i<noBuffers;i++) {
 			if(avalBuffers[i]) {
 				canWrite = true;
+				break;
 			}
 		}
 	}
@@ -424,14 +427,15 @@ namespace WinampOpenALOut {
 		}
 
 		/*
-			initialise open al itself - this has been modified
+			initialise openal itself - this has been modified
 			and will also select the default sound card
 		*/
 		if (!Framework::getInstance()->ALFWInitOpenAL(currentDevice)) {
 			MessageBoxA(NULL, "Could not initialise OpenAL", "Error", MB_OK);
 		}
 
-		alListenerfv(AL_POSITION,listenerPos);
+		//alListenerfv(AL_POSITION,listenerPos);
+		alListener3f(AL_POSITION,listenerPos[0],listenerPos[1],listenerPos[2]);
 		alListenerfv(AL_VELOCITY,listenerVel);
 		alListenerfv(AL_ORIENTATION,listenerOri);
 
@@ -1049,7 +1053,10 @@ namespace WinampOpenALOut {
 		
 		// clear the error state
 		alGetError();
-		
+
+		// if this is un-paused during pre-buffering
+		// we may start to play data before it's ready
+		// and cause and under-run
 		if(streamOpen && !preBuffer) {
 			if(pause) {
 				alSourcePause(uiSource);
@@ -1111,7 +1118,11 @@ namespace WinampOpenALOut {
 	int Output_Wumpus::SetBufferTime(int tMs) {
 		// calculate the number of bytes that will have been
 		// processed after (t)ms
-		int calcTime = (((sampleRate / ONE_SECOND_IN_MS) * (bitsPerSample >> SHIFT_BITS_TO_BYTES)) * numberOfChannels) * tMs;
+		int calcTime;
+
+		SYNC_START;
+		
+		calcTime = (((sampleRate / ONE_SECOND_IN_MS) * (bitsPerSample >> SHIFT_BITS_TO_BYTES)) * numberOfChannels) * tMs;
 
 		// reset played pointers
 		total_written = calcTime;
@@ -1120,6 +1131,8 @@ namespace WinampOpenALOut {
 		lastWrittenTime = tMs;
 		currentOutputTime = tMs;
 		currentWrittenTime = tMs;
+
+		SYNC_END;
 
 		return calcTime;
 	}
@@ -1171,10 +1184,11 @@ namespace WinampOpenALOut {
 
 			ALint deltaBytes;
 			alGetError();
+			// get the position in the currently playing buffer
 			alGetSourcei(uiSource, AL_BYTE_OFFSET, &deltaBytes);
 			ALenum err = alGetError();
 
-			// this works it out
+			// this works it out how many bytes it is
 			currentOutputTime = total_played + deltaBytes;
 
 			// this converts bytes to ms and does 32bit part

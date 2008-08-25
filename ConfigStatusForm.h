@@ -278,7 +278,7 @@ private: System::ComponentModel::IContainer^  components;
 			// tabControl1
 			// 
 			this->tabControl1->Controls->Add(this->tabPageConfig);
-			// TODO remove the 3D tab for now, it doesn't work
+			// disable 3d menu
 			//this->tabControl1->Controls->Add(this->tabPage3D);
 			this->tabControl1->Controls->Add(this->tabPageStatus);
 			this->tabControl1->Location = System::Drawing::Point(12, 12);

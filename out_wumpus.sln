@@ -1,9 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 9.00
 # Visual Studio 2005
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "out_wumpus", "out_wumpus.vcproj", "{3B29D613-DE3B-43B1-A9AD-77A81D3C744D}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "out_openal", "out_wumpus.vcproj", "{3B29D613-DE3B-43B1-A9AD-77A81D3C744D}"
 EndProject
 Global
+	GlobalSection(SubversionScc) = preSolution
+		Svn-Managed = True
+		Manager = AnkhSVN - Subversion Support for Visual Studio
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debugging|Win32 = Debugging|Win32
 		Release|Win32 = Release|Win32
