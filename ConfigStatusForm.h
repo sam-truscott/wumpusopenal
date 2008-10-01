@@ -721,15 +721,15 @@ private: System::Void hScrollBarX_Scroll(System::Object^  sender, System::Window
 			// why do none of these work?
 			 //alListener3f(AL_POSITION, 0.0, 0.0, 0.0);
 			//alSource3f(ptrOw->GetSource(), AL_POSITION, hScrollBarX->Value, vScrollBarY->Value, vScrollBarZ->Value);
-			alListener3f(AL_POSITION, hScrollBarX->Value, vScrollBarY->Value, vScrollBarZ->Value);
+			alListener3f(AL_POSITION, (ALfloat)hScrollBarX->Value, (ALfloat)vScrollBarY->Value, (ALfloat)vScrollBarZ->Value);
 			alSource3f(ptrOw->GetSource(), AL_POSITION, 0.0, 0.0, 0.0);
 		 }
 private: System::Void vScrollBarY_Scroll(System::Object^  sender, System::Windows::Forms::ScrollEventArgs^  e) {
-			alListener3f(AL_POSITION, hScrollBarX->Value, vScrollBarY->Value, vScrollBarZ->Value);
+			alListener3f(AL_POSITION, (ALfloat)hScrollBarX->Value, (ALfloat)vScrollBarY->Value, (ALfloat)vScrollBarZ->Value);
 			alSource3f(ptrOw->GetSource(), AL_POSITION, 0.0, 0.0, 0.0);
 		 }
 private: System::Void vScrollBarZ_Scroll(System::Object^  sender, System::Windows::Forms::ScrollEventArgs^  e) {
-			alListener3f(AL_POSITION, hScrollBarX->Value, vScrollBarY->Value, vScrollBarZ->Value);
+			alListener3f(AL_POSITION, (ALfloat)hScrollBarX->Value, (ALfloat)vScrollBarY->Value, (ALfloat)vScrollBarZ->Value);
 			alSource3f(ptrOw->GetSource(), AL_POSITION, 0.0, 0.0, 0.0);
 		 }
 };

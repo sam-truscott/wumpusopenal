@@ -30,15 +30,15 @@ Change Log
 v0.8.0 [beta]
 ======
 * [b1] Added - Stereo expansion
-	> Enabled by default (in this beta)
 * [b2] Added - Mono expansion
-	> Enabled by default (in this beta)
 * [b3] Added - GUI bits to control Mono/Stereo expansion
 * [b4] Fixed - Expansion Fixed (no static)
 * [b4] Fixed - GUI changes for expansion actioned instantly, not after Winamp restart
 * [b5] Fixed - Skipping of FLAC files no longer causes halts/crashes
 * [b5] Added [disabled] - 3D Positioning, doesn't work (yet)
 * [b6] Updated - Will buffer 3 writes rather than 1 to stop buffer under-runs on startup
+* [b7] Fixed - Out of range volumes ignored, should solve the jump-loud problem
+* [b7] Fixed - Initial volume loaded properly rather than using maximum which may be wrong
 
 v0.7.4
 ======

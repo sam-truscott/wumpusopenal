@@ -1,7 +1,3 @@
-#ifdef _DEBUG
-#include <stdio.h>
-#endif
-
 #define OUT_VER 0x10
 
 extern "C"  {
@@ -75,19 +71,10 @@ Out_Module* GetPluginInstance() {
 		return NULL;
 	}
 
-#ifdef _DEBUG
-	printf("DLL Loaded OK\n");
-#endif
-
-
 	getInstanceType getInstance = (getInstanceType)GetProcAddress(hDLL,"winampGetOutModule");
 	if(getInstance == NULL) {
 		return NULL;
 	}
-
-#ifdef _DEBUG
-	printf("Found Entry OK\n");
-#endif
 
 	Out_Module *m = getInstance();
 

@@ -10,6 +10,7 @@ namespace WinampOpenALOut {
 #define CONF_BUFFER_LENGTH "BufferLength"
 #define CONF_MONO_EXPAND "MonoExpansion"
 #define CONF_STEREO_EXPAND "StereoExpansion"
+#define CONF_VOLUME "volume"
 
 #ifndef SSE_BUILD
 	public class ConfigFile {
@@ -30,6 +31,9 @@ namespace WinampOpenALOut {
 
 		static bool ReadBoolean(char *name);
 		static void WriteBoolean(char* name, bool v);
+
+		static void ReadGlobalString(char *name,char *data, int mlen);
+		static int ReadGlobalInteger(char *name);
 	};
 #ifndef SSE_BUILD
 }

@@ -71,6 +71,8 @@ namespace WinampOpenALOut {
 		void inline CheckAvailableBuffers();
 		int SetBufferTime(int tMs);
 
+		void SetVolumeInternal(ALfloat newVolume);
+
 #ifndef SSE_BUILD
 		class EffectsModule* effectsModule;
 #endif
@@ -157,10 +159,6 @@ namespace WinampOpenALOut {
 		ALfloat listenerPos[3];
 		ALfloat listenerVel[3];
 		ALfloat	listenerOri[6];
-
-#ifdef _DEBUG
-		FILE *file;
-#endif
 
 	private:
 		inline void fmemcpy(char* dest, int destPos, char* src, int size);
