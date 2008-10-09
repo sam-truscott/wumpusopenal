@@ -1,6 +1,4 @@
-#ifndef SSE_BUILD
 namespace WinampOpenALOut {
-#endif
 
 #define CONF_TRUE "true"
 #define CONF_FALSE "false"
@@ -12,11 +10,7 @@ namespace WinampOpenALOut {
 #define CONF_STEREO_EXPAND "StereoExpansion"
 #define CONF_VOLUME "volume"
 
-#ifndef SSE_BUILD
 	public class ConfigFile {
-#else
-	class ConfigFile {
-#endif
 
 	private:
 		static char INI_FILE[MAX_PATH];
@@ -35,6 +29,4 @@ namespace WinampOpenALOut {
 		static void ReadGlobalString(char *name,char *data, int mlen);
 		static int ReadGlobalInteger(char *name);
 	};
-#ifndef SSE_BUILD
 }
-#endif

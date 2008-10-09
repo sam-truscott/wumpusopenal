@@ -7,12 +7,8 @@
 #ifndef C_CLOCK
 #define C_CLOCK
 
-#ifndef SSE_BUILD
 namespace WinampOpenALOut {
 	public class Clock {
-#else
-	class Clock {
-#endif
 
 	public:
 
@@ -36,8 +32,6 @@ namespace WinampOpenALOut {
 
 	};
 
-#ifndef SSE_BUILD
 }
-#endif
 
 #endif

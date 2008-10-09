@@ -1,4 +1,5 @@
-#pragma once
+#ifndef __CONFIG_STATUS_FORM
+#define __CONFIG_STATUS_FORM
 
 #include "Constants.h"
 #include "Framework\aldlist.h"
@@ -100,7 +101,7 @@ namespace WinampOpenALOut {
 
 		static void ThreadProcedure();
 
-		void Update();
+		void DoUpdate();
 
 		int currentDevice;
 
@@ -363,14 +364,14 @@ private: System::ComponentModel::IContainer^  components;
 			// 
 			this->trackBufferLength->LargeChange = 500;
 			this->trackBufferLength->Location = System::Drawing::Point(15, 50);
-			this->trackBufferLength->Maximum = 4000;
-			this->trackBufferLength->Minimum = 1000;
+			this->trackBufferLength->Maximum = CONF_BUFFER_LENGTH_MAX;
+			this->trackBufferLength->Minimum = CONF_BUFFER_LENGTH_MIN;
 			this->trackBufferLength->Name = L"trackBufferLength";
 			this->trackBufferLength->Size = System::Drawing::Size(369, 45);
 			this->trackBufferLength->SmallChange = 100;
 			this->trackBufferLength->TabIndex = 10;
 			this->trackBufferLength->TickFrequency = 256;
-			this->trackBufferLength->Value = 2000;
+			this->trackBufferLength->Value = DEFC_BUFFER_LENGTH;
 			this->trackBufferLength->Scroll += gcnew System::EventHandler(this, &Config::trackBufferLength_Scroll);
 			// 
 			// checkBoxEffectsEnabled
@@ -383,6 +384,7 @@ private: System::ComponentModel::IContainer^  components;
 			this->checkBoxEffectsEnabled->TabIndex = 7;
 			this->checkBoxEffectsEnabled->Text = L"Enable Effects";
 			this->checkBoxEffectsEnabled->UseVisualStyleBackColor = true;
+			//TODO fix effects?
 			this->checkBoxEffectsEnabled->Visible = false;
 			// 
 			// buttonOk
@@ -667,8 +669,6 @@ private: System::ComponentModel::IContainer^  components;
 				}
 				if(ptrOw->GetConfBufferLength() != trackBufferLength->Value) {
 					// if we've changed the buffer length stop playback and change it
-					//ptrOw->Close();
-					//Sleep(50);
 					ptrOw->SetConfBufferLength(trackBufferLength->Value);
 					ConfigFile::WriteInteger(CONF_BUFFER_LENGTH, trackBufferLength->Value);
 					ptrOw->SwitchOutputDevice(currentDevice);
@@ -722,15 +722,17 @@ private: System::Void hScrollBarX_Scroll(System::Object^  sender, System::Window
 			 //alListener3f(AL_POSITION, 0.0, 0.0, 0.0);
 			//alSource3f(ptrOw->GetSource(), AL_POSITION, hScrollBarX->Value, vScrollBarY->Value, vScrollBarZ->Value);
 			alListener3f(AL_POSITION, (ALfloat)hScrollBarX->Value, (ALfloat)vScrollBarY->Value, (ALfloat)vScrollBarZ->Value);
-			alSource3f(ptrOw->GetSource(), AL_POSITION, 0.0, 0.0, 0.0);
+			//alSource3f(ptrOw->GetSource(), AL_POSITION, 0.0, 0.0, 0.0);
 		 }
 private: System::Void vScrollBarY_Scroll(System::Object^  sender, System::Windows::Forms::ScrollEventArgs^  e) {
 			alListener3f(AL_POSITION, (ALfloat)hScrollBarX->Value, (ALfloat)vScrollBarY->Value, (ALfloat)vScrollBarZ->Value);
-			alSource3f(ptrOw->GetSource(), AL_POSITION, 0.0, 0.0, 0.0);
+			//alSource3f(ptrOw->GetSource(), AL_POSITION, 0.0, 0.0, 0.0);
 		 }
 private: System::Void vScrollBarZ_Scroll(System::Object^  sender, System::Windows::Forms::ScrollEventArgs^  e) {
 			alListener3f(AL_POSITION, (ALfloat)hScrollBarX->Value, (ALfloat)vScrollBarY->Value, (ALfloat)vScrollBarZ->Value);
-			alSource3f(ptrOw->GetSource(), AL_POSITION, 0.0, 0.0, 0.0);
+			//alSource3f(ptrOw->GetSource(), AL_POSITION, 0.0, 0.0, 0.0);
 		 }
 };
 }
+
+#endif /*__CONFIG_STATUS_FORM*/

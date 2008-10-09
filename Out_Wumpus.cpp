@@ -1,12 +1,8 @@
 #include "Out_Wumpus.h"
 #include "Version.h"
 
-#ifndef SSE_BUILD
 #include "ConfigStatusForm.h"
 #include "Out_Effects.h"
-#else
-#include "ConfigFile.h"
-#endif
 
 #ifdef _DEBUG
 	#include <crtdbg.h>
@@ -15,9 +11,7 @@
 #define SYNC_START EnterCriticalSection(&criticalSection)
 #define SYNC_END LeaveCriticalSection(&criticalSection)
 
-#ifndef SSE_BUILD
 namespace WinampOpenALOut {
-#endif
 
 	Output_Wumpus::Output_Wumpus() {
 
@@ -30,19 +24,15 @@ namespace WinampOpenALOut {
 		currentWrittenTime = ZERO_TIME;
 
 		// create an instance of the effects module
-#ifndef SSE_BUILD
 		effectsModule = new EffectsModule(this);
-#endif
 
 	}
 
 	Output_Wumpus::~Output_Wumpus() {
 
 		//ensure everything in memory is deleted
-#ifndef SSE_BUILD
 		delete effectsModule;
 		effectsModule = NULL;
-#endif
 	}
 
 	/*
@@ -306,14 +296,10 @@ namespace WinampOpenALOut {
 	*/
 	void Output_Wumpus::Config(HWND hwnd) {
 
-#ifndef SSE_BUILD
 		WinampOpenALOut::Config^ config = WinampOpenALOut::Config::GetInstance(this);
 		if(!config->Visible) {
 			Application::Run(config);
 		}
-#else
-		MessageBoxA(hwnd, "Wumpus OpenAL Output Plugin (SSE2 version) has no configuration", "Configure", MB_OK);
-#endif
 	}
 
 	/*
@@ -461,10 +447,8 @@ namespace WinampOpenALOut {
 
 		SYNC_START;
 
-#ifndef SSE_BUILD
 		delete effectsModule;
 		effectsModule = 0;
-#endif
 
 		// shutdown openal
 		Framework::getInstance()->ALFWShutdownOpenAL();
@@ -626,9 +610,7 @@ namespace WinampOpenALOut {
 		/* enable effects (this returns instantly if
 							effects are not supported
 							or enabled */
-#ifndef SSE_BUILD
 		effectsModule->SourceDetermined(uiSource);
-#endif
 
 		// set the volume for the source
 		SetVolumeInternal(volume);
@@ -693,9 +675,7 @@ namespace WinampOpenALOut {
 		// delete all the buffers
 		alDeleteBuffers( noBuffers, uiBuffers );
 
-#ifndef SSE_BUILD
 		effectsModule->SourceRemoved();
-#endif
 
 		// just incase the thread has exitted, assume playing has stopped
 		isPlaying = false;
@@ -1012,7 +992,8 @@ namespace WinampOpenALOut {
 		// and cause and under-run
 		if(streamOpen && !preBuffer) {
 			if(pause) {
-				alSourcePause(uiSource);
+				//alSourcePause(uiSource);
+				alSourceStop(uiSource);
 			}else{
 				alSourcePlay(uiSource);
 			}
@@ -1173,19 +1154,11 @@ namespace WinampOpenALOut {
 	}
 
 	bool Output_Wumpus::GetEffectsEnabled() {
-#ifndef SSE_BUILD
 		return effectsModule->GetEffectsEnabled();
-#else
-		return false;
-#endif
 	}
 	
 	bool Output_Wumpus::GetEffectsSupported() {
-#ifndef SSE_BUILD
 		return effectsModule->GetEffectsSupported();
-#else
-		return false;
-#endif
 	}
 
 	void Output_Wumpus::SetEffectsEnabled(bool b) {
@@ -1194,9 +1167,7 @@ namespace WinampOpenALOut {
 
 		bool tempWrite = canWrite;
 		canWrite = false;
-#ifndef SSE_BUILD
 		effectsModule->SetEffectsEnabled(b);
-#endif
 		canWrite = tempWrite;
 
 		SYNC_END;
@@ -1204,11 +1175,7 @@ namespace WinampOpenALOut {
 
 	void Output_Wumpus::SetEffectsSupported(bool b) {
 		SYNC_START;
-#ifndef SSE_BUILD
 		effectsModule->SetEffectsSupported(b);
-#endif
 		SYNC_END;
 	}
-#ifndef SSE_BUILD
 }
-#endif

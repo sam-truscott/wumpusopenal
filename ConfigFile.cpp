@@ -4,9 +4,7 @@
 #define WM_WA_IPC WM_USER
 #define IPC_GETINIFILE 334
 
-#ifndef SSE_BUILD
 namespace WinampOpenALOut {
-#endif
 
 	char ConfigFile::INI_FILE[MAX_PATH];
 
@@ -95,6 +93,4 @@ namespace WinampOpenALOut {
 		}
 		WritePrivateProfileString(app_name,name,buf,INI_FILE);
 	}
-#ifndef SSE_BUILD
 }
-#endif

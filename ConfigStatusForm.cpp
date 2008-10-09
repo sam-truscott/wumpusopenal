@@ -33,7 +33,7 @@ namespace WinampOpenALOut {
 
 			/* make the gui thread update */
 			try {
-				UpdateData^ update = gcnew UpdateData(ptrForm, &Update);
+				UpdateData^ update = gcnew UpdateData(ptrForm, &DoUpdate);
 				if(!ptrForm->Disposing && ptrForm->Visible && ptrForm->WindowState == FormWindowState::Normal) {
 					ptrForm->Invoke(update);
 				}
@@ -44,7 +44,7 @@ namespace WinampOpenALOut {
 			}
 
 			// sleep for a nominal time
-			Sleep(10);
+			Sleep(50);
 		}
 	}
 
@@ -93,7 +93,7 @@ namespace WinampOpenALOut {
 		}
 	}
 
-	void Config::Update() {
+	void Config::DoUpdate() {
 		try {
 			/* update all the text for times and sizes */
 			lblBitsPerSecond->Text = gcnew System::String("" + bitsPerSample);

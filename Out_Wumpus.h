@@ -4,12 +4,9 @@
 #include "Framework\Framework.h"
 #include "Clock.h"
 
-#ifndef SSE_BUILD
 namespace WinampOpenALOut {
 	public class Output_Wumpus {
-#else
-	class Output_Wumpus {
-#endif
+
 	public:
 		Output_Wumpus();
 		~Output_Wumpus();
@@ -30,7 +27,7 @@ namespace WinampOpenALOut {
 		int GetWrittenTime();
 
 		void SwitchOutputDevice(int device);
-		void Relocate(int device, int currentPosition);
+		
 
 		inline bool IsStreamOpen()						{ return streamOpen; }
 
@@ -65,6 +62,7 @@ namespace WinampOpenALOut {
 	protected:
 
 		inline void onError();
+		void Relocate(int device, int currentPosition);
 
 		void CheckProcessedBuffers();
 		void CheckPlayState();
@@ -73,9 +71,7 @@ namespace WinampOpenALOut {
 
 		void SetVolumeInternal(ALfloat newVolume);
 
-#ifndef SSE_BUILD
 		class EffectsModule* effectsModule;
-#endif
 
 			// semaphore for the right access to buffers/open_al api
 		CRITICAL_SECTION criticalSection;
@@ -164,6 +160,5 @@ namespace WinampOpenALOut {
 		inline void fmemcpy(char* dest, int destPos, char* src, int size);
 		inline void fmemcpy(char* dest, int destPos, char* src, int srcPos, int size);
 	};
-#ifndef SSE_BUILD
+
 }
-#endif

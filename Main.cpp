@@ -7,11 +7,7 @@
 	#include <crtdbg.h>
 #endif
 
-#ifndef SSE_BUILD
 WinampOpenALOut::Output_Wumpus *outputWumpus = 0;
-#else
-Output_Wumpus* outputWumpus = 0;
-#endif
 
 /*
 	point to the correct procedures
@@ -58,11 +54,9 @@ void _Initialise() {
 		delete outputWumpus;
 		outputWumpus = 0;
 	}
-#ifndef SSE_BUILD
+
 	outputWumpus = new WinampOpenALOut::Output_Wumpus();
-#else
-	outputWumpus = new Output_Wumpus();
-#endif
+
 	if(outputWumpus) {
 		outputWumpus->Initialise(out.hMainWindow);
 	}
