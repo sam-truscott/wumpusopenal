@@ -42,12 +42,6 @@ namespace WinampOpenALOut {
 		inline unsigned int GetNumberOfBuffers()		{ return noBuffers; }
 		inline unsigned int GetBufferSize(int buffer)	{ return bufferSizes[buffer];}
 
-		inline bool GetEffectsEnabled();
-		inline bool GetEffectsSupported();
-
-		inline void	SetEffectsEnabled(bool b);
-		inline void	SetEffectsSupported(bool b);
-
 		inline int GetConfBufferLength() { return c_bufferLength;}
 		inline void SetConfBufferLength( unsigned int i) { c_bufferLength = i;}
 
@@ -93,10 +87,6 @@ namespace WinampOpenALOut {
 
 		char*			tmpBuffer;
 		unsigned int	tmpBufferSize;
-
-		 // boolean to store if effects are supported
-		bool			effectsSupported;
-		bool			effectsEnabled;
 
 		// integer to store the sample rate
 		unsigned int	sampleRate;

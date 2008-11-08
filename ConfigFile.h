@@ -4,7 +4,6 @@ namespace WinampOpenALOut {
 #define CONF_FALSE "false"
 
 #define CONF_DEVICE "DefaultDevice"
-#define CONF_EFX "EffectsEnabled"
 #define CONF_BUFFER_LENGTH "BufferLength"
 #define CONF_MONO_EXPAND "MonoExpansion"
 #define CONF_STEREO_EXPAND "StereoExpansion"

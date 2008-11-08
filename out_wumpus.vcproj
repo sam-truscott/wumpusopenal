@@ -453,10 +453,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Out_Effects.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\Out_Wumpus.cpp"
 				>
 				<FileConfiguration
@@ -519,10 +515,6 @@
 			</File>
 			<File
 				RelativePath="Main.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Out_Effects.h"
 				>
 			</File>
 			<File

@@ -60,16 +60,6 @@ namespace WinampOpenALOut {
 				comboBoxDevices->SelectedIndex = currentDevice;
 			}
 
-			// determine if efx is supported and enabled
-			bool efxSupported = ptrOw->GetEffectsSupported();
-			if(efxSupported) {
-				checkBoxEffectsEnabled->Checked = ptrOw->GetEffectsEnabled();
-				checkBoxEffectsEnabled->Enabled = true;
-			}else{
-				checkBoxEffectsEnabled->Checked = false;
-				checkBoxEffectsEnabled->Enabled = false;
-			}
-
 			trackBufferLength->Value = ConfigFile::ReadInteger(CONF_BUFFER_LENGTH);
 
 			// update their captions with values
@@ -675,10 +665,6 @@ private: System::ComponentModel::IContainer^  components;
 				}
 				
 				// store settings regarding effects
-				ptrOw->SetEffectsSupported(Framework::getInstance()->ALFWIsEFXSupported() == AL_TRUE ? true : false);
-				ptrOw->SetEffectsEnabled(checkBoxEffectsEnabled->Checked);
-				ConfigFile::WriteBoolean(CONF_EFX, checkBoxEffectsEnabled->Checked);
-
 				if(ptrOw->IsMonoExpanded() != checkBoxExpandMono->Checked
 					|| ptrOw->IsStereoExpanded() != checkBoxExpandStereo->Checked) {
 						

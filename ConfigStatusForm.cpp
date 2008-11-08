@@ -81,16 +81,6 @@ namespace WinampOpenALOut {
 			listBoxExtensions->Items->Add("Absent: ALC_EXT_EFX");
 		}
 
-		ptrOw->SetEffectsSupported(Framework::getInstance()->ALFWIsEFXSupported() == AL_TRUE ? true : false);
-
-		bool efxSupported = ptrOw->GetEffectsSupported();
-		if(efxSupported) {
-			checkBoxEffectsEnabled->Checked = ptrOw->GetEffectsEnabled();
-			checkBoxEffectsEnabled->Enabled = true;
-		}else{
-			checkBoxEffectsEnabled->Checked = false;
-			checkBoxEffectsEnabled->Enabled = false;
-		}
 	}
 
 	void Config::DoUpdate() {

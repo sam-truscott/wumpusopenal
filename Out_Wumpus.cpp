@@ -2,7 +2,6 @@
 #include "Version.h"
 
 #include "ConfigStatusForm.h"
-#include "Out_Effects.h"
 
 #ifdef _DEBUG
 	#include <crtdbg.h>
@@ -22,10 +21,6 @@ namespace WinampOpenALOut {
 		total_played = ZERO_TIME;
 		currentOutputTime = ZERO_TIME;
 		currentWrittenTime = ZERO_TIME;
-
-		// create an instance of the effects module
-		effectsModule = new EffectsModule(this);
-
 	}
 
 	Output_Wumpus::~Output_Wumpus() {
@@ -399,17 +394,6 @@ namespace WinampOpenALOut {
 		alListenerfv(AL_VELOCITY,listenerVel);
 		alListenerfv(AL_ORIENTATION,listenerOri);
 
-		// find out if effects are supported
-		this->effectsSupported = Framework::getInstance()->ALFWIsEFXSupported() == AL_TRUE ? true : false;
-		// find out if effects are enabled
-		this->effectsEnabled = ConfigFile::ReadBoolean(CONF_EFX);
-
-		// if effects are enabled, but not supported, disable them
-		if(!effectsSupported) {
-			effectsEnabled = false;
-			ConfigFile::WriteBoolean(CONF_EFX, false);
-		}
-
 		this->monoExpand = ConfigFile::ReadBoolean(CONF_MONO_EXPAND);
 		this->stereoExpand = ConfigFile::ReadBoolean(CONF_STEREO_EXPAND);
 
@@ -607,11 +591,6 @@ namespace WinampOpenALOut {
 
 		alSourcei(uiSource, AL_LOOPING, AL_FALSE);
 
-		/* enable effects (this returns instantly if
-							effects are not supported
-							or enabled */
-		effectsModule->SourceDetermined(uiSource);
-
 		// set the volume for the source
 		SetVolumeInternal(volume);
 
@@ -675,8 +654,6 @@ namespace WinampOpenALOut {
 		// delete all the buffers
 		alDeleteBuffers( noBuffers, uiBuffers );
 
-		effectsModule->SourceRemoved();
-
 		// just incase the thread has exitted, assume playing has stopped
 		isPlaying = false;
 
@@ -717,9 +694,9 @@ namespace WinampOpenALOut {
 		if(tmpBufferSize + len == MAXIMUM_BUFFER_SIZE) {
 
 			/*
-			there is exactly one buffers full of data
-			so we can process it
-			*/
+			 * there is exactly one buffers full of data
+			 * so we can process it
+			 */
 
 			fmemcpy(tmpBuffer, tmpBufferSize, buf, len);
 			tmpBufferSize += len;
@@ -727,23 +704,23 @@ namespace WinampOpenALOut {
 		}else if(tmpBufferSize + len > MAXIMUM_BUFFER_SIZE) {
 
 			/*
-			there is too much so write whats possible and
-			store the current buffer until the end and then
-			add that to the new empty queue
-			*/
+			 * there is too much so write whats possible and
+			 * store the current buffer until the end and then
+			 * add that to the new empty queue
+			 */
 
 			dataToBuffer = true;
 
 		}else {
 
 			/*
-			the buffer isnt full so we just add it
-
-			if this doesnt ever get full then to ensure we dont
-			just keep waiting there is a flush operation that will
-			make sure this data gets processed after a certain
-			amount of time
-			*/
+			 * the buffer isnt full so we just add it
+			 * 
+			 * if this doesnt ever get full then to ensure we dont
+			 * just keep waiting there is a flush operation that will
+			 * make sure this data gets processed after a certain
+			 * mount of time
+			 */
 
 			fmemcpy(tmpBuffer, tmpBufferSize, buf, len);
 			tmpBufferSize += len;
@@ -765,7 +742,8 @@ namespace WinampOpenALOut {
 			/*	go through the buffers and find an available one
 
 				if we're here (critical section, canWrite=true) then
-				we assume that one is! */
+				we assume that one is! 
+			*/
 			for(ALuint i=0;i<noBuffers;i++) {
 				if(avalBuffers[i]) {
 						// find an available buffer
@@ -992,7 +970,6 @@ namespace WinampOpenALOut {
 		// and cause and under-run
 		if(streamOpen && !preBuffer) {
 			if(pause) {
-				//alSourcePause(uiSource);
 				alSourceStop(uiSource);
 			}else{
 				alSourcePlay(uiSource);
@@ -1151,31 +1128,5 @@ namespace WinampOpenALOut {
 
 		lastOutputTime = (int)(currentOutputTime & THIRTY_TWO_BIT_BIT_MASK);
 		return lastOutputTime;
-	}
-
-	bool Output_Wumpus::GetEffectsEnabled() {
-		return effectsModule->GetEffectsEnabled();
-	}
-	
-	bool Output_Wumpus::GetEffectsSupported() {
-		return effectsModule->GetEffectsSupported();
-	}
-
-	void Output_Wumpus::SetEffectsEnabled(bool b) {
-		
-		SYNC_START;
-
-		bool tempWrite = canWrite;
-		canWrite = false;
-		effectsModule->SetEffectsEnabled(b);
-		canWrite = tempWrite;
-
-		SYNC_END;
-	}
-
-	void Output_Wumpus::SetEffectsSupported(bool b) {
-		SYNC_START;
-		effectsModule->SetEffectsSupported(b);
-		SYNC_END;
 	}
 }
