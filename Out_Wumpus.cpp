@@ -94,6 +94,7 @@ namespace WinampOpenALOut {
 
 		// shut down the thread and wait for it to shutdown
 		bool tempStreamOpen = streamOpen;
+		int tempPause = lastPause;
 		float tempVolume = volume;
 		this->Close();
 		
@@ -114,7 +115,7 @@ namespace WinampOpenALOut {
 		}
 		
 		if(tempStreamOpen) {
-			// re-initialise everything
+			// re-initialise everythinghttp://news.bbc.co.uk/1/hi/england/tyne/7720587.stm
 			this->Open(tempSampleRate, tempNumberOfChannels, tempBitsPerSample, 0,0);
 						
 			// reset back to the current position
@@ -122,6 +123,8 @@ namespace WinampOpenALOut {
 
 			// reset the volume
 			SetVolumeInternal(tempVolume);
+
+			this->Pause(tempPause);
 		}
 		SYNC_END;
 	}
