@@ -1,7 +1,7 @@
 Wumpus Out OpenAL is copyright (c) 2008 by Sam Truscott.
 =======================================================
 
-Wumpus Out OpenAL v0.8.0
+Wumpus Out OpenAL v0.8.1
 ========================
 
 Install
@@ -26,6 +26,10 @@ Known Issues
 
 Change Log
 ==========
+
+v0.8.1
+======
+* Fixed - If the file is skipped when pause playback will resume (Thanks Goujon)
 
 v0.8.0
 ======

@@ -306,7 +306,13 @@ namespace WinampOpenALOut {
 		this procedure is invoked by winamp when the about button is clicked
 	*/
 	void Output_Wumpus::About(HWND hwnd) {
-		MessageBoxA(hwnd,"Wumpus OpenAL Output Plug-in " PI_VER "\nCompiled on " __DATE__ " - " __TIME__"\n(c) 2008 Sam Truscott\nThanks to:\n\tTinuva\n","About",MB_OK);
+		MessageBoxA(hwnd,"Wumpus OpenAL Output Plug-in "
+			PI_VER "\nCompiled on " __DATE__ " - " __TIME__
+			"\n(c) 2008 Sam Truscott\n"
+			"Thanks to:\n"
+			"\tTinuva\n"
+			"\tGoujon\n"
+			,"About",MB_OK);
 	}
 
 	/*
