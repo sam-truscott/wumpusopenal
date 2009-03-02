@@ -143,27 +143,6 @@ private: System::Windows::Forms::HScrollBar^  hScrollBarX;
 
 private: System::Windows::Forms::VScrollBar^  vScrollBarY;
 private: System::Windows::Forms::Label^  label3;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 	protected: 
 
 			 static System::Windows::Forms::Label^ ptrLblSampleRate;

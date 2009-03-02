@@ -26,8 +26,6 @@ namespace WinampOpenALOut {
 	Output_Wumpus::~Output_Wumpus() {
 
 		//ensure everything in memory is deleted
-		delete effectsModule;
-		effectsModule = NULL;
 	}
 
 	/*
@@ -440,9 +438,6 @@ namespace WinampOpenALOut {
 
 		SYNC_START;
 
-		delete effectsModule;
-		effectsModule = 0;
-
 		// shutdown openal
 		Framework::getInstance()->ALFWShutdownOpenAL();
 		Framework::deleteInstance();
@@ -808,6 +803,7 @@ namespace WinampOpenALOut {
 
 				// expand buffer here
 				char* newBuffer = new char[MAXIMUM_BUFFER_SIZE * 2];
+				memset(newBuffer, 0, MAXIMUM_BUFFER_SIZE * 2);
 
 				unsigned int nPos = 0;
 				unsigned char sampleSize = bitsPerSample == 8 ? TWO_BYTE_SAMPLE : FOUR_BYTE_SAMPLE;
@@ -979,7 +975,7 @@ namespace WinampOpenALOut {
 		// and cause and under-run
 		if(streamOpen && !preBuffer) {
 			if(pause) {
-				alSourceStop(uiSource);
+				alSourcePause(uiSource);
 			}else{
 				alSourcePlay(uiSource);
 			}

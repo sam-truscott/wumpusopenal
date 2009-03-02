@@ -65,8 +65,6 @@ namespace WinampOpenALOut {
 
 		void SetVolumeInternal(ALfloat newVolume);
 
-		class EffectsModule* effectsModule;
-
 			// semaphore for the right access to buffers/open_al api
 		CRITICAL_SECTION criticalSection;
 
