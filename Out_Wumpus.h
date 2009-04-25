@@ -86,6 +86,8 @@ namespace WinampOpenALOut {
 		char*			tmpBuffer;
 		unsigned int	tmpBufferSize;
 
+		bool			xram_enabled;
+
 		// integer to store the sample rate
 		unsigned int	sampleRate;
 		// integer to store the number of channels
@@ -136,17 +138,11 @@ namespace WinampOpenALOut {
 		bool			stereoExpand;
 		bool			monoExpand;
 
-		// used for 3D Position and Panning
-		//ALfloat posX;
-		//ALfloat posY;
-		//ALfloat posZ;
-		ALfloat listenerPos[3];
-		ALfloat listenerVel[3];
-		ALfloat	listenerOri[6];
-
 	private:
 		inline void fmemcpy(char* dest, int destPos, char* src, int size);
 		inline void fmemcpy(char* dest, int destPos, char* src, int srcPos, int size);
+
+		void log_debug_msg(char* msg);
 	};
 
 }

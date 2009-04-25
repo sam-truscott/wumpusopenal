@@ -254,14 +254,6 @@ namespace WinampOpenALOut {
 
 				// if any buffers are queued and we're not playing - play!
 				if(!lastPause) {
-					//alSource3f(uiSource, AL_POSITION, listenerPos);
-					alGetError();
-					//alListenerfv(AL_POSITION,listenerPos);
-					alListener3f(AL_POSITION,listenerPos[0],listenerPos[1],listenerPos[2]);
-					alListenerfv(AL_ORIENTATION,listenerOri);
-					err = alGetError();
-					//alSourcefv(uiSource, AL_POSITION, listenerPos);
-					//err = alGetError();
 					alSourcePlay(uiSource);
 					isPlaying = true;
 				}
@@ -294,8 +286,15 @@ namespace WinampOpenALOut {
 
 		WinampOpenALOut::Config^ config = WinampOpenALOut::Config::GetInstance(this);
 		if(!config->Visible) {
-			Application::Run(config);
+			/*Application::Run(config);*/
+			config->Visible = true;
 		}
+	}
+
+	void Output_Wumpus::log_debug_msg(char* msg)
+	{
+		WinampOpenALOut::Config^ config = WinampOpenALOut::Config::GetInstance(this);
+		config->LogMessage(gcnew String(msg));
 	}
 
 	/*
@@ -347,22 +346,6 @@ namespace WinampOpenALOut {
 		lastOutputTime = ZERO_TIME;
 		lastWrittenTime = ZERO_TIME;
 
-		// TODO used for 3D Position and Panning
-		listenerPos[0]=0.0; // X - Left and Right
-		listenerPos[1]=0.0; // Y - Up and Down
-		listenerPos[2]=0.0; // Z - Forward and Back
-
-		listenerVel[0]=0.0;	// X vel
-		listenerVel[1]=0.0;	// Y vel
-		listenerVel[2]=0.0;	// Z vel
-
-		listenerOri[0]=0.0; // X target
-		listenerOri[1]=0.0; // Y target
-		listenerOri[2]=0.0; // Z target
-		listenerOri[3]=0.0; // 
-		listenerOri[4]=0.0;
-		listenerOri[5]=0.0;
-
 		for(int i=0;i<MAX_NO_BUFFERS;i++) {
 			bufferSizes[i] = EMPTY_THE_BUFFER;
 		}
@@ -386,7 +369,7 @@ namespace WinampOpenALOut {
 			ConfigFile::WriteInteger(CONF_DEVICE, currentDevice);
 		}
 
-		volume = (ALfloat)ConfigFile::ReadGlobalInteger(CONF_VOLUME) / VOLUME_DIVISOR; 
+		volume = (ALfloat)ConfigFile::ReadGlobalInteger(CONF_VOLUME) / VOLUME_DIVISOR;
 
 		/*
 			initialise openal itself - this has been modified
@@ -396,13 +379,15 @@ namespace WinampOpenALOut {
 			MessageBoxA(NULL, "Could not initialise OpenAL", "Error", MB_OK);
 		}
 
-		//alListenerfv(AL_POSITION,listenerPos);
-		alListener3f(AL_POSITION,listenerPos[0],listenerPos[1],listenerPos[2]);
-		alListenerfv(AL_VELOCITY,listenerVel);
-		alListenerfv(AL_ORIENTATION,listenerOri);
+		char dbg[255] = {'\0'};
+		sprintf(dbg, "Using Device {%d} with buffer of {%d}", currentDevice, c_bufferLength);
+		log_debug_msg(dbg);
 
 		this->monoExpand = ConfigFile::ReadBoolean(CONF_MONO_EXPAND);
 		this->stereoExpand = ConfigFile::ReadBoolean(CONF_STEREO_EXPAND);
+
+		sprintf(dbg, "Mono expansion {%d}, Stereo expansion {%d}", this->monoExpand, this->stereoExpand);
+		log_debug_msg(dbg);
 
 		SYNC_END;
 
@@ -465,6 +450,11 @@ namespace WinampOpenALOut {
 			SYNC_END;
 			return -1;
 		}
+
+		char dbg[255] = {'\0'};
+		sprintf(dbg, "Open: Sample rate {%d}, Channels {%d}, Bits {%d}", samplerate, numchannels, bitspersamp);
+		log_debug_msg(dbg);
+
 		
 		//record the format of the data we're getting
 		sampleRate = samplerate;
@@ -534,6 +524,9 @@ namespace WinampOpenALOut {
 		if(noBuffers < MINIMUM_BUFFERS) {
 			noBuffers = MINIMUM_BUFFERS;
 		}
+
+		sprintf(dbg, "-> Using {%d} buffers for total size of {%d}", noBuffers, bufferSize);
+		log_debug_msg(dbg);
 
 		/*
 			set up the various timers
@@ -613,6 +606,18 @@ namespace WinampOpenALOut {
 		for(unsigned int i=0;i<noBuffers;i++) {
 			avalBuffers[i] = true;
 			bufferSizes[i] = EMPTY_THE_BUFFER;
+		}
+
+		if ( Framework::getInstance()->ALFWIsXRAMSupported() == AL_TRUE )
+		{
+			sprintf(dbg,"-> Detect XRAM, Size {%d}MB, Free {%d}MB",
+				eXRAMSize / (1024*1024), eXRAMFree / (1024 * 1024) );
+			log_debug_msg(dbg);
+			xram_enabled = true;
+		}
+		else
+		{
+			xram_enabled = false;
 		}
 
 		SYNC_END;
@@ -860,6 +865,17 @@ namespace WinampOpenALOut {
 					MessageBoxA(NULL, txt, "Error", MB_OK);
 				}
 				onError();
+			}
+
+			/* if xram is enabled write the buffer to XRAM */
+			if ( xram_enabled == true )
+			{
+				ALenum cmode = eaxGetBufferMode(uiNextBuffer, NULL);
+				ALboolean inhw = eaxSetBufferMode(1,&uiNextBuffer, eXRAMAuto);
+				if ( inhw == AL_FALSE )
+				{
+					//log_debug_msg("Failed to put buffer into XRAM");
+				}
 			}
 
 			// add the buffer to the source queue
