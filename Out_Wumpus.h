@@ -5,7 +5,15 @@
 #include "Clock.h"
 
 namespace WinampOpenALOut {
+
 	public class Output_Wumpus {
+
+		typedef struct
+		{
+			ALuint buffer_id;
+			bool available;
+			unsigned int size;
+		} buffer_type;
 
 	public:
 		Output_Wumpus();
@@ -31,8 +39,6 @@ namespace WinampOpenALOut {
 
 		inline bool IsStreamOpen()						{ return streamOpen; }
 
-		unsigned int GetPlayingBuffer();
-
 		inline unsigned int	GetSampleRate()				{ return sampleRate; }
 		inline unsigned int GetBitsPerSample()			{ return bitsPerSample; }
 		inline unsigned int GetNumberOfChannels()		{ return numberOfChannels; }
@@ -40,18 +46,15 @@ namespace WinampOpenALOut {
 		inline int GetLastWrittenTime()					{ return lastWrittenTime; }
 
 		inline unsigned int GetNumberOfBuffers()		{ return noBuffers; }
-		inline unsigned int GetBufferSize(int buffer)	{ return bufferSizes[buffer];}
 
 		inline int GetConfBufferLength() { return c_bufferLength;}
 		inline void SetConfBufferLength( unsigned int i) { c_bufferLength = i;}
 
 		inline bool IsStereoExpanded() { return stereoExpand;}
-		inline void SetStereoExpanded(bool expanded) { stereoExpand = expanded;}
+		inline void SetStereoExpanded(bool expanded);
 
 		inline bool IsMonoExpanded() { return monoExpand;}
-		inline void SetMonoExpanded(bool expanded) {monoExpand = expanded;}
-
-		inline ALuint GetSource() { return uiSource; }
+		inline void SetMonoExpanded(bool expanded);
 
 	protected:
 
@@ -60,7 +63,6 @@ namespace WinampOpenALOut {
 
 		void CheckProcessedBuffers();
 		void CheckPlayState();
-		void inline CheckAvailableBuffers();
 		int SetBufferTime(int tMs);
 
 		void SetVolumeInternal(ALfloat newVolume);
@@ -83,8 +85,7 @@ namespace WinampOpenALOut {
 		bool			preBuffer;
 		unsigned int	preBufferNumber;
 
-		char*			tmpBuffer;
-		unsigned int	tmpBufferSize;
+		unsigned int	buffer_free;
 
 		bool			xram_enabled;
 
@@ -120,12 +121,7 @@ namespace WinampOpenALOut {
 		int			lastWrittenTime;
 
 		// the open al buffers themselves
-		ALuint		    uiBuffers[MAX_NO_BUFFERS];
-		// boolean array used to store whether buffers are usable/available
-		bool			avalBuffers[MAX_NO_BUFFERS];
-		// integer array to store the sizes of the buffers from winamp
-		// this is used so we only update the time written when its done
-		unsigned int	bufferSizes[MAX_NO_BUFFERS];
+		buffer_type	    uiBuffers[MAX_NO_BUFFERS];
 		// integer used to reference the open al source
 		ALuint		    uiSource;
 
@@ -139,8 +135,6 @@ namespace WinampOpenALOut {
 		bool			monoExpand;
 
 	private:
-		inline void fmemcpy(char* dest, int destPos, char* src, int size);
-		inline void fmemcpy(char* dest, int destPos, char* src, int srcPos, int size);
 
 		void log_debug_msg(char* msg);
 	};
