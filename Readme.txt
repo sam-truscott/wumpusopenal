@@ -1,7 +1,7 @@
-Wumpus Out OpenAL is copyright (c) 2008 by Sam Truscott.
+Wumpus Out OpenAL is copyright (c) 2009 by Sam Truscott.
 =======================================================
 
-Wumpus Out OpenAL v0.8.2
+Wumpus Out OpenAL v0.9.0
 ========================
 
 Install
@@ -26,6 +26,12 @@ Known Issues
 
 Change Log
 ==========
+
+v0.9.0
+======
+* Added - XRAM utilisation
+* Updated - no internal buffering, passed straight to OpenAL to reduce memory usage
+	and CPU utilisation
 
 v0.8.2
 ======

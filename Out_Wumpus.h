@@ -56,6 +56,9 @@ namespace WinampOpenALOut {
 		inline bool IsMonoExpanded() { return monoExpand;}
 		inline void SetMonoExpanded(bool expanded);
 
+		inline bool IsXRAMEnabled() { return xram_enabled; }
+		inline void SetXRAMEnabled( bool enabled );
+
 	protected:
 
 		inline void onError();

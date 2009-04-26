@@ -7,6 +7,7 @@ namespace WinampOpenALOut {
 #define CONF_BUFFER_LENGTH "BufferLength"
 #define CONF_MONO_EXPAND "MonoExpansion"
 #define CONF_STEREO_EXPAND "StereoExpansion"
+#define CONF_XRAM_ENABLED "UseXRAM"
 #define CONF_VOLUME "volume"
 
 	public class ConfigFile {

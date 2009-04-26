@@ -252,7 +252,7 @@ namespace WinampOpenALOut {
 		WinampOpenALOut::Config^ config = WinampOpenALOut::Config::GetInstance(this);
 		if(!config->Visible)
 		{
-			config->Visible = true;
+			config->Load();
 		}
 	}
 
@@ -351,13 +351,15 @@ namespace WinampOpenALOut {
 
 		this->monoExpand = ConfigFile::ReadBoolean(CONF_MONO_EXPAND);
 		this->stereoExpand = ConfigFile::ReadBoolean(CONF_STEREO_EXPAND);
+		this->xram_enabled = ConfigFile::ReadBoolean(CONF_XRAM_ENABLED);
 
 		sprintf_s(
 			dbg,
 			255,
-			"Mono expansion {%d}, Stereo expansion {%d}",
+			"Mono expansion {%d}, Stereo expansion {%d}, Use XRAM? {%d}",
 			this->monoExpand,
-			this->stereoExpand);
+			this->stereoExpand,
+			this->xram_enabled);
 		this->log_debug_msg(dbg);
 
 		SYNC_END;
@@ -380,6 +382,8 @@ namespace WinampOpenALOut {
 			this->Close();
 			streamOpen = false;
 		}
+
+		ConfigFile::WriteGlobalInteger(CONF_VOLUME, volume * VOLUME_DIVISOR);
 
 		// shutdown openal
 		Framework::getInstance()->ALFWShutdownOpenAL();
@@ -498,6 +502,20 @@ namespace WinampOpenALOut {
 			bufferSize);
 		this->log_debug_msg(dbg);
 
+		bool xram_detected = false;
+
+		if ( Framework::getInstance()->ALFWIsXRAMSupported() == AL_TRUE )
+		{
+			sprintf_s(
+				dbg,
+				255,
+				"-> Detect XRAM, Size {%d}MB, Free {%d}MB",
+				eXRAMSize / (1024*1024),
+				eXRAMFree / (1024 * 1024) );
+			this->log_debug_msg(dbg);
+			xram_detected = true;
+		}
+
 		/*
 			set up the various timers
 		*/
@@ -510,6 +528,8 @@ namespace WinampOpenALOut {
 		// determine the delay to check the state of the openal buffers
 		lastCheckDelay = Clock::Milliseconds(c_bufferLength / noBuffers);
 
+		unsigned int in_xram_ok = 0;
+
 		// allocate some buffers
 		alGetError();
 		for(unsigned int i=0;i<noBuffers;i++)
@@ -517,7 +537,35 @@ namespace WinampOpenALOut {
 			uiBuffers[i].size = 0;
 			uiBuffers[i].available = true;
 			alGenBuffers( 1, &uiBuffers[i].buffer_id );
+
+			/* if xram is enabled write the buffer to XRAM */
+			if ( xram_detected == true && 
+				xram_enabled == true )
+			{
+				ALboolean inhw = eaxSetBufferMode(
+					1,
+					&uiBuffers[i].buffer_id,
+					eXRAMHardware);
+
+				if ( inhw == AL_FALSE )
+				{
+					log_debug_msg("Failed to set buffer as XRAM");
+				}
+				else
+				{
+					in_xram_ok++;
+				}	
+			}
 		}
+
+		sprintf_s(
+			dbg, 
+			255, 
+			"--> {%d} Buffers from {%d} were stored in XRAM OK", 
+			in_xram_ok, 
+			noBuffers);
+		log_debug_msg(dbg);
+
 		ALenum err = alGetError();
 		if( err == AL_INVALID_VALUE || err == AL_OUT_OF_MEMORY) {
 
@@ -580,22 +628,6 @@ namespace WinampOpenALOut {
 		preBuffer = true;
 
 		preBufferNumber = NO_BUFFERS_PROCESSED;
-
-		if ( Framework::getInstance()->ALFWIsXRAMSupported() == AL_TRUE )
-		{
-			sprintf_s(
-				dbg,
-				255,
-				"-> Detect XRAM, Size {%d}MB, Free {%d}MB",
-				eXRAMSize / (1024*1024),
-				eXRAMFree / (1024 * 1024) );
-			this->log_debug_msg(dbg);
-			xram_enabled = true;
-		}
-		else
-		{
-			xram_enabled = false;
-		}
 
 		SYNC_END;
 		return c_bufferLength;
@@ -805,17 +837,6 @@ namespace WinampOpenALOut {
 				this->onError();
 			}
 
-			/* if xram is enabled write the buffer to XRAM */
-			if ( xram_enabled == true )
-			{
-				ALenum cmode = eaxGetBufferMode(uiNextBuffer, NULL);
-				ALboolean inhw = eaxSetBufferMode(1,&uiNextBuffer, eXRAMAuto);
-				if ( cmode != eXRAMAuto && inhw == AL_FALSE )
-				{
-					//log_debug_msg("Failed to put buffer into XRAM");
-				}
-			}
-
 			// add the buffer to the source queue
 			alGetError();
 			alSourceQueueBuffers(uiSource, 1, &uiNextBuffer);
@@ -962,10 +983,12 @@ namespace WinampOpenALOut {
 		set volume (internal) - used to check the volume range
 		and store the volume for later use
 	*/
-	void Output_Wumpus::SetVolumeInternal(ALfloat newVolume) {
+	void Output_Wumpus::SetVolumeInternal(ALfloat newVolume)
+	{
 		if(newVolume <= VOLUME_MAX && newVolume >= VOLUME_MIN) {
 			volume = newVolume;
 			alSourcef(uiSource,AL_GAIN, newVolume);
+			ConfigFile::WriteGlobalInteger(CONF_VOLUME, volume * VOLUME_DIVISOR);
 		}
 	}
 
@@ -974,7 +997,8 @@ namespace WinampOpenALOut {
 
 		this procedure is invoked by winamp to set the pan
 	*/
-	void Output_Wumpus::SetPan(int pan) {
+	void Output_Wumpus::SetPan(int pan)
+	{
 	}
 
 	/*
@@ -1093,10 +1117,17 @@ namespace WinampOpenALOut {
 		monoExpand = expanded;
 		ConfigFile::WriteBoolean(CONF_MONO_EXPAND,monoExpand);
 	}
+
 	void Output_Wumpus::SetStereoExpanded(bool expanded)
 	{ 
 		stereoExpand = expanded;
 		ConfigFile::WriteBoolean(CONF_STEREO_EXPAND,stereoExpand);
+	}
+
+	void Output_Wumpus::SetXRAMEnabled( bool enabled )
+	{
+		xram_enabled = enabled;
+		ConfigFile::WriteBoolean(CONF_XRAM_ENABLED,xram_enabled);
 	}
 
 }
