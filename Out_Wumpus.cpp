@@ -383,7 +383,7 @@ namespace WinampOpenALOut {
 			streamOpen = false;
 		}
 
-		ConfigFile::WriteGlobalInteger(CONF_VOLUME, volume * VOLUME_DIVISOR);
+		ConfigFile::WriteInteger(CONF_VOLUME, volume * VOLUME_DIVISOR);
 
 		// shutdown openal
 		Framework::getInstance()->ALFWShutdownOpenAL();
@@ -988,7 +988,7 @@ namespace WinampOpenALOut {
 		if(newVolume <= VOLUME_MAX && newVolume >= VOLUME_MIN) {
 			volume = newVolume;
 			alSourcef(uiSource,AL_GAIN, newVolume);
-			ConfigFile::WriteGlobalInteger(CONF_VOLUME, volume * VOLUME_DIVISOR);
+			ConfigFile::WriteInteger(CONF_VOLUME, volume * VOLUME_DIVISOR);
 		}
 	}
 
