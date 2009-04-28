@@ -27,7 +27,7 @@ Known Issues
 Change Log
 ==========
 
-v0.9.0
+v0.9.0 [beta 1]
 ======
 * Added - XRAM utilisation
 * Updated - no internal buffering, passed straight to OpenAL to reduce memory usage

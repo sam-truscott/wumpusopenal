@@ -558,13 +558,17 @@ namespace WinampOpenALOut {
 			}
 		}
 
-		sprintf_s(
-			dbg, 
-			255, 
-			"--> {%d} Buffers from {%d} were stored in XRAM OK", 
-			in_xram_ok, 
-			noBuffers);
-		log_debug_msg(dbg);
+		if ( xram_detected == true && 
+				xram_enabled == true )
+		{
+			sprintf_s(
+				dbg, 
+				255, 
+				"--> {%d} Buffers from {%d} were stored in XRAM OK", 
+				in_xram_ok, 
+				noBuffers);
+			log_debug_msg(dbg);
+		}
 
 		ALenum err = alGetError();
 		if( err == AL_INVALID_VALUE || err == AL_OUT_OF_MEMORY) {
