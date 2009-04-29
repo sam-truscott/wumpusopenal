@@ -3,6 +3,8 @@
 
 #include "ConfigStatusForm.h"
 
+#define DEBUG_BUFFER_SIZE 255
+
 #ifdef _DEBUG
 	#include <crtdbg.h>
 #endif
@@ -51,6 +53,16 @@ namespace WinampOpenALOut {
 	int Output_Wumpus::get_current_written_time(__int64 currentWrittenTime, unsigned int sampleRate)//this ignores high 32bits of total_written
 	{
 		return MulDiv( (int)(currentWrittenTime & THIRTY_TWO_BIT_BIT_MASK),ONE_SECOND_IN_MS,sampleRate);
+	}
+
+	void Output_Wumpus::fmemcpy(char* dest, int destPos, char* src, int srcPos, int size) {
+		
+		// get a pointer to the memory data with an offset
+		void* ptr = (void*)&dest[destPos];
+		void* ptrSrc = (void*)&src[srcPos];
+
+		// now copy from this position onwards
+		memcpy_s(ptr, MAXIMUM_BUFFER_SIZE, ptrSrc, size);
 	}
 
 	void Output_Wumpus::onError()
@@ -340,10 +352,10 @@ namespace WinampOpenALOut {
 			MessageBoxA(NULL, "Could not initialise OpenAL", "Error", MB_OK);
 		}
 
-		char dbg[255] = {'\0'};
+		char dbg[DEBUG_BUFFER_SIZE] = {'\0'};
 		sprintf_s(
 			dbg,
-			255,
+			DEBUG_BUFFER_SIZE,
 			"Using Device {%d} with buffer of {%d}",
 			currentDevice,
 			c_bufferLength);
@@ -355,7 +367,7 @@ namespace WinampOpenALOut {
 
 		sprintf_s(
 			dbg,
-			255,
+			DEBUG_BUFFER_SIZE,
 			"Mono expansion {%d}, Stereo expansion {%d}, Use XRAM? {%d}",
 			this->monoExpand,
 			this->stereoExpand,
@@ -414,10 +426,10 @@ namespace WinampOpenALOut {
 			return -1;
 		}
 
-		char dbg[255] = {'\0'};
+		char dbg[DEBUG_BUFFER_SIZE] = {'\0'};
 		sprintf_s(
 			dbg,
-			255,
+			DEBUG_BUFFER_SIZE,
 			"Open: Sample rate {%d}, Channels {%d}, Bits {%d}",
 			samplerate,
 			numchannels,
@@ -496,7 +508,7 @@ namespace WinampOpenALOut {
 
 		sprintf_s(
 			dbg,
-			255,
+			DEBUG_BUFFER_SIZE,
 			"-> Using {%d} buffers for total size of {%d}", 
 			noBuffers,
 			bufferSize);
@@ -506,10 +518,10 @@ namespace WinampOpenALOut {
 		{
 			sprintf_s(
 				dbg,
-				255,
+				DEBUG_BUFFER_SIZE,
 				"-> Detect XRAM, Size {%d}MB, Free {%d}MB",
-				eXRAMSize / (1024*1024),
-				eXRAMFree / (1024 * 1024) );
+				alGetEnumValue("AL_EAX_RAM_SIZE") / (1024 * 1024),
+				alGetEnumValue("AL_EAX_RAM_FREE") / (1024 * 1024) );
 			this->log_debug_msg(dbg);
 			xram_detected = true;
 		}
@@ -538,7 +550,8 @@ namespace WinampOpenALOut {
 
 			/* if xram is enabled write the buffer to XRAM */
 			if ( xram_detected == true && 
-				xram_enabled == true )
+				xram_enabled == true &&
+				alGetEnumValue("AL_EAX_RAM_FREE") > 0)
 			{
 				ALboolean inhw = eaxSetBufferMode(
 					1,
@@ -561,7 +574,7 @@ namespace WinampOpenALOut {
 		{
 			sprintf_s(
 				dbg, 
-				255, 
+				DEBUG_BUFFER_SIZE, 
 				"--> {%d} Buffers from {%d} were stored in XRAM OK", 
 				in_xram_ok, 
 				noBuffers);
@@ -569,8 +582,8 @@ namespace WinampOpenALOut {
 		}
 
 		ALenum err = alGetError();
-		if( err == AL_INVALID_VALUE || err == AL_OUT_OF_MEMORY) {
-
+		if( err == AL_INVALID_VALUE || err == AL_OUT_OF_MEMORY)
+		{
 			if( err != AL_NO_ERROR) 
 			{
 				if(err == AL_OUT_OF_MEMORY) {
@@ -640,8 +653,8 @@ namespace WinampOpenALOut {
 
 		this procedure is invoked by winamp when the file is closed
 	*/
-	void Output_Wumpus::Close() {
-
+	void Output_Wumpus::Close() 
+	{
 		SYNC_START;
 		streamOpen = false;
 
@@ -697,14 +710,15 @@ namespace WinampOpenALOut {
 		this procedure is invoked by winamp when it attempts to write
 		data to the plugin
 	*/
-	int Output_Wumpus::Write(char *buf, int len) {
-
+	int Output_Wumpus::Write(char *buf, int len)
+	{
 		SYNC_START;
 
 		ALenum err;
 
 		// if we cannot write exit now (non-blocking op)
-		if(!canWrite || !streamOpen) {
+		if(!canWrite || !streamOpen)
+		{
 			SYNC_END;
 			return -1;
 		}
@@ -739,84 +753,77 @@ namespace WinampOpenALOut {
 				return -1;
 			}
 
-			//// ############## MONO EXPANSION
-
-			//if(monoExpand) {
-			//	// we're writing out four as much data so
-			//	// increase this value by three more times
-			//	total_written += (tmpBufferSize*3);
-
-			//	// expand buffer here
-			//	char* newBuffer = new char[MAXIMUM_BUFFER_SIZE * 4];
-
-			//	// set relative value to zero
-			//	unsigned int nPos = 0;
-			//	
-			//	/* expand the samples out */
-			//	for(unsigned int pos=0; pos < tmpBufferSize; pos++) {
-			//		newBuffer[nPos++] = tmpBuffer[pos];
-			//		newBuffer[nPos++] = tmpBuffer[pos];
-			//		newBuffer[nPos++] = tmpBuffer[pos];
-			//		newBuffer[nPos++] = tmpBuffer[pos];
-			//	}
-
-			//	// delete old buffer
-			//	delete tmpBuffer;
-			//	// switch em over
-			//	tmpBuffer = newBuffer;
-			//	// increase the size by four
-			//	tmpBufferSize *= 4;
-			//}
-
-			//// ############## END MONO EXPANSION
-
-			//// ############## STEREO EXPANSION
-
-			//if(stereoExpand) {
-
-			//	// we're writing out twice as much data so
-			//	// increase this value again
-			//	total_written += tmpBufferSize;
-
-			//	// expand buffer here
-			//	char* newBuffer = new char[MAXIMUM_BUFFER_SIZE * 2];
-			//	memset(newBuffer, 0, MAXIMUM_BUFFER_SIZE * 2);
-
-			//	unsigned int nPos = 0;
-			//	unsigned char sampleSize = bitsPerSample == 8 ? TWO_BYTE_SAMPLE : FOUR_BYTE_SAMPLE;
-			//	
-			//	/* expand the samples out */
-			//	for(unsigned int pos=0; pos < tmpBufferSize;) {
-			//		// copy the front left and right
-			//		fmemcpy(/*dst	*/	newBuffer,
-			//				/*dstPos*/	nPos,
-			//				/*src	*/	tmpBuffer, 
-			//				/*srcPos*/	pos, 
-			//				/*size	*/	sampleSize);
-			//		nPos+=sampleSize;
-
-			//		// copy the rear left and right
-			//		fmemcpy(/*dst	*/	newBuffer,
-			//				/*dstPos*/	nPos,
-			//				/*src	*/	tmpBuffer,
-			//				/*srcPos*/	pos,
-			//				/*size	*/	sampleSize);
-			//		nPos+=sampleSize;
-			//		pos+=sampleSize;
-			//	}
-
-			//	// delete old buffer
-			//	delete tmpBuffer;
-			//	// switch em over
-			//	tmpBuffer = newBuffer;
-			//	// increase the size by two
-			//	tmpBufferSize *= 2;
-			//}
-
-			//// ############## END STEREO EXPANSION
-
 			buffer_free-=len;
 			total_written += len;
+
+			// ############## MONO EXPANSION
+
+			if(monoExpand) {
+				// we're writing out four as much data so
+				// increase this value by three more times
+				total_written += (len*3);
+
+				// expand buffer here
+				char* newBuffer = new char[MAXIMUM_BUFFER_SIZE * 4];
+				memset(newBuffer, 0, MAXIMUM_BUFFER_SIZE * 4);
+
+				// set relative value to zero
+				unsigned int nPos = 0;
+				
+				/* expand the samples out */
+				for(unsigned int pos=0; pos < len; pos++) {
+					newBuffer[nPos++] = buf[pos];
+					newBuffer[nPos++] = buf[pos];
+					newBuffer[nPos++] = buf[pos];
+					newBuffer[nPos++] = buf[pos];
+				}
+
+				buf = newBuffer;
+				len *= 4;
+			}
+
+			// ############## END MONO EXPANSION
+
+			// ############## STEREO EXPANSION
+
+			if(stereoExpand) {
+
+				// we're writing out twice as much data so
+				// increase this value again
+				total_written += len;
+
+				// expand buffer here
+				char* newBuffer = new char[MAXIMUM_BUFFER_SIZE * 2];
+				memset(newBuffer, 0, MAXIMUM_BUFFER_SIZE * 2);
+
+				unsigned int nPos = 0;
+				unsigned char sampleSize = bitsPerSample == 8 ? TWO_BYTE_SAMPLE : FOUR_BYTE_SAMPLE;
+				
+				/* expand the samples out */
+				for(unsigned int pos=0; pos < len;) {
+					// copy the front left and right
+					fmemcpy(/*dst	*/	newBuffer,
+							/*dstPos*/	nPos,
+							/*src	*/	buf, 
+							/*srcPos*/	pos, 
+							/*size	*/	sampleSize);
+					nPos+=sampleSize;
+
+					// copy the rear left and right
+					fmemcpy(/*dst	*/	newBuffer,
+							/*dstPos*/	nPos,
+							/*src	*/	buf,
+							/*srcPos*/	pos,
+							/*size	*/	sampleSize);
+					nPos+=sampleSize;
+					pos+=sampleSize;
+				}
+
+				len *= 2;
+				buf = newBuffer;
+			}
+
+			// ############## END STEREO EXPANSION
 
 			// buffer the data with the correct format
 			alGetError();

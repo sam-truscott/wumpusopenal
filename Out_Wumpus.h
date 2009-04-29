@@ -143,6 +143,7 @@ namespace WinampOpenALOut {
 	private:
 
 		void log_debug_msg(char* msg);
+		inline void fmemcpy(char* dest, int destPos, char* src, int srcPos, int size);
 	};
 
 }

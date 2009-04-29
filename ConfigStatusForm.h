@@ -28,7 +28,8 @@ namespace WinampOpenALOut {
 	public ref class Config : public System::Windows::Forms::Form
 	{
 	public:
-		Config(class Output_Wumpus *aPtrOw) {
+		Config(class Output_Wumpus *aPtrOw)
+		{
 			InitializeComponent();
 
 			ptrOw = aPtrOw;
@@ -74,7 +75,8 @@ namespace WinampOpenALOut {
 			ShowDeviceDetails();
 		}
 
-		void Load() {
+		void Load()
+		{
 			Show();
 			checkBoxExpandMono->Checked = ptrOw->IsMonoExpanded();
 			checkBoxExpandStereo->Checked = ptrOw->IsStereoExpanded();
@@ -88,6 +90,7 @@ namespace WinampOpenALOut {
 				checkBoxXRAM->Enabled = false;
 				checkBoxXRAM->Checked = false;
 			}
+			this->Visible = true;
 		}
 
 		delegate void UpdateLog(String^ text);
@@ -103,8 +106,10 @@ namespace WinampOpenALOut {
 			ptrForm->Invoke(update,text);
 		}
 
-		static Config^ GetInstance(Output_Wumpus *aPtrOw) {
-			if(!loaded) {
+		static Config^ GetInstance(Output_Wumpus *aPtrOw)
+		{
+			if(!loaded)
+			{
 				loaded = true;
 				ptrForm = gcnew Config(aPtrOw);
 				ptrForm->Load();			
