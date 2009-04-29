@@ -59,6 +59,8 @@ namespace WinampOpenALOut {
 		inline bool IsXRAMEnabled() { return xram_enabled; }
 		inline void SetXRAMEnabled( bool enabled );
 
+		inline bool	IsXRAMPresent() { return xram_detected; }
+
 	protected:
 
 		inline void onError();
@@ -90,6 +92,7 @@ namespace WinampOpenALOut {
 
 		unsigned int	buffer_free;
 
+		bool			xram_detected;
 		bool			xram_enabled;
 
 		// integer to store the sample rate

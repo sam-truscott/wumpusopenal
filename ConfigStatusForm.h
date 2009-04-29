@@ -78,7 +78,16 @@ namespace WinampOpenALOut {
 			Show();
 			checkBoxExpandMono->Checked = ptrOw->IsMonoExpanded();
 			checkBoxExpandStereo->Checked = ptrOw->IsStereoExpanded();
-			checkBoxXRAM->Checked = ptrOw->IsXRAMEnabled();
+			if(ptrOw->IsXRAMPresent() == true)
+			{
+				checkBoxXRAM->Enabled = true;
+				checkBoxXRAM->Checked = ptrOw->IsXRAMEnabled();
+			}
+			else
+			{
+				checkBoxXRAM->Enabled = false;
+				checkBoxXRAM->Checked = false;
+			}
 		}
 
 		delegate void UpdateLog(String^ text);

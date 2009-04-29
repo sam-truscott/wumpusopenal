@@ -502,8 +502,6 @@ namespace WinampOpenALOut {
 			bufferSize);
 		this->log_debug_msg(dbg);
 
-		bool xram_detected = false;
-
 		if ( Framework::getInstance()->ALFWIsXRAMSupported() == AL_TRUE )
 		{
 			sprintf_s(
