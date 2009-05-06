@@ -59,8 +59,10 @@ namespace WinampOpenALOut {
 				comboBoxDevices->SelectedIndex = currentDevice;
 			}
 
-			if ( ConfigFile::ReadInteger(CONF_BUFFER_LENGTH) < 250
-				|| ConfigFile::ReadInteger(CONF_BUFFER_LENGTH) > 4000)
+			int buffer = ConfigFile::ReadInteger(CONF_BUFFER_LENGTH);
+
+			if ( buffer >= 250
+				|| buffer <= 4000)
 			{
 				trackBufferLength->Value = ConfigFile::ReadInteger(CONF_BUFFER_LENGTH);
 			}
@@ -91,19 +93,6 @@ namespace WinampOpenALOut {
 				checkBoxXRAM->Checked = false;
 			}
 			this->Visible = true;
-		}
-
-		delegate void UpdateLog(String^ text);
-
-		void RealLogMessage(String^ text)
-		{
-			listBoxLog->Items->Add(text);
-		}
-
-		void LogMessage(String^ text)
-		{
-			UpdateLog^ update = gcnew UpdateLog(ptrForm, &Config::RealLogMessage);
-			ptrForm->Invoke(update,text);
 		}
 
 		static Config^ GetInstance(Output_Wumpus *aPtrOw)
@@ -138,8 +127,8 @@ namespace WinampOpenALOut {
 	private: System::Windows::Forms::VScrollBar^  vScrollBarY;
 	private: System::Windows::Forms::Label^  label3;
 
-	private: System::Windows::Forms::TabPage^  tabPageLog;
-	private: System::Windows::Forms::ListBox^  listBoxLog;
+
+
 private: System::Windows::Forms::TabPage^  tabPageConfig;
 private: System::Windows::Forms::CheckBox^  checkBoxExpandStereo;
 private: System::Windows::Forms::CheckBox^  checkBoxExpandMono;
@@ -221,6 +210,7 @@ private: System::ComponentModel::IContainer^  components;
 		{
 			this->tabControl1 = (gcnew System::Windows::Forms::TabControl());
 			this->tabPageConfig = (gcnew System::Windows::Forms::TabPage());
+			this->checkBoxXRAM = (gcnew System::Windows::Forms::CheckBox());
 			this->checkBoxExpandStereo = (gcnew System::Windows::Forms::CheckBox());
 			this->checkBoxExpandMono = (gcnew System::Windows::Forms::CheckBox());
 			this->label4 = (gcnew System::Windows::Forms::Label());
@@ -234,25 +224,20 @@ private: System::ComponentModel::IContainer^  components;
 			this->label16 = (gcnew System::Windows::Forms::Label());
 			this->comboBoxDevices = (gcnew System::Windows::Forms::ComboBox());
 			this->label1 = (gcnew System::Windows::Forms::Label());
-			this->tabPageLog = (gcnew System::Windows::Forms::TabPage());
-			this->listBoxLog = (gcnew System::Windows::Forms::ListBox());
 			this->tabPage3D = (gcnew System::Windows::Forms::TabPage());
 			this->label3 = (gcnew System::Windows::Forms::Label());
 			this->vScrollBarZ = (gcnew System::Windows::Forms::VScrollBar());
 			this->hScrollBarX = (gcnew System::Windows::Forms::HScrollBar());
 			this->vScrollBarY = (gcnew System::Windows::Forms::VScrollBar());
-			this->checkBoxXRAM = (gcnew System::Windows::Forms::CheckBox());
 			this->tabControl1->SuspendLayout();
 			this->tabPageConfig->SuspendLayout();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->trackBufferLength))->BeginInit();
-			this->tabPageLog->SuspendLayout();
 			this->tabPage3D->SuspendLayout();
 			this->SuspendLayout();
 			// 
 			// tabControl1
 			// 
 			this->tabControl1->Controls->Add(this->tabPageConfig);
-			this->tabControl1->Controls->Add(this->tabPageLog);
 			this->tabControl1->Location = System::Drawing::Point(12, 12);
 			this->tabControl1->Name = L"tabControl1";
 			this->tabControl1->SelectedIndex = 0;
@@ -282,6 +267,16 @@ private: System::ComponentModel::IContainer^  components;
 			this->tabPageConfig->TabIndex = 0;
 			this->tabPageConfig->Text = L"Configuration";
 			this->tabPageConfig->UseVisualStyleBackColor = true;
+			// 
+			// checkBoxXRAM
+			// 
+			this->checkBoxXRAM->AutoSize = true;
+			this->checkBoxXRAM->Location = System::Drawing::Point(6, 256);
+			this->checkBoxXRAM->Name = L"checkBoxXRAM";
+			this->checkBoxXRAM->Size = System::Drawing::Size(187, 17);
+			this->checkBoxXRAM->TabIndex = 16;
+			this->checkBoxXRAM->Text = L"Use XRAM (small performance hit)";
+			this->checkBoxXRAM->UseVisualStyleBackColor = true;
 			// 
 			// checkBoxExpandStereo
 			// 
@@ -405,25 +400,6 @@ private: System::ComponentModel::IContainer^  components;
 			this->label1->Size = System::Drawing::Size(0, 13);
 			this->label1->TabIndex = 0;
 			// 
-			// tabPageLog
-			// 
-			this->tabPageLog->Controls->Add(this->listBoxLog);
-			this->tabPageLog->Location = System::Drawing::Point(4, 22);
-			this->tabPageLog->Name = L"tabPageLog";
-			this->tabPageLog->Padding = System::Windows::Forms::Padding(3);
-			this->tabPageLog->Size = System::Drawing::Size(401, 364);
-			this->tabPageLog->TabIndex = 2;
-			this->tabPageLog->Text = L"Log";
-			this->tabPageLog->UseVisualStyleBackColor = true;
-			// 
-			// listBoxLog
-			// 
-			this->listBoxLog->FormattingEnabled = true;
-			this->listBoxLog->Location = System::Drawing::Point(6, 6);
-			this->listBoxLog->Name = L"listBoxLog";
-			this->listBoxLog->Size = System::Drawing::Size(389, 355);
-			this->listBoxLog->TabIndex = 0;
-			// 
 			// tabPage3D
 			// 
 			this->tabPage3D->Controls->Add(this->label3);
@@ -477,16 +453,6 @@ private: System::ComponentModel::IContainer^  components;
 			this->vScrollBarY->TabIndex = 0;
 			this->vScrollBarY->Scroll += gcnew System::Windows::Forms::ScrollEventHandler(this, &Config::vScrollBarY_Scroll);
 			// 
-			// checkBoxXRAM
-			// 
-			this->checkBoxXRAM->AutoSize = true;
-			this->checkBoxXRAM->Location = System::Drawing::Point(6, 256);
-			this->checkBoxXRAM->Name = L"checkBoxXRAM";
-			this->checkBoxXRAM->Size = System::Drawing::Size(187, 17);
-			this->checkBoxXRAM->TabIndex = 16;
-			this->checkBoxXRAM->Text = L"Use XRAM (small performance hit)";
-			this->checkBoxXRAM->UseVisualStyleBackColor = true;
-			// 
 			// Config
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
@@ -506,7 +472,6 @@ private: System::ComponentModel::IContainer^  components;
 			this->tabPageConfig->ResumeLayout(false);
 			this->tabPageConfig->PerformLayout();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->trackBufferLength))->EndInit();
-			this->tabPageLog->ResumeLayout(false);
 			this->tabPage3D->ResumeLayout(false);
 			this->tabPage3D->PerformLayout();
 			this->ResumeLayout(false);

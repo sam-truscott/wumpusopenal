@@ -262,16 +262,18 @@ namespace WinampOpenALOut {
 	void Output_Wumpus::Config(HWND hwnd) {
 
 		WinampOpenALOut::Config^ config = WinampOpenALOut::Config::GetInstance(this);
-		if(!config->Visible)
-		{
-			config->Load();
-		}
+		config->Load();
 	}
 
-	void Output_Wumpus::log_debug_msg(char* msg)
+	void Output_Wumpus::log_debug_msg(char* msg, char* file, int line)
 	{
-		WinampOpenALOut::Config^ config = WinampOpenALOut::Config::GetInstance(this);
-		config->LogMessage(gcnew String(msg));
+		/* basic logging to file - only if we're in debug mode */
+#ifdef _DEBUG
+		FILE *debug_file = NULL;
+		fopen_s(&debug_file, "out_openal.log", "a+");
+		fprintf_s(debug_file,"%s, %d - %s\n", file, line, msg);
+		fclose(debug_file);
+#endif
 	}
 
 	/*
@@ -286,6 +288,7 @@ namespace WinampOpenALOut {
 			"\n(c) 2008 Sam Truscott\n"
 			"Thanks to:\n"
 			"\tTinuva\n"
+			"\tsoddit112\n"
 			"\tGoujon\n"
 			,"About",MB_OK);
 	}
@@ -341,7 +344,8 @@ namespace WinampOpenALOut {
 			ConfigFile::WriteInteger(CONF_DEVICE, currentDevice);
 		}
 
-		volume = (ALfloat)(ConfigFile::ReadGlobalInteger(CONF_VOLUME) / VOLUME_DIVISOR);
+		int last_volume = ConfigFile::ReadGlobalInteger(CONF_VOLUME);
+		volume = (last_volume / (ALfloat)VOLUME_DIVISOR);
 
 		/*
 			initialise openal itself - this has been modified
@@ -359,7 +363,7 @@ namespace WinampOpenALOut {
 			"Using Device {%d} with buffer of {%d}",
 			currentDevice,
 			c_bufferLength);
-		this->log_debug_msg(dbg);
+		this->log_debug_msg(dbg, __FILE__, __LINE__);
 
 		this->monoExpand = ConfigFile::ReadBoolean(CONF_MONO_EXPAND);
 		this->stereoExpand = ConfigFile::ReadBoolean(CONF_STEREO_EXPAND);
@@ -372,7 +376,24 @@ namespace WinampOpenALOut {
 			this->monoExpand,
 			this->stereoExpand,
 			this->xram_enabled);
-		this->log_debug_msg(dbg);
+		this->log_debug_msg(dbg, __FILE__, __LINE__);
+
+		this->log_debug_msg("Looking for XRAM, all values need to be larger than Zero");
+
+		ALboolean xram_ext = alIsExtensionPresent("EAX-RAM");
+		sprintf_s(
+			dbg,
+			DEBUG_BUFFER_SIZE,
+			"XRAM Extension: {=%d}, SetMode {0x%08X}, GetMode {0x%08X}, Size {%d}, Free {%d}, Auto {%d}, Hardware {%d}, Accessible {%d}",
+			xram_ext,
+			alGetProcAddress("EAXSetBufferMode"),
+			alGetProcAddress("EAXGetBufferMode"),
+			alGetEnumValue("AL_EAX_RAM_SIZE"),
+			alGetEnumValue("AL_EAX_RAM_FREE"),
+			alGetEnumValue("AL_STORAGE_AUTOMATIC"),
+			alGetEnumValue("AL_STORAGE_HARDWARE"),
+			alGetEnumValue("AL_STORAGE_ACCESSIBLE"));
+		this->log_debug_msg(dbg, __FILE__, __LINE__);
 
 		SYNC_END;
 
@@ -434,7 +455,7 @@ namespace WinampOpenALOut {
 			samplerate,
 			numchannels,
 			bitspersamp);
-		log_debug_msg(dbg);
+		log_debug_msg(dbg, __FILE__, __LINE__);
 
 		//record the format of the data we're getting
 		sampleRate = samplerate;
@@ -512,7 +533,7 @@ namespace WinampOpenALOut {
 			"-> Using {%d} buffers for total size of {%d}", 
 			noBuffers,
 			bufferSize);
-		this->log_debug_msg(dbg);
+		this->log_debug_msg(dbg, __FILE__, __LINE__);
 
 		if ( Framework::getInstance()->ALFWIsXRAMSupported() == AL_TRUE )
 		{
@@ -522,7 +543,7 @@ namespace WinampOpenALOut {
 				"-> Detect XRAM, Size {%d}MB, Free {%d}MB",
 				alGetEnumValue("AL_EAX_RAM_SIZE") / (1024 * 1024),
 				alGetEnumValue("AL_EAX_RAM_FREE") / (1024 * 1024) );
-			this->log_debug_msg(dbg);
+			this->log_debug_msg(dbg, __FILE__, __LINE__);
 			xram_detected = true;
 		}
 
@@ -560,7 +581,7 @@ namespace WinampOpenALOut {
 
 				if ( inhw == AL_FALSE )
 				{
-					log_debug_msg("Failed to set buffer as XRAM");
+					log_debug_msg("Failed to set buffer as XRAM", __FILE__, __LINE__);
 				}
 				else
 				{
@@ -578,7 +599,7 @@ namespace WinampOpenALOut {
 				"--> {%d} Buffers from {%d} were stored in XRAM OK", 
 				in_xram_ok, 
 				noBuffers);
-			log_debug_msg(dbg);
+			log_debug_msg(dbg, __FILE__, __LINE__);
 		}
 
 		ALenum err = alGetError();

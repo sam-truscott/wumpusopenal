@@ -18,20 +18,30 @@ Features
 ========
 * Mono, Stereo, Multi-channel (4, 5.1, 7.1) audio at 8bit/16bit.
 * Hardware acceleration support
+* Low CPU utilisation even with software rendering 
 
 Known Issues
 ============
 * No 24bit audio support
-* EFX disabled
 
 Change Log
 ==========
+
+v0.9.0 [beta 3]
+======
+* Fixed - Loading of the buffer size on the Configuration Window
+* Fixed - Loading of the volume
+* Fixed - Lockups when opening/skipping tracks
+
+v0.9.0 [beta 2]
+======
+* Fixed - XRAM cannot be enabled if it's absent
 
 v0.9.0 [beta 1]
 ======
 * Added - XRAM utilisation
 * Updated - no internal buffering, passed straight to OpenAL to reduce memory usage
-	and CPU utilisation
+	and CPU utilisation. Even software rendering should have virtually no CPU usage.
 
 v0.8.2
 ======
