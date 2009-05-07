@@ -19,6 +19,7 @@ Features
 * Mono, Stereo, Multi-channel (4, 5.1, 7.1) audio at 8bit/16bit.
 * Hardware acceleration support
 * Low CPU utilisation even with software rendering 
+* Expand Mono and Stereo to 4.0 (small performance hit)
 
 Known Issues
 ============
@@ -26,6 +27,10 @@ Known Issues
 
 Change Log
 ==========
+
+v0.9.0 [beta 4]
+======
+* Fixed - Memory leak with Mono/Stereo Expansion enabled
 
 v0.9.0 [beta 3]
 ======

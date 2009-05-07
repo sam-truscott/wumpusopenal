@@ -283,9 +283,9 @@ private: System::ComponentModel::IContainer^  components;
 			this->checkBoxExpandStereo->AutoSize = true;
 			this->checkBoxExpandStereo->Location = System::Drawing::Point(6, 302);
 			this->checkBoxExpandStereo->Name = L"checkBoxExpandStereo";
-			this->checkBoxExpandStereo->Size = System::Drawing::Size(126, 17);
+			this->checkBoxExpandStereo->Size = System::Drawing::Size(276, 17);
 			this->checkBoxExpandStereo->TabIndex = 15;
-			this->checkBoxExpandStereo->Text = L"Expand Stereo to 4.0";
+			this->checkBoxExpandStereo->Text = L"Expand Stereo to 4.0 (also has small performance hit)";
 			this->checkBoxExpandStereo->UseVisualStyleBackColor = true;
 			// 
 			// checkBoxExpandMono
@@ -293,9 +293,9 @@ private: System::ComponentModel::IContainer^  components;
 			this->checkBoxExpandMono->AutoSize = true;
 			this->checkBoxExpandMono->Location = System::Drawing::Point(6, 279);
 			this->checkBoxExpandMono->Name = L"checkBoxExpandMono";
-			this->checkBoxExpandMono->Size = System::Drawing::Size(122, 17);
+			this->checkBoxExpandMono->Size = System::Drawing::Size(262, 17);
 			this->checkBoxExpandMono->TabIndex = 14;
-			this->checkBoxExpandMono->Text = L"Expand Mono to 4.0";
+			this->checkBoxExpandMono->Text = L"Expand Mono to 4.0 (again, small performance hit)";
 			this->checkBoxExpandMono->UseVisualStyleBackColor = true;
 			// 
 			// label4

@@ -13,6 +13,7 @@ namespace WinampOpenALOut {
 			ALuint buffer_id;
 			bool available;
 			unsigned int size;
+			void* data;
 		} buffer_type;
 
 	public:

@@ -175,6 +175,12 @@ namespace WinampOpenALOut {
 				{
 					selectedBuffer = i;
 					uiBuffers[i].available = true;
+
+					if ( uiBuffers[i].data != NULL )
+					{
+						delete uiBuffers[i].data;
+						uiBuffers[i].data = NULL;
+					}
 					break;
 				}
 			}
@@ -567,6 +573,7 @@ namespace WinampOpenALOut {
 		{
 			uiBuffers[i].size = 0;
 			uiBuffers[i].available = true;
+			uiBuffers[i].data = NULL;
 			alGenBuffers( 1, &uiBuffers[i].buffer_id );
 
 			/* if xram is enabled write the buffer to XRAM */
@@ -705,6 +712,11 @@ namespace WinampOpenALOut {
 		// delete all the buffers
 		for(unsigned int i=0;i<noBuffers;i++)
 		{
+			if ( uiBuffers[i].data != NULL )
+			{
+				delete uiBuffers[i].data;
+				uiBuffers[i].data = NULL;
+			}
 			alDeleteBuffers( noBuffers, &uiBuffers[i].buffer_id );
 		}
 
@@ -776,17 +788,18 @@ namespace WinampOpenALOut {
 
 			buffer_free-=len;
 			total_written += len;
+			uiBuffers[selectedBuffer].data = NULL;
 
 			// ############## MONO EXPANSION
 
 			if(monoExpand) {
 				// we're writing out four as much data so
 				// increase this value by three more times
-				total_written += (len*3);
+				unsigned int new_len = (len*4);
 
 				// expand buffer here
-				char* newBuffer = new char[MAXIMUM_BUFFER_SIZE * 4];
-				memset(newBuffer, 0, MAXIMUM_BUFFER_SIZE * 4);
+				char* newBuffer = new char[new_len];
+				memset(newBuffer, 0, new_len);
 
 				// set relative value to zero
 				unsigned int nPos = 0;
@@ -801,6 +814,7 @@ namespace WinampOpenALOut {
 
 				buf = newBuffer;
 				len *= 4;
+				uiBuffers[selectedBuffer].data = buf;
 			}
 
 			// ############## END MONO EXPANSION
@@ -811,11 +825,11 @@ namespace WinampOpenALOut {
 
 				// we're writing out twice as much data so
 				// increase this value again
-				total_written += len;
+				unsigned int new_len = len * 2;
 
 				// expand buffer here
-				char* newBuffer = new char[MAXIMUM_BUFFER_SIZE * 2];
-				memset(newBuffer, 0, MAXIMUM_BUFFER_SIZE * 2);
+				char* newBuffer = new char[new_len];
+				memset(newBuffer, 0, new_len);
 
 				unsigned int nPos = 0;
 				unsigned char sampleSize = bitsPerSample == 8 ? TWO_BYTE_SAMPLE : FOUR_BYTE_SAMPLE;
@@ -842,6 +856,7 @@ namespace WinampOpenALOut {
 
 				len *= 2;
 				buf = newBuffer;
+				uiBuffers[selectedBuffer].data = buf;
 			}
 
 			// ############## END STEREO EXPANSION
