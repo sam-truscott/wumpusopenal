@@ -4,6 +4,13 @@ Wumpus Out OpenAL is copyright (c) 2009 by Sam Truscott.
 Wumpus Out OpenAL v0.9.0
 ========================
 
+Requirements
+============
+OpenAL (32bit version) which is available from:
+http://connect.creativelabs.com/openal/Downloads/Forms/AllItems.aspx
+
+Select oalist - OpenAL Installer for Windows
+
 Install
 =======
 Place the out_openal.dll file in Winamp\Plugins directory

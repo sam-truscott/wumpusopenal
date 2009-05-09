@@ -291,7 +291,9 @@ namespace WinampOpenALOut {
 	{
 		MessageBoxA(hwnd,"Wumpus OpenAL Output Plug-in "
 			PI_VER "\nCompiled on " __DATE__ " - " __TIME__
-			"\n(c) 2008 Sam Truscott\n"
+			"\n(c) 2008 Sam Truscott\n\n"
+			"Download latest version and source code (GPL)\n"
+			"https://sourceforge.net/projects/winampopenalout/\n\n"
 			"Thanks to:\n"
 			"\tTinuva\n"
 			"\tsoddit112\n"
@@ -786,7 +788,7 @@ namespace WinampOpenALOut {
 				return -1;
 			}
 
-			buffer_free-=len;
+			buffer_free -= len;
 			total_written += len;
 			uiBuffers[selectedBuffer].data = NULL;
 
@@ -813,7 +815,7 @@ namespace WinampOpenALOut {
 				}
 
 				buf = newBuffer;
-				len *= 4;
+				len = new_len;
 				uiBuffers[selectedBuffer].data = buf;
 			}
 
@@ -854,7 +856,7 @@ namespace WinampOpenALOut {
 					pos+=sampleSize;
 				}
 
-				len *= 2;
+				len = new_len;
 				buf = newBuffer;
 				uiBuffers[selectedBuffer].data = buf;
 			}
