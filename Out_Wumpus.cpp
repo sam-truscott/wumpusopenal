@@ -876,10 +876,6 @@ namespace WinampOpenALOut {
 				temp_size = 0; 
 			}
 
-			buffer_free -= len;
-			total_written += len;
-			uiBuffers[selectedBuffer].size = len;
-
 			// ############## MONO EXPANSION
 
 			if(monoExpand) {
@@ -904,6 +900,12 @@ namespace WinampOpenALOut {
 
 				buf = newBuffer;
 				len = new_len;
+				/* we're using the internal buffer on the heap now */
+				if ( uiBuffers[selectedBuffer].data != NULL )
+				{
+					delete uiBuffers[selectedBuffer].data;
+					uiBuffers[selectedBuffer].data = NULL;
+				}
 				uiBuffers[selectedBuffer].data = buf;
 			}
 
@@ -946,8 +948,18 @@ namespace WinampOpenALOut {
 
 				len = new_len;
 				buf = newBuffer;
+				/* we're using the internal buffer on the heap now */
+				if ( uiBuffers[selectedBuffer].data != NULL )
+				{
+					delete uiBuffers[selectedBuffer].data;
+					uiBuffers[selectedBuffer].data = NULL;
+				}
 				uiBuffers[selectedBuffer].data = buf;
 			}
+
+			buffer_free -= len;
+			total_written += len;
+			uiBuffers[selectedBuffer].size = len;
 
 			// ############## END STEREO EXPANSION
 #ifdef _DEBUG
