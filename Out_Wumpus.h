@@ -140,7 +140,7 @@ namespace WinampOpenALOut {
 
 		int			lastOutputTime;
 		int			lastWrittenTime;
-#define TEMP_BUFFER_SIZE MAXIMUM_BUFFER_SIZE
+#define TEMP_BUFFER_SIZE MAXIMUM_BUFFER_SIZE * 2
 		char		temp[TEMP_BUFFER_SIZE];
 		unsigned int temp_size;
 

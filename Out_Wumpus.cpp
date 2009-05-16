@@ -795,7 +795,7 @@ namespace WinampOpenALOut {
 					0,
 					len);
 
-				temp_size += len;
+				temp_size = temp_size + len;
 
 				sprintf_s(
 					dbg,
@@ -845,7 +845,7 @@ namespace WinampOpenALOut {
 
 			if ( temp_size > 0 )
 			{
-				uiBuffers[selectedBuffer].data = new char[MAXIMUM_BUFFER_SIZE];
+				uiBuffers[selectedBuffer].data = new char[len+temp_size];
 
 				/* copy the first buffer in */
 				memcpy_s(
@@ -860,47 +860,17 @@ namespace WinampOpenALOut {
 					"Copying {%d} bytes from temp", temp_size);
 				log_debug_msg(dbg, __FILE__, __LINE__);
 
-				unsigned int overflow = 0;
-				if ((temp_size + len) > MAXIMUM_BUFFER_SIZE)
-				{
-					overflow = (temp_size + len) - MAXIMUM_BUFFER_SIZE;
-				}
-
-				const unsigned int remains = len - overflow;
-
 				/* copy what we can of the second */
 				fmemcpy(
 					(char*)uiBuffers[selectedBuffer].data,
 					temp_size,
 					buf,
 					0,
-					remains);
+					len);
 
 				buf = (char*)uiBuffers[selectedBuffer].data;
-				len = temp_size + remains;
-
-				if ( overflow > 0 )
-				{
-
-					/* get the rest ready for next time */
-					memcpy_s(
-						temp,
-						TEMP_BUFFER_SIZE,
-						(char*)(buf + remains),
-						overflow);
-
-					sprintf_s(
-						dbg,
-						DEBUG_BUFFER_SIZE,
-						"Storing {%d} bytes for next time", overflow);
-					log_debug_msg(dbg, __FILE__, __LINE__);
-
-					temp_size = overflow; 
-				}
-				else
-				{
-					temp_size = 0; 
-				}
+				len += temp_size;
+				temp_size = 0; 
 			}
 
 			buffer_free -= len;
