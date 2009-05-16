@@ -35,6 +35,10 @@ Known Issues
 Change Log
 ==========
 
+v0.9.0 [beta 5]
+======
+* Fixed - Corrupt audio on VBR (Varible Bit Rate) Audio
+
 v0.9.0 [beta 4]
 ======
 * Fixed - Memory leak with Mono/Stereo Expansion enabled
