@@ -5,7 +5,6 @@ namespace WinampOpenALOut {
 
 #define CONF_DEVICE "DefaultDevice"
 #define CONF_BUFFER_LENGTH "BufferLength"
-#define CONF_BUFFER_LATENCY "BufferLatency"
 #define CONF_MONO_EXPAND "MonoExpansion"
 #define CONF_STEREO_EXPAND "StereoExpansion"
 #define CONF_XRAM_ENABLED "UseXRAM"

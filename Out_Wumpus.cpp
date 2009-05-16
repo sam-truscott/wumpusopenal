@@ -347,15 +347,6 @@ namespace WinampOpenALOut {
 			ConfigFile::WriteInteger(CONF_BUFFER_LENGTH, c_bufferLength);
 		}
 
-		c_bufferLatency = ConfigFile::ReadInteger(CONF_BUFFER_LATENCY);
-		if(c_bufferLatency == ERROR_BUFFER || 
-			c_bufferLatency > CONF_BUFFER_LATENCY_MAX || 
-			c_bufferLatency < CONF_BUFFER_LATENCY_MIN)
-		{
-			c_bufferLatency = DEFC_BUFFER_LATENCY;
-			ConfigFile::WriteInteger(CONF_BUFFER_LATENCY, c_bufferLatency);
-		}
-
 		// read in the current device to use
 		int currentDevice = ConfigFile::ReadInteger(CONF_DEVICE);
 		if(currentDevice == -1)
@@ -376,6 +367,7 @@ namespace WinampOpenALOut {
 			MessageBoxA(NULL, "Could not initialise OpenAL", "Error", MB_OK);
 		}
 
+#ifdef _DEBUG
 		char dbg[DEBUG_BUFFER_SIZE] = {'\0'};
 		sprintf_s(
 			dbg,
@@ -384,11 +376,13 @@ namespace WinampOpenALOut {
 			currentDevice,
 			c_bufferLength);
 		this->log_debug_msg(dbg, __FILE__, __LINE__);
+#endif
 
 		this->monoExpand = ConfigFile::ReadBoolean(CONF_MONO_EXPAND);
 		this->stereoExpand = ConfigFile::ReadBoolean(CONF_STEREO_EXPAND);
 		this->xram_enabled = ConfigFile::ReadBoolean(CONF_XRAM_ENABLED);
 
+#ifdef _DEBUG
 		sprintf_s(
 			dbg,
 			DEBUG_BUFFER_SIZE,
@@ -397,7 +391,6 @@ namespace WinampOpenALOut {
 			this->stereoExpand,
 			this->xram_enabled);
 		this->log_debug_msg(dbg, __FILE__, __LINE__);
-
 		this->log_debug_msg("Looking for XRAM, all values need to be larger than Zero");
 
 		ALboolean xram_ext = alIsExtensionPresent("EAX-RAM");
@@ -414,9 +407,11 @@ namespace WinampOpenALOut {
 			alGetEnumValue("AL_STORAGE_HARDWARE"),
 			alGetEnumValue("AL_STORAGE_ACCESSIBLE"));
 		this->log_debug_msg(dbg, __FILE__, __LINE__);
+#endif
 
 		if ( Framework::getInstance()->ALFWIsXRAMSupported() == AL_TRUE )
 		{
+#ifdef _DEBUG
 			sprintf_s(
 				dbg,
 				DEBUG_BUFFER_SIZE,
@@ -424,6 +419,7 @@ namespace WinampOpenALOut {
 				alGetEnumValue("AL_EAX_RAM_SIZE") / (1024 * 1024),
 				alGetEnumValue("AL_EAX_RAM_FREE") / (1024 * 1024) );
 			this->log_debug_msg(dbg, __FILE__, __LINE__);
+#endif
 			xram_detected = true;
 		}
 
@@ -477,7 +473,7 @@ namespace WinampOpenALOut {
 			SYNC_END;
 			return -1;
 		}
-
+#ifdef _DEBUG
 		char dbg[DEBUG_BUFFER_SIZE] = {'\0'};
 		sprintf_s(
 			dbg,
@@ -487,6 +483,7 @@ namespace WinampOpenALOut {
 			numchannels,
 			bitspersamp);
 		log_debug_msg(dbg, __FILE__, __LINE__);
+#endif
 
 		//record the format of the data we're getting
 		sampleRate = samplerate;
@@ -561,6 +558,7 @@ namespace WinampOpenALOut {
 		this->buffer_free = noBuffers * MAXIMUM_BUFFER_SIZE;
 		buffers_free = noBuffers;
 
+#ifdef _DEBUG
 		sprintf_s(
 			dbg,
 			DEBUG_BUFFER_SIZE,
@@ -568,6 +566,7 @@ namespace WinampOpenALOut {
 			noBuffers,
 			bufferSize);
 		this->log_debug_msg(dbg, __FILE__, __LINE__);
+#endif
 
 		/*
 			set up the various timers
@@ -620,6 +619,7 @@ namespace WinampOpenALOut {
 			}
 		}
 
+#ifdef _DEBUG
 		if ( xram_detected == true && 
 				xram_enabled == true )
 		{
@@ -631,6 +631,7 @@ namespace WinampOpenALOut {
 				noBuffers);
 			log_debug_msg(dbg, __FILE__, __LINE__);
 		}
+#endif
 
 		ALenum err = alGetError();
 		if( err == AL_INVALID_VALUE || err == AL_OUT_OF_MEMORY)
@@ -695,7 +696,7 @@ namespace WinampOpenALOut {
 
 		SYNC_END;
 
-		return c_bufferLatency;
+		return c_bufferLength;
 	}
 
 	/*
@@ -778,6 +779,7 @@ namespace WinampOpenALOut {
 		// if the buffer is valid (non-NULL)
 		if (buf) {
 
+#ifdef _DEBUG
 			char dbg[DEBUG_BUFFER_SIZE] = {'\0'};
 
 			sprintf_s(
@@ -785,6 +787,7 @@ namespace WinampOpenALOut {
 				DEBUG_BUFFER_SIZE,
 				"Writing data {0x%08X} with length {%d}",buf, len);
 			log_debug_msg(dbg, __FILE__, __LINE__);
+#endif
 
 			if ( len + temp_size < MINIMUM_BUFFER_SIZE ) 
 			{
@@ -796,13 +799,13 @@ namespace WinampOpenALOut {
 					len);
 
 				temp_size = temp_size + len;
-
+#ifdef _DEBUG
 				sprintf_s(
 					dbg,
 					DEBUG_BUFFER_SIZE,
 					"Temp buffer increased by {%d} to {%d}",len, temp_size);
 				log_debug_msg(dbg, __FILE__, __LINE__);
-
+#endif
 				SYNC_END;
 				return 0;
 			}
@@ -828,13 +831,13 @@ namespace WinampOpenALOut {
 					break;
 				}
 			}
-
+#ifdef _DEBUG
 			sprintf_s(
 				dbg,
 				DEBUG_BUFFER_SIZE,
 				"Writing using buffer {%d}", selectedBuffer);
 			log_debug_msg(dbg, __FILE__, __LINE__);
-
+#endif
 			if(selectedBuffer == UNKNOWN_BUFFER)
 			{
 				SYNC_END;
@@ -853,13 +856,13 @@ namespace WinampOpenALOut {
 					MAXIMUM_BUFFER_SIZE,
 					temp,
 					temp_size);
-
+#ifdef _DEBUG
 				sprintf_s(
 					dbg,
 					DEBUG_BUFFER_SIZE,
 					"Copying {%d} bytes from temp", temp_size);
 				log_debug_msg(dbg, __FILE__, __LINE__);
-
+#endif
 				/* copy what we can of the second */
 				fmemcpy(
 					(char*)uiBuffers[selectedBuffer].data,
@@ -947,13 +950,13 @@ namespace WinampOpenALOut {
 			}
 
 			// ############## END STEREO EXPANSION
-
+#ifdef _DEBUG
 			sprintf_s(
 				dbg,
 				DEBUG_BUFFER_SIZE,
 				"Writing to OpenAL buffer,{%d} bytes", len);
 			log_debug_msg(dbg, __FILE__, __LINE__);
-
+#endif
 			// buffer the data with the correct format
 			alGetError();
 			alBufferData(uiNextBuffer, ulFormat, buf, len, sampleRate);

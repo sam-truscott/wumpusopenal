@@ -51,9 +51,6 @@ namespace WinampOpenALOut {
 		inline int GetConfBufferLength() { return c_bufferLength;}
 		inline void SetConfBufferLength( unsigned int i) { c_bufferLength = i;}
 
-		inline int GetConfBufferLatency() { return c_bufferLatency;}
-		inline void SetConfBufferLatency( unsigned int i) { c_bufferLatency = i;}
-
 		inline bool IsStereoExpanded() { return stereoExpand;}
 		inline void SetStereoExpanded(bool expanded);
 
@@ -156,7 +153,6 @@ namespace WinampOpenALOut {
 
 		// used to store the configuration buffer length
 		unsigned int	c_bufferLength;
-		unsigned int	c_bufferLatency;
 
 		bool			stereoExpand;
 		bool			monoExpand;

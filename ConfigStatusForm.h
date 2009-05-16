@@ -66,16 +66,8 @@ namespace WinampOpenALOut {
 				trackBufferLength->Value = buffer;
 			}
 
-			buffer = ConfigFile::ReadInteger(CONF_BUFFER_LATENCY);
-			if ( buffer >= 250
-				|| buffer <= 4000)
-			{
-				trackBarLatency->Value = buffer;
-			}
-
 			// update their captions with values
 			labelBufferLength->Text = "Buffer Length (" + trackBufferLength->Value + "ms)";
-			labelBuffLatency->Text = "Buffer Latency (" + trackBarLatency->Value + "ms)";
 
 			checkBoxExpandMono->Checked = ptrOw->IsMonoExpanded();
 			checkBoxExpandStereo->Checked = ptrOw->IsStereoExpanded();
@@ -178,8 +170,8 @@ private: System::Windows::Forms::Label^  labelPlayedB;
 private: System::Windows::Forms::Label^  labelWrittenB;
 private: System::Windows::Forms::Label^  label8;
 private: System::Windows::Forms::Label^  label10;
-private: System::Windows::Forms::TrackBar^  trackBarLatency;
-private: System::Windows::Forms::Label^  labelBuffLatency;
+
+
 
 
 
@@ -252,8 +244,6 @@ private: System::ComponentModel::IContainer^  components;
 			this->components = (gcnew System::ComponentModel::Container());
 			this->tabConfiguration = (gcnew System::Windows::Forms::TabControl());
 			this->tabPageConfig = (gcnew System::Windows::Forms::TabPage());
-			this->labelBuffLatency = (gcnew System::Windows::Forms::Label());
-			this->trackBarLatency = (gcnew System::Windows::Forms::TrackBar());
 			this->checkBoxXRAM = (gcnew System::Windows::Forms::CheckBox());
 			this->checkBoxExpandStereo = (gcnew System::Windows::Forms::CheckBox());
 			this->checkBoxExpandMono = (gcnew System::Windows::Forms::CheckBox());
@@ -290,7 +280,6 @@ private: System::ComponentModel::IContainer^  components;
 			this->toolTipInfo = (gcnew System::Windows::Forms::ToolTip(this->components));
 			this->tabConfiguration->SuspendLayout();
 			this->tabPageConfig->SuspendLayout();
-			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->trackBarLatency))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->trackBufferLength))->BeginInit();
 			this->tabPageStatistics->SuspendLayout();
 			this->tabPage3D->SuspendLayout();
@@ -308,8 +297,6 @@ private: System::ComponentModel::IContainer^  components;
 			// 
 			// tabPageConfig
 			// 
-			this->tabPageConfig->Controls->Add(this->labelBuffLatency);
-			this->tabPageConfig->Controls->Add(this->trackBarLatency);
 			this->tabPageConfig->Controls->Add(this->checkBoxXRAM);
 			this->tabPageConfig->Controls->Add(this->checkBoxExpandStereo);
 			this->tabPageConfig->Controls->Add(this->checkBoxExpandMono);
@@ -331,30 +318,6 @@ private: System::ComponentModel::IContainer^  components;
 			this->tabPageConfig->TabIndex = 0;
 			this->tabPageConfig->Text = L"Configuration";
 			this->tabPageConfig->UseVisualStyleBackColor = true;
-			// 
-			// labelBuffLatency
-			// 
-			this->labelBuffLatency->AutoSize = true;
-			this->labelBuffLatency->Location = System::Drawing::Point(198, 34);
-			this->labelBuffLatency->Name = L"labelBuffLatency";
-			this->labelBuffLatency->Size = System::Drawing::Size(28, 13);
-			this->labelBuffLatency->TabIndex = 18;
-			this->labelBuffLatency->Text = L"###";
-			// 
-			// trackBarLatency
-			// 
-			this->trackBarLatency->LargeChange = 500;
-			this->trackBarLatency->Location = System::Drawing::Point(199, 50);
-			this->trackBarLatency->Maximum = 2000;
-			this->trackBarLatency->Minimum = 400;
-			this->trackBarLatency->Name = L"trackBarLatency";
-			this->trackBarLatency->Size = System::Drawing::Size(196, 45);
-			this->trackBarLatency->SmallChange = 250;
-			this->trackBarLatency->TabIndex = 17;
-			this->trackBarLatency->TickFrequency = 256;
-			this->toolTipWarning->SetToolTip(this->trackBarLatency, L"The Latency reported to Winamp. It\'s advised that this is not changed.");
-			this->trackBarLatency->Value = 2000;
-			this->trackBarLatency->Scroll += gcnew System::EventHandler(this, &Config::trackBarLatency_Scroll);
 			// 
 			// checkBoxXRAM
 			// 
@@ -426,7 +389,7 @@ private: System::ComponentModel::IContainer^  components;
 			this->trackBufferLength->Maximum = 4000;
 			this->trackBufferLength->Minimum = 250;
 			this->trackBufferLength->Name = L"trackBufferLength";
-			this->trackBufferLength->Size = System::Drawing::Size(184, 45);
+			this->trackBufferLength->Size = System::Drawing::Size(386, 45);
 			this->trackBufferLength->SmallChange = 250;
 			this->trackBufferLength->TabIndex = 10;
 			this->trackBufferLength->TickFrequency = 256;
@@ -469,7 +432,7 @@ private: System::ComponentModel::IContainer^  components;
 			this->listBoxExtensions->FormattingEnabled = true;
 			this->listBoxExtensions->Location = System::Drawing::Point(15, 101);
 			this->listBoxExtensions->Name = L"listBoxExtensions";
-			this->listBoxExtensions->Size = System::Drawing::Size(360, 147);
+			this->listBoxExtensions->Size = System::Drawing::Size(380, 147);
 			this->listBoxExtensions->TabIndex = 3;
 			this->toolTipInfo->SetToolTip(this->listBoxExtensions, L"A list of supported OpenAL Extensions the card supports. Not all are shown.");
 			// 
@@ -712,7 +675,6 @@ private: System::ComponentModel::IContainer^  components;
 			this->tabConfiguration->ResumeLayout(false);
 			this->tabPageConfig->ResumeLayout(false);
 			this->tabPageConfig->PerformLayout();
-			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->trackBarLatency))->EndInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->trackBufferLength))->EndInit();
 			this->tabPageStatistics->ResumeLayout(false);
 			this->tabPageStatistics->PerformLayout();
@@ -734,12 +696,6 @@ private: System::ComponentModel::IContainer^  components;
 					// if we've changed the buffer length stop playback and change it
 					ptrOw->SetConfBufferLength(trackBufferLength->Value);
 					ConfigFile::WriteInteger(CONF_BUFFER_LENGTH, trackBufferLength->Value);
-					ptrOw->SwitchOutputDevice(currentDevice);
-				}
-				if(ptrOw->GetConfBufferLatency() != trackBarLatency->Value) {
-					// if we've changed the buffer length stop playback and change it
-					ptrOw->SetConfBufferLatency(trackBarLatency->Value);
-					ConfigFile::WriteInteger(CONF_BUFFER_LATENCY, trackBarLatency->Value);
 					ptrOw->SwitchOutputDevice(currentDevice);
 				}
 				
@@ -786,15 +742,10 @@ private: System::Void trackBufferLength_Scroll(System::Object^  sender, System::
 		 }
 private: System::Void buttonReset_Click(System::Object^  sender, System::EventArgs^  e) {
 			 trackBufferLength->Value = DEFC_BUFFER_LENGTH;
-			 trackBarLatency->Value = DEFC_BUFFER_LATENCY;
 			 labelBufferLength->Text = "Buffer Length (" + trackBufferLength->Value + "ms)";
-			 labelBuffLatency->Text = "Buffer Latency (" + trackBarLatency->Value + "ms)";
 			 checkBoxXRAM->Checked = false;
 			 checkBoxExpandMono->Checked = false;
 			 checkBoxExpandStereo->Checked = false;
-		 }
-private: System::Void trackBarLatency_Scroll(System::Object^  sender, System::EventArgs^  e) {
-			 labelBuffLatency->Text = "Buffer Latency (" + trackBarLatency->Value + "ms)";
 		 }
 };
 }

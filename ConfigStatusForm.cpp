@@ -16,6 +16,11 @@ namespace WinampOpenALOut {
 			played_bytes		= ptrOw->GetPlayedBytes();
 			buffer_percent_full = ptrOw->GetPcBufferFull();
 
+			if ( buffer_percent_full > 100 )
+			{
+				buffer_percent_full = 100;
+			}
+
 			/* make the gui thread update */
 			try {
 				UpdateData^ update = gcnew UpdateData(ptrForm, &DoUpdate);
