@@ -3,6 +3,50 @@
 
 namespace WinampOpenALOut {
 
+	delegate void UpdateData();
+
+	void Config::ThreadProcedure() {
+		// only execute this thread while the form is visible to save cpu
+		while(ptrForm->Visible && !overRide) {
+
+			// get all the dynamic values
+			written_ms			= ptrOw->GetLastWrittenTime();
+			played_ms			= ptrOw->GetLastOutputTime();
+			written_bytes		= ptrOw->GetWrittenBytes();
+			played_bytes		= ptrOw->GetPlayedBytes();
+			buffer_percent_full = ptrOw->GetPcBufferFull();
+
+			/* make the gui thread update */
+			try {
+				UpdateData^ update = gcnew UpdateData(ptrForm, &DoUpdate);
+				if(!ptrForm->Disposing && ptrForm->Visible && ptrForm->WindowState == FormWindowState::Normal) {
+					ptrForm->Invoke(update);
+				}
+				delete update;
+			}catch(...) {
+				overRide = true;
+				break;
+			}
+
+			// sleep for a nominal time
+			Sleep(10);
+		}
+	}
+
+	void Config::DoUpdate() {
+		try {
+			/* update all the text for times and sizes */
+			labelWrittenMs ->Text = gcnew System::String("" + written_ms);
+			labelPlayedMs->Text = gcnew System::String("" + played_ms);
+			labelWrittenB->Text = gcnew System::String("" + written_bytes);
+			labelPlayedB->Text = gcnew System::String("" + played_bytes);
+			labelLatency->Text = gcnew System::String("" + (written_ms - played_ms) );
+			progressBar1->Value = buffer_percent_full;
+		}catch(...) {
+			overRide = true;
+		}
+	}
+
 	void Config::ShowDeviceDetails() {
 		// clear down other items already in the list
 		listBoxExtensions->Items->Clear();

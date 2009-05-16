@@ -72,6 +72,8 @@ namespace WinampOpenALOut {
 
 	void Output_Wumpus::SwitchOutputDevice(int device)
 	{
+		/* stop the source so we dont hear anthing else */
+		alSourceStop(uiSource);
 		this->Relocate(device, GetOutputTime());
 	}
 
@@ -181,6 +183,8 @@ namespace WinampOpenALOut {
 						delete uiBuffers[i].data;
 						uiBuffers[i].data = NULL;
 					}
+
+					buffers_free++;
 					break;
 				}
 			}
@@ -318,7 +322,6 @@ namespace WinampOpenALOut {
 			set up the variables to a default state
 		*/
 		streamOpen = false;
-		canWrite = false;
 		isPlaying = false;
 
 		noBuffers = NO_BUFFERS;
@@ -342,6 +345,15 @@ namespace WinampOpenALOut {
 		{
 			c_bufferLength = DEFC_BUFFER_LENGTH;
 			ConfigFile::WriteInteger(CONF_BUFFER_LENGTH, c_bufferLength);
+		}
+
+		c_bufferLatency = ConfigFile::ReadInteger(CONF_BUFFER_LATENCY);
+		if(c_bufferLatency == ERROR_BUFFER || 
+			c_bufferLatency > CONF_BUFFER_LATENCY_MAX || 
+			c_bufferLatency < CONF_BUFFER_LATENCY_MIN)
+		{
+			c_bufferLatency = DEFC_BUFFER_LATENCY;
+			ConfigFile::WriteInteger(CONF_BUFFER_LATENCY, c_bufferLatency);
 		}
 
 		// read in the current device to use
@@ -403,6 +415,18 @@ namespace WinampOpenALOut {
 			alGetEnumValue("AL_STORAGE_ACCESSIBLE"));
 		this->log_debug_msg(dbg, __FILE__, __LINE__);
 
+		if ( Framework::getInstance()->ALFWIsXRAMSupported() == AL_TRUE )
+		{
+			sprintf_s(
+				dbg,
+				DEBUG_BUFFER_SIZE,
+				"-> Detect XRAM, Size {%d}MB, Free {%d}MB",
+				alGetEnumValue("AL_EAX_RAM_SIZE") / (1024 * 1024),
+				alGetEnumValue("AL_EAX_RAM_FREE") / (1024 * 1024) );
+			this->log_debug_msg(dbg, __FILE__, __LINE__);
+			xram_detected = true;
+		}
+
 		SYNC_END;
 
 	}
@@ -449,7 +473,6 @@ namespace WinampOpenALOut {
 
 		if(bitspersamp > SIXTEEN_BIT_PER_SAMPLE)
 		{
-			canWrite = false;
 			MessageBoxA(NULL, "This Plug-In only supports 8 and 16bit audio, please disable 24bit audio in Winamp", "Whoops", MB_OK);
 			SYNC_END;
 			return -1;
@@ -514,13 +537,15 @@ namespace WinampOpenALOut {
 		total_played = ZERO_TIME;
 		lastPause = 0;
 
+		temp_size = 0;
+
 		// determine the size of the buffer
 		bytesPerSampleChannel = ((bitsPerSample >> SHIFT_BITS_TO_BYTES)*numberOfChannels);
 
 		if (stereoExpand) { bytesPerSampleChannel *= 2; }
 		if (monoExpand) { bytesPerSampleChannel *=4; }
 
-		unsigned int bufferSize = (bytesPerSampleChannel * (sampleRate / ONE_SECOND_IN_MS)) * c_bufferLength;
+		bufferSize = (bytesPerSampleChannel * (sampleRate / ONE_SECOND_IN_MS)) * c_bufferLength;
 
 		//noBuffers = MAX_NO_BUFFERS;
 		noBuffers = (bufferSize / MAXIMUM_BUFFER_SIZE);// + MAXIMUM_BUFFER_OFFSET;
@@ -534,6 +559,7 @@ namespace WinampOpenALOut {
 		}
 
 		this->buffer_free = noBuffers * MAXIMUM_BUFFER_SIZE;
+		buffers_free = noBuffers;
 
 		sprintf_s(
 			dbg,
@@ -542,18 +568,6 @@ namespace WinampOpenALOut {
 			noBuffers,
 			bufferSize);
 		this->log_debug_msg(dbg, __FILE__, __LINE__);
-
-		if ( Framework::getInstance()->ALFWIsXRAMSupported() == AL_TRUE )
-		{
-			sprintf_s(
-				dbg,
-				DEBUG_BUFFER_SIZE,
-				"-> Detect XRAM, Size {%d}MB, Free {%d}MB",
-				alGetEnumValue("AL_EAX_RAM_SIZE") / (1024 * 1024),
-				alGetEnumValue("AL_EAX_RAM_FREE") / (1024 * 1024) );
-			this->log_debug_msg(dbg, __FILE__, __LINE__);
-			xram_detected = true;
-		}
 
 		/*
 			set up the various timers
@@ -571,6 +585,13 @@ namespace WinampOpenALOut {
 
 		// allocate some buffers
 		alGetError();
+		for(unsigned int i=0;i<MAX_NO_BUFFERS;i++)
+		{
+			uiBuffers[i].size = 0;
+			uiBuffers[i].available = false;
+			uiBuffers[i].data = NULL;
+		}
+
 		for(unsigned int i=0;i<noBuffers;i++)
 		{
 			uiBuffers[i].size = 0;
@@ -663,8 +684,6 @@ namespace WinampOpenALOut {
 		// set the volume for the source
 		this->SetVolumeInternal(volume);
 
-		// we can write to the buffers now(pre-buffer)
-		canWrite = true;
 		// we're not playing yet because we're prebuffering
 		isPlaying = false;
 		// the stream is open and ready for the main thread
@@ -675,7 +694,8 @@ namespace WinampOpenALOut {
 		preBufferNumber = NO_BUFFERS_PROCESSED;
 
 		SYNC_END;
-		return c_bufferLength;
+
+		return c_bufferLatency;
 	}
 
 	/*
@@ -687,9 +707,6 @@ namespace WinampOpenALOut {
 	{
 		SYNC_START;
 		streamOpen = false;
-
-		// mark the stream as closed
-		canWrite = false;
 
 		// stop the source
 		alSourceStop(uiSource);
@@ -752,7 +769,7 @@ namespace WinampOpenALOut {
 		ALenum err;
 
 		// if we cannot write exit now (non-blocking op)
-		if(!canWrite || !streamOpen)
+		if(buffers_free == 0 || !streamOpen)
 		{
 			SYNC_END;
 			return -1;
@@ -760,6 +777,35 @@ namespace WinampOpenALOut {
 
 		// if the buffer is valid (non-NULL)
 		if (buf) {
+
+			char dbg[DEBUG_BUFFER_SIZE] = {'\0'};
+
+			sprintf_s(
+				dbg,
+				DEBUG_BUFFER_SIZE,
+				"Writing data {0x%08X} with length {%d}",buf, len);
+			log_debug_msg(dbg, __FILE__, __LINE__);
+
+			if ( len + temp_size < MINIMUM_BUFFER_SIZE ) 
+			{
+				fmemcpy(
+					temp,
+					temp_size,
+					buf,
+					0,
+					len);
+
+				temp_size += len;
+
+				sprintf_s(
+					dbg,
+					DEBUG_BUFFER_SIZE,
+					"Temp buffer increased by {%d} to {%d}",len, temp_size);
+				log_debug_msg(dbg, __FILE__, __LINE__);
+
+				SYNC_END;
+				return 0;
+			}
 			
 			// set it to ERROR'd so we can detect errors
 			ALuint uiNextBuffer = UNKNOWN_BUFFER;
@@ -777,20 +823,89 @@ namespace WinampOpenALOut {
 				{
 					uiNextBuffer = uiBuffers[i].buffer_id;
 					uiBuffers[i].available = false;
-					uiBuffers[i].size = len;
 					selectedBuffer = i;
+					buffers_free--;
 					break;
 				}
 			}
+
+			sprintf_s(
+				dbg,
+				DEBUG_BUFFER_SIZE,
+				"Writing using buffer {%d}", selectedBuffer);
+			log_debug_msg(dbg, __FILE__, __LINE__);
+
 			if(selectedBuffer == UNKNOWN_BUFFER)
 			{
 				SYNC_END;
 				return -1;
 			}
 
+			uiBuffers[selectedBuffer].data = NULL;
+
+			if ( temp_size > 0 )
+			{
+				uiBuffers[selectedBuffer].data = new char[MAXIMUM_BUFFER_SIZE];
+
+				/* copy the first buffer in */
+				memcpy_s(
+					uiBuffers[selectedBuffer].data,
+					MAXIMUM_BUFFER_SIZE,
+					temp,
+					temp_size);
+
+				sprintf_s(
+					dbg,
+					DEBUG_BUFFER_SIZE,
+					"Copying {%d} bytes from temp", temp_size);
+				log_debug_msg(dbg, __FILE__, __LINE__);
+
+				unsigned int overflow = 0;
+				if ((temp_size + len) > MAXIMUM_BUFFER_SIZE)
+				{
+					overflow = (temp_size + len) - MAXIMUM_BUFFER_SIZE;
+				}
+
+				const unsigned int remains = len - overflow;
+
+				/* copy what we can of the second */
+				fmemcpy(
+					(char*)uiBuffers[selectedBuffer].data,
+					temp_size,
+					buf,
+					0,
+					remains);
+
+				buf = (char*)uiBuffers[selectedBuffer].data;
+				len = temp_size + remains;
+
+				if ( overflow > 0 )
+				{
+
+					/* get the rest ready for next time */
+					memcpy_s(
+						temp,
+						TEMP_BUFFER_SIZE,
+						(char*)(buf + remains),
+						overflow);
+
+					sprintf_s(
+						dbg,
+						DEBUG_BUFFER_SIZE,
+						"Storing {%d} bytes for next time", overflow);
+					log_debug_msg(dbg, __FILE__, __LINE__);
+
+					temp_size = overflow; 
+				}
+				else
+				{
+					temp_size = 0; 
+				}
+			}
+
 			buffer_free -= len;
 			total_written += len;
-			uiBuffers[selectedBuffer].data = NULL;
+			uiBuffers[selectedBuffer].size = len;
 
 			// ############## MONO EXPANSION
 
@@ -862,6 +977,12 @@ namespace WinampOpenALOut {
 			}
 
 			// ############## END STEREO EXPANSION
+
+			sprintf_s(
+				dbg,
+				DEBUG_BUFFER_SIZE,
+				"Writing to OpenAL buffer,{%d} bytes", len);
+			log_debug_msg(dbg, __FILE__, __LINE__);
 
 			// buffer the data with the correct format
 			alGetError();
@@ -936,16 +1057,7 @@ namespace WinampOpenALOut {
 
 			this->CheckProcessedBuffers();
 
-			canWrite = false;
-			for(unsigned int i=0;i<noBuffers;i++)
-			{
-				if(uiBuffers[i].available == true)
-				{
-					canWrite = true;
-				}
-			}
-
-			r = canWrite == true ? buffer_free : 0;
+			r = ((buffers_free > 0) ? buffer_free : 0);
 		}else{
 			r = EMPTY_THE_BUFFER;
 		}

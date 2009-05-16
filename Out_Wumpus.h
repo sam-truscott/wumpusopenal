@@ -51,6 +51,9 @@ namespace WinampOpenALOut {
 		inline int GetConfBufferLength() { return c_bufferLength;}
 		inline void SetConfBufferLength( unsigned int i) { c_bufferLength = i;}
 
+		inline int GetConfBufferLatency() { return c_bufferLatency;}
+		inline void SetConfBufferLatency( unsigned int i) { c_bufferLatency = i;}
+
 		inline bool IsStereoExpanded() { return stereoExpand;}
 		inline void SetStereoExpanded(bool expanded);
 
@@ -61,6 +64,18 @@ namespace WinampOpenALOut {
 		inline void SetXRAMEnabled( bool enabled );
 
 		inline bool	IsXRAMPresent() { return xram_detected; }
+
+		inline __int64 GetWrittenBytes() { return total_written; }
+		inline __int64 GetPlayedBytes() { return total_played; }	
+
+		unsigned char GetPcBufferFull()
+		{ 
+			float r = (float)(bufferSize-buffer_free) / (float)bufferSize;
+			r *= 100;
+			int r2 = (int)(r+0.5f);
+			
+			return r2;
+		}
 
 	protected:
 
@@ -79,8 +94,6 @@ namespace WinampOpenALOut {
 		int inline get_current_output_time(__int64 currentOutputTime, unsigned int sampleRate);
 		int inline get_current_written_time(__int64 currentOutputTime, unsigned int sampleRate);
 
-		// boolean to store if winamp is allowed to write more data
-		bool			canWrite;
 		// boolean to store internal playing state
 		bool			isPlaying;
 		// boolean to store if the file steam is open and
@@ -92,6 +105,7 @@ namespace WinampOpenALOut {
 		unsigned int	preBufferNumber;
 
 		unsigned int	buffer_free;
+		unsigned int	buffers_free;
 
 		bool			xram_detected;
 		bool			xram_enabled;
@@ -126,17 +140,23 @@ namespace WinampOpenALOut {
 
 		int			lastOutputTime;
 		int			lastWrittenTime;
+#define TEMP_BUFFER_SIZE MAXIMUM_BUFFER_SIZE
+		char		temp[TEMP_BUFFER_SIZE];
+		unsigned int temp_size;
 
 		// the open al buffers themselves
 		buffer_type	    uiBuffers[MAX_NO_BUFFERS];
 		// integer used to reference the open al source
 		ALuint		    uiSource;
 
+		unsigned int	bufferSize;
+
 		Time_Type		lastCheckBuffers;
 		Time_Type		lastCheckDelay;
 
 		// used to store the configuration buffer length
 		unsigned int	c_bufferLength;
+		unsigned int	c_bufferLatency;
 
 		bool			stereoExpand;
 		bool			monoExpand;
