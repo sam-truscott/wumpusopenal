@@ -35,6 +35,12 @@ Wumpus Out OpenAL v0.9.0
 Change Log
 ==========
 
+	v0.9.1
+	======
+	* Updated - minor optimisations to Mono/Stereo expansion so 
+		it copies the data using single instructions rather than
+		memcpy System Calls which should reduce CPU usage.
+
 	v0.9.0
 	======
 	* Fixed - Corrupt audio on VBR (Varible Bit Rate) Audio

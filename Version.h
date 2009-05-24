@@ -1,7 +1,7 @@
+#define PI_VER2 "v0.9.1"
+
 #ifdef _DEBUG
-#define PI_VER2 "v0.9.0 [DEBUG]"
-#else
-#define PI_VER2 "v0.9.0"
+#define PI_VER2 PI_VER2 "[DEBUG]"
 #endif
 
 #ifdef __alpha
