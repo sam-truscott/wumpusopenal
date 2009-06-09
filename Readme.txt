@@ -1,7 +1,7 @@
 Wumpus Out OpenAL is copyright (c) 2009 by Sam Truscott.
 =======================================================
 
-Wumpus Out OpenAL v0.9.0
+Wumpus Out OpenAL v0.9.1
 ========================
 
 	Requirements
@@ -37,6 +37,8 @@ Change Log
 
 	v0.9.1
 	======
+	* Added - few checks for Windows 7 so it doesn't use XRAM
+		which seems to cause problems on Windows 7 RC 1.
 	* Updated - minor optimisations to Mono/Stereo expansion so 
 		it copies the data using single instructions rather than
 		memcpy System Calls which should reduce CPU usage.

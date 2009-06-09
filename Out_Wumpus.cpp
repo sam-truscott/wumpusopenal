@@ -408,19 +408,26 @@ namespace WinampOpenALOut {
 			alGetEnumValue("AL_STORAGE_ACCESSIBLE"));
 		this->log_debug_msg(dbg, __FILE__, __LINE__);
 #endif
-
-		if ( Framework::getInstance()->ALFWIsXRAMSupported() == AL_TRUE )
+		if ( WINVER <= 0x0600 )
 		{
+			if ( Framework::getInstance()->ALFWIsXRAMSupported() == AL_TRUE )
+			{
 #ifdef _DEBUG
-			sprintf_s(
-				dbg,
-				DEBUG_BUFFER_SIZE,
-				"-> Detect XRAM, Size {%d}MB, Free {%d}MB",
-				alGetEnumValue("AL_EAX_RAM_SIZE") / (1024 * 1024),
-				alGetEnumValue("AL_EAX_RAM_FREE") / (1024 * 1024) );
-			this->log_debug_msg(dbg, __FILE__, __LINE__);
+				sprintf_s(
+					dbg,
+					DEBUG_BUFFER_SIZE,
+					"-> Detect XRAM, Size {%d}MB, Free {%d}MB",
+					alGetEnumValue("AL_EAX_RAM_SIZE") / (1024 * 1024),
+					alGetEnumValue("AL_EAX_RAM_FREE") / (1024 * 1024) );
+				this->log_debug_msg(dbg, __FILE__, __LINE__);
 #endif
-			xram_detected = true;
+				this->xram_detected = true;
+			}
+		}
+		else
+		{
+			this->xram_detected = false;
+			SetXRAMEnabled(false);
 		}
 
 		SYNC_END;
@@ -970,7 +977,7 @@ namespace WinampOpenALOut {
 					else
 					{
 						const unsigned int* src = 
-							(unsigned int*)(buf + pos);
+							(const unsigned int*)(buf + pos);
 						unsigned int* dst_a = 
 							(unsigned int*)(newBuffer + nPos);
 						unsigned int* dst_b = 
@@ -1308,6 +1315,12 @@ namespace WinampOpenALOut {
 
 	void Output_Wumpus::SetXRAMEnabled( bool enabled )
 	{
+		/* Windows Vista or higher doesnt support XRAM yet - it seems */
+		if ( WINVER > 0x0600 )
+		{
+			enabled = false;
+		}
+
 		xram_enabled = enabled;
 		ConfigFile::WriteBoolean(CONF_XRAM_ENABLED,xram_enabled);
 	}
