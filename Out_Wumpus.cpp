@@ -356,7 +356,14 @@ namespace WinampOpenALOut {
 		}
 
 		int last_volume = ConfigFile::ReadGlobalInteger(CONF_VOLUME);
-		volume = (last_volume / (ALfloat)VOLUME_DIVISOR);
+		if ( last_volume != -1)
+		{
+			volume = (last_volume / (ALfloat)VOLUME_DIVISOR);
+		}
+		else
+		{
+			volume = 1.0f;
+		}
 
 		/*
 			initialise openal itself - this has been modified
