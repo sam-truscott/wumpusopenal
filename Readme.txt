@@ -42,6 +42,7 @@ Change Log
 	* Updated - minor optimisations to Mono/Stereo expansion so 
 		it copies the data using single instructions rather than
 		memcpy System Calls which should reduce CPU usage.
+	* Fixed - no crash if no permission to write the volume
 
 	v0.9.0
 	======
