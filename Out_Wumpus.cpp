@@ -1,6 +1,6 @@
 #include "Out_Wumpus.h"
 #include "Version.h"
-
+#include "Out_Effects.h"
 #include "ConfigStatusForm.h"
 
 #define DEBUG_BUFFER_SIZE 255
@@ -316,6 +316,8 @@ namespace WinampOpenALOut {
 
 		SYNC_START;
 
+		effects = new Output_Effects();
+
 		Clock::Initialise();
 
 		/*
@@ -364,6 +366,20 @@ namespace WinampOpenALOut {
 		{
 			volume = 1.0f;
 		}
+
+		bool efx_enabled = ConfigFile::ReadBoolean(CONF_EFX_ENABLED);
+		effects_list efx_env = EFX_REVERB_PRESET_GENERIC;
+			
+		efx_env = (effects_list)ConfigFile::ReadInteger(CONF_EFX_ENV);
+
+		if ( efx_env < EFX_REVERB_PRESET_GENERIC ||
+			 efx_env > EFX_REVERB_PRESET_SMALLWATERROOM )
+		{
+			efx_env = EFX_REVERB_PRESET_GENERIC;
+		}
+
+		effects->set_enabled(efx_enabled);
+		effects->set_current_effect(efx_env);
 
 		/*
 			initialise openal itself - this has been modified
@@ -457,6 +473,9 @@ namespace WinampOpenALOut {
 			this->Close();
 			streamOpen = false;
 		}
+
+		delete effects;
+		effects = NULL;
 
 		ConfigFile::WriteInteger(CONF_VOLUME, volume * VOLUME_DIVISOR);
 
@@ -695,6 +714,9 @@ namespace WinampOpenALOut {
 		}
 		
 		alSourcei(uiSource, AL_LOOPING, AL_FALSE);
+		
+		/* Effects */
+		effects->set_source(uiSource);
 
 		// set the volume for the source
 		this->SetVolumeInternal(volume);
@@ -722,6 +744,8 @@ namespace WinampOpenALOut {
 	{
 		SYNC_START;
 		streamOpen = false;
+
+		effects->on_close();
 
 		// stop the source
 		alSourceStop(uiSource);
@@ -1330,6 +1354,11 @@ namespace WinampOpenALOut {
 
 		xram_enabled = enabled;
 		ConfigFile::WriteBoolean(CONF_XRAM_ENABLED,xram_enabled);
+	}
+
+	Output_Effects* Output_Wumpus::get_effects()
+	{
+		return this->effects;
 	}
 
 }

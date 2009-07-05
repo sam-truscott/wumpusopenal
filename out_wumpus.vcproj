@@ -85,7 +85,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="&quot;$(OPENAL_SDK_DIR)\libs\Win32\OpenAL32.lib&quot; &quot;$(OPENAL_SDK_DIR)\libs\Win32\EFX-Util_MT\EFX-Util.lib&quot;"
+				AdditionalDependencies="&quot;$(OPENAL_SDK_DIR)\libs\Win32\OpenAL32.lib&quot; &quot;$(OPENAL_SDK_DIR)\libs\Win32\EFX-Util_MTDLL\EFX-Util.lib&quot;"
 				OutputFile="$(PROGRAMFILES)\Winamp\Plugins\out_openal.dll"
 				Version="0.9.0"
 				LinkIncremental="1"
@@ -190,7 +190,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="&quot;$(OPENAL_SDK_DIR)\libs\Win32\OpenAL32.lib&quot; &quot;$(OPENAL_SDK_DIR)\libs\Win32\EFX-Util_MT\EFX-Util.lib&quot;"
+				AdditionalDependencies="&quot;$(OPENAL_SDK_DIR)\libs\Win32\OpenAL32.lib&quot; &quot;$(OPENAL_SDK_DIR)\libs\Win32\EFX-Util_MTDLL\EFX-Util.lib&quot;"
 				OutputFile="$(PROGRAMFILES)\Winamp\Plugins\out_openal.dll"
 				Version="0.9.0"
 				IgnoreDefaultLibraryNames=""
@@ -454,6 +454,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Out_Effects.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Out_Wumpus.cpp"
 				>
 				<FileConfiguration
@@ -516,6 +520,10 @@
 			</File>
 			<File
 				RelativePath="Main.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Out_Effects.h"
 				>
 			</File>
 			<File

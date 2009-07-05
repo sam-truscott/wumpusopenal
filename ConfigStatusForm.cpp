@@ -91,11 +91,11 @@ namespace WinampOpenALOut {
 		listBoxExtensions->Items->Add("\tAL_STORAGE_HARDWARE: " + alGetEnumValue("AL_STORAGE_HARDWARE"));
 		listBoxExtensions->Items->Add("\tAL_STORAGE_ACCESSIBLE: " + alGetEnumValue("AL_STORAGE_ACCESSIBLE"));
 
-		/*if (alcIsExtensionPresent(pDevice, "ALC_EXT_EFX") == AL_TRUE) {
+		if (alcIsExtensionPresent(pDevice, "ALC_EXT_EFX") == AL_TRUE) {
 			listBoxExtensions->Items->Add("Present: ALC_EXT_EFX");
 		}else{
 			listBoxExtensions->Items->Add("Absent: ALC_EXT_EFX");
-		}*/
+		}
 
 		/*if (alcIsExtensionPresent(pDevice, "EAX2.0") == AL_TRUE) {
 			listBoxExtensions->Items->Add("Present: EAX 2.0");

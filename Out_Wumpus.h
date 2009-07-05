@@ -4,10 +4,10 @@
 #include "Framework\Framework.h"
 #include "Clock.h"
 
-namespace WinampOpenALOut {
-
-	public class Output_Wumpus {
-
+namespace WinampOpenALOut
+{
+	public class Output_Wumpus
+	{
 		typedef struct
 		{
 			ALuint buffer_id;
@@ -64,6 +64,8 @@ namespace WinampOpenALOut {
 
 		inline __int64 GetWrittenBytes() { return total_written; }
 		inline __int64 GetPlayedBytes() { return total_played; }	
+
+		class Output_Effects* get_effects();
 
 		unsigned char GetPcBufferFull()
 		{ 
@@ -156,6 +158,8 @@ namespace WinampOpenALOut {
 
 		bool			stereoExpand;
 		bool			monoExpand;
+
+		class Output_Effects	*effects;
 
 	private:
 

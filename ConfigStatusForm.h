@@ -4,6 +4,7 @@
 #include "Constants.h"
 #include "Framework\aldlist.h"
 #include "ConfigFile.h"
+#include "Out_Effects.h"
 
 using namespace System;
 using namespace System::ComponentModel;
@@ -73,6 +74,23 @@ namespace WinampOpenALOut {
 			checkBoxExpandStereo->Checked = ptrOw->IsStereoExpanded();
 			checkBoxXRAM->Checked = ptrOw->IsXRAMEnabled();
 
+			int i;
+			for ( i = 0 ; i < NO_OF_EFFECTS ; i++ )
+			{
+				this->comboBoxEffect->Items->Add( gcnew String( REVERB_NAMES_TABLE[i] ));
+			}
+
+			int efx_env = ConfigFile::ReadInteger(CONF_EFX_ENV);
+
+			if ( efx_env < EFX_REVERB_PRESET_GENERIC ||
+				 efx_env > EFX_REVERB_PRESET_SMALLWATERROOM )
+			{
+				efx_env = EFX_REVERB_PRESET_GENERIC;
+			}
+			this->comboBoxEffect->SelectedIndex = efx_env;
+
+			this->checkBoxEfxEnabled->Checked = ConfigFile::ReadBoolean(CONF_EFX_ENABLED);
+
 			ShowDeviceDetails();
 		}
 
@@ -129,15 +147,6 @@ namespace WinampOpenALOut {
 		static UInt32 written_ms;
 		static UInt32 played_ms;
 
-	private: System::Windows::Forms::TabPage^  tabPage3D;
-	private: System::Windows::Forms::VScrollBar^  vScrollBarZ;
-	private: System::Windows::Forms::HScrollBar^  hScrollBarX;
-
-
-	private: System::Windows::Forms::VScrollBar^  vScrollBarY;
-	private: System::Windows::Forms::Label^  label3;
-
-
 
 private: System::Windows::Forms::TabPage^  tabPageConfig;
 private: System::Windows::Forms::CheckBox^  checkBoxExpandStereo;
@@ -170,6 +179,13 @@ private: System::Windows::Forms::Label^  labelPlayedB;
 private: System::Windows::Forms::Label^  labelWrittenB;
 private: System::Windows::Forms::Label^  label8;
 private: System::Windows::Forms::Label^  label10;
+private: System::Windows::Forms::TabPage^  tabPageEffects;
+private: System::Windows::Forms::CheckBox^  checkBoxEfxEnabled;
+private: System::Windows::Forms::ComboBox^  comboBoxEffect;
+private: System::Windows::Forms::Label^  label3;
+
+
+
 
 
 
@@ -258,6 +274,10 @@ private: System::ComponentModel::IContainer^  components;
 			this->label16 = (gcnew System::Windows::Forms::Label());
 			this->comboBoxDevices = (gcnew System::Windows::Forms::ComboBox());
 			this->label1 = (gcnew System::Windows::Forms::Label());
+			this->tabPageEffects = (gcnew System::Windows::Forms::TabPage());
+			this->label3 = (gcnew System::Windows::Forms::Label());
+			this->checkBoxEfxEnabled = (gcnew System::Windows::Forms::CheckBox());
+			this->comboBoxEffect = (gcnew System::Windows::Forms::ComboBox());
 			this->tabPageStatistics = (gcnew System::Windows::Forms::TabPage());
 			this->labelPlayedB = (gcnew System::Windows::Forms::Label());
 			this->labelWrittenB = (gcnew System::Windows::Forms::Label());
@@ -271,23 +291,19 @@ private: System::ComponentModel::IContainer^  components;
 			this->label5 = (gcnew System::Windows::Forms::Label());
 			this->progressBar1 = (gcnew System::Windows::Forms::ProgressBar());
 			this->label2 = (gcnew System::Windows::Forms::Label());
-			this->tabPage3D = (gcnew System::Windows::Forms::TabPage());
-			this->label3 = (gcnew System::Windows::Forms::Label());
-			this->vScrollBarZ = (gcnew System::Windows::Forms::VScrollBar());
-			this->hScrollBarX = (gcnew System::Windows::Forms::HScrollBar());
-			this->vScrollBarY = (gcnew System::Windows::Forms::VScrollBar());
 			this->toolTipWarning = (gcnew System::Windows::Forms::ToolTip(this->components));
 			this->toolTipInfo = (gcnew System::Windows::Forms::ToolTip(this->components));
 			this->tabConfiguration->SuspendLayout();
 			this->tabPageConfig->SuspendLayout();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->trackBufferLength))->BeginInit();
+			this->tabPageEffects->SuspendLayout();
 			this->tabPageStatistics->SuspendLayout();
-			this->tabPage3D->SuspendLayout();
 			this->SuspendLayout();
 			// 
 			// tabConfiguration
 			// 
 			this->tabConfiguration->Controls->Add(this->tabPageConfig);
+			this->tabConfiguration->Controls->Add(this->tabPageEffects);
 			this->tabConfiguration->Controls->Add(this->tabPageStatistics);
 			this->tabConfiguration->Location = System::Drawing::Point(12, 12);
 			this->tabConfiguration->Name = L"tabConfiguration";
@@ -461,6 +477,46 @@ private: System::ComponentModel::IContainer^  components;
 			this->label1->Size = System::Drawing::Size(0, 13);
 			this->label1->TabIndex = 0;
 			// 
+			// tabPageEffects
+			// 
+			this->tabPageEffects->Controls->Add(this->label3);
+			this->tabPageEffects->Controls->Add(this->checkBoxEfxEnabled);
+			this->tabPageEffects->Controls->Add(this->comboBoxEffect);
+			this->tabPageEffects->Location = System::Drawing::Point(4, 22);
+			this->tabPageEffects->Name = L"tabPageEffects";
+			this->tabPageEffects->Padding = System::Windows::Forms::Padding(3);
+			this->tabPageEffects->Size = System::Drawing::Size(401, 364);
+			this->tabPageEffects->TabIndex = 2;
+			this->tabPageEffects->Text = L"Effects";
+			this->tabPageEffects->UseVisualStyleBackColor = true;
+			// 
+			// label3
+			// 
+			this->label3->Location = System::Drawing::Point(6, 3);
+			this->label3->Name = L"label3";
+			this->label3->Size = System::Drawing::Size(389, 34);
+			this->label3->TabIndex = 2;
+			this->label3->Text = L"OpenAL supports a wide variety of effects. The list below is some built in reverb" 
+				L" effects.";
+			// 
+			// checkBoxEfxEnabled
+			// 
+			this->checkBoxEfxEnabled->AutoSize = true;
+			this->checkBoxEfxEnabled->Location = System::Drawing::Point(6, 40);
+			this->checkBoxEfxEnabled->Name = L"checkBoxEfxEnabled";
+			this->checkBoxEfxEnabled->Size = System::Drawing::Size(101, 17);
+			this->checkBoxEfxEnabled->TabIndex = 1;
+			this->checkBoxEfxEnabled->Text = L"Effects Enabled";
+			this->checkBoxEfxEnabled->UseVisualStyleBackColor = true;
+			// 
+			// comboBoxEffect
+			// 
+			this->comboBoxEffect->FormattingEnabled = true;
+			this->comboBoxEffect->Location = System::Drawing::Point(6, 72);
+			this->comboBoxEffect->Name = L"comboBoxEffect";
+			this->comboBoxEffect->Size = System::Drawing::Size(389, 21);
+			this->comboBoxEffect->TabIndex = 0;
+			// 
 			// tabPageStatistics
 			// 
 			this->tabPageStatistics->Controls->Add(this->labelPlayedB);
@@ -603,50 +659,6 @@ private: System::ComponentModel::IContainer^  components;
 			this->toolTipInfo->SetToolTip(this->label2, L"The amount of data in OpenALs buffers. Won\'t always be full because Winamp doesn\'" 
 				L"t write full packets.");
 			// 
-			// tabPage3D
-			// 
-			this->tabPage3D->Controls->Add(this->label3);
-			this->tabPage3D->Controls->Add(this->vScrollBarZ);
-			this->tabPage3D->Controls->Add(this->hScrollBarX);
-			this->tabPage3D->Controls->Add(this->vScrollBarY);
-			this->tabPage3D->Location = System::Drawing::Point(4, 22);
-			this->tabPage3D->Name = L"tabPage3D";
-			this->tabPage3D->Padding = System::Windows::Forms::Padding(3);
-			this->tabPage3D->Size = System::Drawing::Size(401, 364);
-			this->tabPage3D->TabIndex = 2;
-			this->tabPage3D->Text = L"3D";
-			this->tabPage3D->UseVisualStyleBackColor = true;
-			// 
-			// label3
-			// 
-			this->label3->AutoSize = true;
-			this->label3->Location = System::Drawing::Point(6, 3);
-			this->label3->Name = L"label3";
-			this->label3->Size = System::Drawing::Size(25, 13);
-			this->label3->TabIndex = 3;
-			this->label3->Text = L"Info";
-			// 
-			// vScrollBarZ
-			// 
-			this->vScrollBarZ->Location = System::Drawing::Point(0, 0);
-			this->vScrollBarZ->Name = L"vScrollBarZ";
-			this->vScrollBarZ->Size = System::Drawing::Size(17, 80);
-			this->vScrollBarZ->TabIndex = 4;
-			// 
-			// hScrollBarX
-			// 
-			this->hScrollBarX->Location = System::Drawing::Point(0, 0);
-			this->hScrollBarX->Name = L"hScrollBarX";
-			this->hScrollBarX->Size = System::Drawing::Size(80, 17);
-			this->hScrollBarX->TabIndex = 5;
-			// 
-			// vScrollBarY
-			// 
-			this->vScrollBarY->Location = System::Drawing::Point(0, 0);
-			this->vScrollBarY->Name = L"vScrollBarY";
-			this->vScrollBarY->Size = System::Drawing::Size(17, 80);
-			this->vScrollBarY->TabIndex = 6;
-			// 
 			// toolTipWarning
 			// 
 			this->toolTipWarning->ToolTipIcon = System::Windows::Forms::ToolTipIcon::Warning;
@@ -676,10 +688,10 @@ private: System::ComponentModel::IContainer^  components;
 			this->tabPageConfig->ResumeLayout(false);
 			this->tabPageConfig->PerformLayout();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->trackBufferLength))->EndInit();
+			this->tabPageEffects->ResumeLayout(false);
+			this->tabPageEffects->PerformLayout();
 			this->tabPageStatistics->ResumeLayout(false);
 			this->tabPageStatistics->PerformLayout();
-			this->tabPage3D->ResumeLayout(false);
-			this->tabPage3D->PerformLayout();
 			this->ResumeLayout(false);
 
 		}
@@ -711,6 +723,18 @@ private: System::ComponentModel::IContainer^  components;
 				if(ptrOw->IsXRAMEnabled() != checkBoxXRAM->Checked)
 				{
 					ptrOw->SetXRAMEnabled(checkBoxXRAM->Checked);
+				}
+
+				if(ptrOw->get_effects()->get_current_effect() != comboBoxEffect->SelectedIndex)
+				{
+					ptrOw->get_effects()->set_current_effect((effects_list)comboBoxEffect->SelectedIndex);
+					ConfigFile::WriteInteger(CONF_EFX_ENV, comboBoxEffect->SelectedIndex);
+				}
+
+				if(ptrOw->get_effects()->is_enabled() != checkBoxEfxEnabled->Checked)
+				{
+					ptrOw->get_effects()->set_enabled(checkBoxEfxEnabled->Checked);
+					ConfigFile::WriteBoolean(CONF_EFX_ENABLED, checkBoxEfxEnabled->Checked);
 				}
 
 				ConfigFile::WriteBoolean(CONF_MONO_EXPAND, checkBoxExpandMono->Checked);
