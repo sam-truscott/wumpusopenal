@@ -303,7 +303,7 @@ private: System::ComponentModel::IContainer^  components;
 			// tabConfiguration
 			// 
 			this->tabConfiguration->Controls->Add(this->tabPageConfig);
-			this->tabConfiguration->Controls->Add(this->tabPageEffects);
+			/* this->tabConfiguration->Controls->Add(this->tabPageEffects); */
 			this->tabConfiguration->Controls->Add(this->tabPageStatistics);
 			this->tabConfiguration->Location = System::Drawing::Point(12, 12);
 			this->tabConfiguration->Name = L"tabConfiguration";
