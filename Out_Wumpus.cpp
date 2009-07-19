@@ -949,6 +949,8 @@ namespace WinampOpenALOut {
 	*/
 	void Output_Wumpus::SetPan(int pan)
 	{
+		ALfloat f = pan/255.0f; 
+		alListener3f(AL_POSITION, -f ,1.0,1.0);
 	}
 
 	/*
