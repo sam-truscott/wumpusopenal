@@ -2,6 +2,7 @@
 #include "Version.h"
 #include "Out_Effects.h"
 #include "ConfigStatusForm.h"
+#include "Out_Renderer.h"
 
 #define DEBUG_BUFFER_SIZE 255
 
@@ -72,8 +73,12 @@ namespace WinampOpenALOut {
 
 	void Output_Wumpus::SwitchOutputDevice(int device)
 	{
+		for ( char i=0 ; i<no_renderers ; i++)
+		{
+			this->renderers[i]->Close();
+		}
+
 		/* stop the source so we dont hear anthing else */
-		alSourceStop(uiSource);
 		this->Relocate(device, GetOutputTime());
 	}
 
@@ -120,147 +125,29 @@ namespace WinampOpenALOut {
 			this->SetVolumeInternal(tempVolume);
 
 			// if it was paused, re-pause
-			this->Pause(tempPause);
+			if (tempPause)
+			{
+				this->Pause(tempPause);
+			}
 		}
 		SYNC_END;
 	}
 
 	void Output_Wumpus::CheckProcessedBuffers() 
 	{
-
-		ALint			iBuffersProcessed;
-		ALuint			uiNextBuffer;
-		ALenum			err;
-
-		unsigned int selectedBuffer;
-
-		iBuffersProcessed = NO_BUFFERS_PROCESSED;
-
-		// ask open al how many buffers have been processed
-		alGetError();
-		alGetSourcei(uiSource, AL_BUFFERS_PROCESSED, &iBuffersProcessed);
-		if( (err = alGetError()) != AL_NO_ERROR )
+		/* TODO */
+		for ( char i=0 ; i < no_renderers ; i++ )
 		{
-			if(err == AL_INVALID_VALUE) {
-				MessageBoxA(NULL, "Error with Source - Invalid Value", "Error With Source", MB_OK);
-			} else if (err == AL_INVALID_ENUM) {
-				MessageBoxA(NULL, "Error with Source - Invalid Enumeration", "Error With Source", MB_OK);
-			} else if (err == AL_INVALID_NAME) {
-				MessageBoxA(NULL, "Error with Source - Invalid Name", "Error With Source", MB_OK);
-			} else if (err == AL_INVALID_OPERATION) {
-				MessageBoxA(NULL, "Error with Source - Invalid Operation", "Error With Source", MB_OK);
-			} else {
-				MessageBoxA(NULL, "Error with Source - Unknown Error", "Error With Source", MB_OK);
-			}
-			onError();
-		}
-
-		while (iBuffersProcessed--)
-		{
-			uiNextBuffer = DEFAULT_BUFFER;
-			
-			// clear any open al errors
-			alGetError();
-
-			/* unqueue *any* processed buffer. the buffer that has been
-				processed will be put into uiNextBuffer */
-			alSourceUnqueueBuffers(
-				uiSource,
-				GET_ONE_BUFFER,
-				&uiNextBuffer); 
-
-			// based on the bufferID determine the buffer index
-			selectedBuffer = UNKNOWN_BUFFER;
-			for(unsigned int i=0;i<noBuffers;i++)
-			{
-				if( (!uiBuffers[i].available) && uiBuffers[i].buffer_id == uiNextBuffer )
-				{
-					selectedBuffer = i;
-					uiBuffers[i].available = true;
-
-					if ( uiBuffers[i].data != NULL )
-					{
-						delete uiBuffers[i].data;
-						uiBuffers[i].data = NULL;
-					}
-
-					buffers_free++;
-					break;
-				}
-			}
-
-			/* if no errors have occured we can mark that
-				buffer as available again */
-			if(alGetError() == AL_NO_ERROR)
-			{
-				/* increase our played time position
-				 (the delta for where we are in the current buffer is done
-				 in get_output_time */
-				total_played += uiBuffers[selectedBuffer].size;
-				buffer_free += uiBuffers[selectedBuffer].size;
-				uiBuffers[selectedBuffer].size = 0;
-
-			} else { 
-				MessageBoxA(NULL, "Error in Monitor Thread - Out of Range", "Error Monitoring", MB_OK);
-				this->onError();
-			}
+			this->renderers[i]->CheckProcessedBuffers();
 		}
 	}
 
-	void Output_Wumpus::CheckPlayState() {
-
-		ALint			iState;
-		ALint			iQueuedBuffers;
-
-		/*
-			can the current state of the source
-		*/
-		/* AL_SOURCE_STATE, AL_INITIAL, AL_PLAYING, AL_PAUSED, AL_STOPPED */
-		alGetError();
-		alGetSourcei(uiSource, AL_SOURCE_STATE, &iState);
-		
-		if(alGetError() != AL_NO_ERROR)
+	void Output_Wumpus::CheckPlayState()
+	{
+		/* TODO */
+		for ( char i=0 ; i < no_renderers ; i++ )
 		{
-			this->onError();
-		}
-
-		if (iState == AL_PLAYING)
-		{
-			// if the source is playing then we record that
-			isPlaying = true;
-		}else{
-
-			if(!preBuffer && 
-				streamOpen && 
-				(iState == AL_INITIAL || iState == AL_STOPPED) &&
-				total_written == total_played)
-			{
-				isPlaying = false;
-				return;
-			}
-
-			// if we're not playing check to see if any buffers are queued
-			alGetError();
-			alGetSourcei(uiSource, AL_BUFFERS_QUEUED, &iQueuedBuffers);
-
-			if(alGetError() != AL_NO_ERROR)
-			{
-				MessageBoxA(NULL, "Error playing", "Error Playing", MB_OK);
-				this->onError();
-			}
-
-			if (iQueuedBuffers)
-			{
-				// if any buffers are queued and we're not playing - play!
-				if(!lastPause)
-				{
-					alSourcePlay(uiSource);
-					isPlaying = true;
-				}
-			} else {
-				// otherwise we're finished
-				isPlaying = false;
-			}
+			this->renderers[i]->CheckPlayState();
 		}
 	}
 
@@ -318,6 +205,11 @@ namespace WinampOpenALOut {
 
 		effects = new Output_Effects();
 
+		for ( char i=0 ; i < MAX_RENDERERS ; i++ )
+		{
+			renderers[i] = NULL;
+		}
+
 		Clock::Initialise();
 
 		/*
@@ -325,6 +217,7 @@ namespace WinampOpenALOut {
 		*/
 		streamOpen = false;
 		isPlaying = false;
+		split_out = false;
 
 		noBuffers = NO_BUFFERS;
 		sampleRate = NO_SAMPLE_RATE;
@@ -522,46 +415,7 @@ namespace WinampOpenALOut {
 		sampleRate = samplerate;
 		numberOfChannels = numchannels;
 		bitsPerSample = bitspersamp;
-
-		bool tmpStereoExpand = stereoExpand;
-		bool tmpMonoExpand = monoExpand;
-
-		stereoExpand = false;
-		monoExpand = false;
-
-		// determine the format to output in
-		switch(numberOfChannels)
-		{
-			case 1:
-				if(tmpMonoExpand) {
-					ulFormat = alGetEnumValue("AL_FORMAT_QUAD16");
-					monoExpand = true;
-				}else{
-					ulFormat = bitsPerSample == 8 ? alGetEnumValue("AL_FORMAT_MONO8") : alGetEnumValue("AL_FORMAT_MONO16");
-				}
-				break;
-			case 2:
-				if(tmpStereoExpand) {
-					ulFormat = alGetEnumValue("AL_FORMAT_QUAD16");
-					stereoExpand = true;
-				}else{
-					ulFormat = bitsPerSample == 8 ? alGetEnumValue("AL_FORMAT_STEREO8") : alGetEnumValue("AL_FORMAT_STEREO16");
-				}
-				break;
-			case 4:
-				ulFormat = alGetEnumValue("AL_FORMAT_QUAD16");
-				break;
-			case 6:
-				ulFormat = alGetEnumValue("AL_FORMAT_51CHN16");
-				break;
-			case 7:
-				ulFormat = alGetEnumValue("AL_FORMAT_61CHN16");
-				break;
-			case 8:
-				ulFormat = alGetEnumValue("AL_FORMAT_71CHN16");
-				break;
-		};
-
+	
 		// reset the play position back to zero
 		total_written = ZERO_TIME;
 		total_played = ZERO_TIME;
@@ -572,24 +426,43 @@ namespace WinampOpenALOut {
 		// determine the size of the buffer
 		bytesPerSampleChannel = ((bitsPerSample >> SHIFT_BITS_TO_BYTES)*numberOfChannels);
 
-		if (stereoExpand) { bytesPerSampleChannel *= 2; }
-		if (monoExpand) { bytesPerSampleChannel *=4; }
-
-		bufferSize = (bytesPerSampleChannel * (sampleRate / ONE_SECOND_IN_MS)) * c_bufferLength;
-
-		//noBuffers = MAX_NO_BUFFERS;
-		noBuffers = (bufferSize / MAXIMUM_BUFFER_SIZE);// + MAXIMUM_BUFFER_OFFSET;
-
-		// if we have no buffers just assume we can use at least (MINIMUM_BUFFERS)
-		// we need more than one so we can listen to one and write t'other
-		// if that doesnt happen it will error anyway
-		if(noBuffers < MINIMUM_BUFFERS)
+		for ( char i=0 ; i < MAX_RENDERERS ; i++ )
 		{
-			noBuffers = MINIMUM_BUFFERS;
+			if ( renderers[i] != NULL )
+			{
+				renderers[i]->Close();
+				delete renderers[i];
+				renderers[i] = NULL;
+			}
 		}
 
-		this->buffer_free = noBuffers * MAXIMUM_BUFFER_SIZE;
-		buffers_free = noBuffers;
+		bool use_xram = false;
+
+		if ( xram_detected == true && 
+				xram_enabled == true &&
+				alGetEnumValue("AL_EAX_RAM_FREE") > 0)
+		{
+			use_xram = true;
+		}
+
+		no_renderers = 0;
+		if ( split_out == true )
+		{
+			for ( char i=0 ; i < numberOfChannels ; i++ )
+			{
+				renderers[i] = new Output_Renderer(c_bufferLength, i);
+				renderers[i]->SetXRAMEnabled(true);
+				renderers[i]->Open(samplerate,numchannels,bitspersamp,0,0);
+				no_renderers++;
+			}
+		}
+		else
+		{
+			renderers[0] = new Output_Renderer(c_bufferLength, 0);
+			renderers[0]->SetXRAMEnabled(true);
+			renderers[0]->Open(samplerate,numchannels,bitspersamp,0,0);
+			no_renderers++;
+		}
 
 #ifdef _DEBUG
 		sprintf_s(
@@ -610,47 +483,11 @@ namespace WinampOpenALOut {
 		Time_Type currentTime = Clock::GetTime();
 		// reset the time we last checked the state of the playing buffers
 		lastCheckBuffers = currentTime;
-		// determine the delay to check the state of the openal buffers
-		lastCheckDelay = Clock::Milliseconds(c_bufferLength / noBuffers);
 
 		unsigned int in_xram_ok = 0;
 
 		// allocate some buffers
 		alGetError();
-		for(unsigned int i=0;i<MAX_NO_BUFFERS;i++)
-		{
-			uiBuffers[i].size = 0;
-			uiBuffers[i].available = false;
-			uiBuffers[i].data = NULL;
-		}
-
-		for(unsigned int i=0;i<noBuffers;i++)
-		{
-			uiBuffers[i].size = 0;
-			uiBuffers[i].available = true;
-			uiBuffers[i].data = NULL;
-			alGenBuffers( 1, &uiBuffers[i].buffer_id );
-
-			/* if xram is enabled write the buffer to XRAM */
-			if ( xram_detected == true && 
-				xram_enabled == true &&
-				alGetEnumValue("AL_EAX_RAM_FREE") > 0)
-			{
-				ALboolean inhw = eaxSetBufferMode(
-					1,
-					&uiBuffers[i].buffer_id,
-					eXRAMHardware);
-
-				if ( inhw == AL_FALSE )
-				{
-					log_debug_msg("Failed to set buffer as XRAM", __FILE__, __LINE__);
-				}
-				else
-				{
-					in_xram_ok++;
-				}	
-			}
-		}
 
 #ifdef _DEBUG
 		if ( xram_detected == true && 
@@ -665,58 +502,6 @@ namespace WinampOpenALOut {
 			log_debug_msg(dbg, __FILE__, __LINE__);
 		}
 #endif
-
-		ALenum err = alGetError();
-		if( err == AL_INVALID_VALUE || err == AL_OUT_OF_MEMORY)
-		{
-			if( err != AL_NO_ERROR) 
-			{
-				if(err == AL_OUT_OF_MEMORY) {
-					MessageBoxA(NULL, "Error generating Buffer - Out of Memory", "Error", MB_OK);
-				} else if(err == AL_INVALID_VALUE) {
-					MessageBoxA(NULL, "Error generating  Buffer - Invalid Value", "Error", MB_OK);
-				} else {
-					MessageBoxA(NULL, "Error generating  Buffer - Unknown Error", "Error", MB_OK);
-				}
-				this->onError();
-			}
-			
-			/* if we've created too many buffers try and
-		     * use less */
-			while(err != AL_NO_ERROR && noBuffers > 1)
-			{
-				alGetError();
-				noBuffers--;
-				for(unsigned int i=0;i<noBuffers;i++)
-				{
-					alGenBuffers( noBuffers, &uiBuffers[i].buffer_id );
-				}
-				err = alGetError();
-			}
-		}
-
-		// allocate a source
-		alGetError();
-		alGenSources( 1, &uiSource );
-
-		if( (err = alGetError()) != AL_NO_ERROR)
-		{
-			if(err == AL_OUT_OF_MEMORY) {
-				MessageBoxA(NULL, "Error generating Source - Out of Memory", "Error", MB_OK);
-			} else if(err == AL_INVALID_VALUE) {
-				MessageBoxA(NULL, "Error generating Source - Invalid Value", "Error", MB_OK);
-			} else if(err == AL_INVALID_OPERATION) {
-				MessageBoxA(NULL, "Error generating Source - Invalid Operation", "Error", MB_OK);
-			}  else {
-				MessageBoxA(NULL, "Error generating Source - Unknown Error", "Error", MB_OK);
-			}
-			this->onError();
-		}
-		
-		alSourcei(uiSource, AL_LOOPING, AL_FALSE);
-		
-		/* Effects */
-		effects->set_source(uiSource);
 
 		// set the volume for the source
 		this->SetVolumeInternal(volume);
@@ -745,37 +530,14 @@ namespace WinampOpenALOut {
 		SYNC_START;
 		streamOpen = false;
 
-		effects->on_close();
-
-		// stop the source
-		alSourceStop(uiSource);
-
-		ALint iState;
-		unsigned int timeout = 0;
-		// query the state of the source and wait for it to stop
-		alGetSourcei(uiSource, AL_SOURCE_STATE, &iState);
-		while(iState != AL_STOPPED && iState != AL_INITIAL)
+		for ( char i=0 ; i < MAX_RENDERERS ; i++ )
 		{
-			Sleep(10);
-			if(timeout++ > CLOSE_TIMEOUT_COUNT) {
-				break;
-			}
-		}
-
-		// remove all buffers
-		alSourcei(uiSource, AL_BUFFER, 0);
-
-		// delete the source
-		alDeleteSources( 1, &uiSource );
-		// delete all the buffers
-		for(unsigned int i=0;i<noBuffers;i++)
-		{
-			if ( uiBuffers[i].data != NULL )
+			if ( renderers[i] != NULL )
 			{
-				delete uiBuffers[i].data;
-				uiBuffers[i].data = NULL;
+				renderers[i]->Close();
+				delete renderers[i];
+				renderers[i] = NULL;
 			}
-			alDeleteBuffers( noBuffers, &uiBuffers[i].buffer_id );
 		}
 
 		// just incase the thread has exitted, assume playing has stopped
@@ -791,6 +553,7 @@ namespace WinampOpenALOut {
 		total_written = ZERO_TIME;
 		lastOutputTime = ZERO_TIME;
 		lastWrittenTime = ZERO_TIME;
+
 		SYNC_END;
 
 	}
@@ -806,13 +569,6 @@ namespace WinampOpenALOut {
 		SYNC_START;
 
 		ALenum err;
-
-		// if we cannot write exit now (non-blocking op)
-		if(buffers_free == 0 || !streamOpen)
-		{
-			SYNC_END;
-			return -1;
-		}
 
 		// if the buffer is valid (non-NULL)
 		if (buf) {
@@ -847,50 +603,16 @@ namespace WinampOpenALOut {
 				SYNC_END;
 				return 0;
 			}
-			
-			// set it to ERROR'd so we can detect errors
-			ALuint uiNextBuffer = UNKNOWN_BUFFER;
-			unsigned int selectedBuffer = UNKNOWN_BUFFER;
 
-			/*	go through the buffers and find an available one
-
-				if we're here (critical section, canWrite=true) then
-				we assume that one is! 
-			*/
-			for(ALuint i=0;i<noBuffers;i++)
-			{
-				// find an available buffer
-				if ( uiBuffers[i].available == true )
-				{
-					uiNextBuffer = uiBuffers[i].buffer_id;
-					uiBuffers[i].available = false;
-					selectedBuffer = i;
-					buffers_free--;
-					break;
-				}
-			}
-#ifdef _DEBUG
-			sprintf_s(
-				dbg,
-				DEBUG_BUFFER_SIZE,
-				"Writing using buffer {%d}", selectedBuffer);
-			log_debug_msg(dbg, __FILE__, __LINE__);
-#endif
-			if(selectedBuffer == UNKNOWN_BUFFER)
-			{
-				SYNC_END;
-				return -1;
-			}
-
-			uiBuffers[selectedBuffer].data = NULL;
+			char * to_write = NULL;
 
 			if ( temp_size > 0 )
 			{
-				uiBuffers[selectedBuffer].data = new char[len+temp_size];
+				to_write = new char[len+temp_size];
 
 				/* copy the first buffer in */
 				fmemcpy(
-					(char*)uiBuffers[selectedBuffer].data,
+					to_write,
 					0,
 					temp,
 					0,
@@ -904,182 +626,143 @@ namespace WinampOpenALOut {
 #endif
 				/* copy what we can of the second */
 				fmemcpy(
-					(char*)uiBuffers[selectedBuffer].data,
+					to_write,
 					temp_size,
 					buf,
 					0,
 					len);
 
-				buf = (char*)uiBuffers[selectedBuffer].data;
+				buf = to_write;
 				len += temp_size;
 				temp_size = 0; 
 			}
+			
+//			// ############## MONO EXPANSION
+//
+//			if(monoExpand) {
+//				// we're writing out four as much data so
+//				// increase this value by three more times
+//				const unsigned int new_len = (len*4);
+//
+//				// expand buffer here
+//				char* newBuffer = new char[new_len];
+//#ifdef _DEBUG
+//				memset(newBuffer, 0, new_len);
+//#endif
+//
+//				// set relative value to zero
+//				unsigned int nPos = 0;
+//
+//				const unsigned char sampleSize = 
+//					((bitsPerSample == 8) ? ONE_BYTE_SAMPLE : TWO_BYTE_SAMPLE);
+//				
+//				/* expand the samples out */
+//				for(unsigned int pos=0; pos < len; pos++) {
+//
+//					if ( sampleSize == ONE_BYTE_SAMPLE)
+//					{
+//						newBuffer[nPos++] = buf[pos];
+//						newBuffer[nPos++] = buf[pos];
+//						newBuffer[nPos++] = buf[pos];
+//						newBuffer[nPos++] = buf[pos];
+//					}
+//					else
+//					{
+//						const short* src = (short*)(buf + pos);
+//						short* dst_a = (short*)(newBuffer + nPos);
+//						short* dst_b = (short*)(newBuffer + nPos + TWO_BYTE_SAMPLE);
+//						short* dst_c = (short*)(newBuffer + nPos + (TWO_BYTE_SAMPLE * 2));
+//						short* dst_d = (short*)(newBuffer + nPos + (TWO_BYTE_SAMPLE * 4));
+//
+//						(*dst_a) = (*src);
+//						(*dst_b) = (*src);
+//						(*dst_c) = (*src);
+//						(*dst_d) = (*src);
+//
+//						nPos += (sampleSize * 4);
+//						pos += sampleSize;
+//					}
+//				}
+//
+//				buf = newBuffer;
+//				len = new_len;
+//				/* we're using the internal buffer on the heap now */
+//				if ( uiBuffers[selectedBuffer].data != NULL )
+//				{
+//					delete uiBuffers[selectedBuffer].data;
+//					uiBuffers[selectedBuffer].data = NULL;
+//				}
+//				uiBuffers[selectedBuffer].data = buf;
+//			}
+//
+//			// ############## END MONO EXPANSION
+//
+//			// ############## STEREO EXPANSION
+//
+//			if(stereoExpand) {
+//
+//				// we're writing out twice as much data so
+//				// increase this value again
+//				const unsigned int new_len = len * 2;
+//
+//				// expand buffer here
+//				char* newBuffer = new char[new_len];
+//#ifdef _DEBUG
+//				memset(newBuffer, 0, new_len);
+//#endif
+//
+//				unsigned int nPos = 0;
+//				const unsigned char sampleSize = 
+//					((bitsPerSample == 8) ? TWO_BYTE_SAMPLE : FOUR_BYTE_SAMPLE);
+//				
+//				/* expand the samples out */
+//				for(unsigned int pos=0; pos < len;)
+//				{
+//					if ( sampleSize == TWO_BYTE_SAMPLE )
+//					{
+//						const short* src = (short*)(buf + pos);
+//						short* dst_a = (short*)(newBuffer + nPos);
+//						short* dst_b = (short*)(newBuffer + nPos + TWO_BYTE_SAMPLE);
+//
+//						(*dst_a) = (*src);
+//						(*dst_b) = (*src);
+//					}
+//					else
+//					{
+//						const unsigned int* src = 
+//							(const unsigned int*)(buf + pos);
+//						unsigned int* dst_a = 
+//							(unsigned int*)(newBuffer + nPos);
+//						unsigned int* dst_b = 
+//							(unsigned int*)(newBuffer + nPos + FOUR_BYTE_SAMPLE);
+//
+//						(*dst_a) = (*src);
+//						(*dst_b) = (*src);
+//					}
+//
+//					nPos += (sampleSize * 2);
+//					pos += sampleSize;
+//				}
+//
+//				len = new_len;
+//				buf = newBuffer;
+//				/* we're using the internal buffer on the heap now */
+//				if ( uiBuffers[selectedBuffer].data != NULL )
+//				{
+//					delete uiBuffers[selectedBuffer].data;
+//					uiBuffers[selectedBuffer].data = NULL;
+//				}
+//				uiBuffers[selectedBuffer].data = buf;
+//			}
 
-			// ############## MONO EXPANSION
-
-			if(monoExpand) {
-				// we're writing out four as much data so
-				// increase this value by three more times
-				const unsigned int new_len = (len*4);
-
-				// expand buffer here
-				char* newBuffer = new char[new_len];
-#ifdef _DEBUG
-				memset(newBuffer, 0, new_len);
-#endif
-
-				// set relative value to zero
-				unsigned int nPos = 0;
-
-				const unsigned char sampleSize = 
-					((bitsPerSample == 8) ? ONE_BYTE_SAMPLE : TWO_BYTE_SAMPLE);
-				
-				/* expand the samples out */
-				for(unsigned int pos=0; pos < len; pos++) {
-
-					if ( sampleSize == ONE_BYTE_SAMPLE)
-					{
-						newBuffer[nPos++] = buf[pos];
-						newBuffer[nPos++] = buf[pos];
-						newBuffer[nPos++] = buf[pos];
-						newBuffer[nPos++] = buf[pos];
-					}
-					else
-					{
-						const short* src = (short*)(buf + pos);
-						short* dst_a = (short*)(newBuffer + nPos);
-						short* dst_b = (short*)(newBuffer + nPos + TWO_BYTE_SAMPLE);
-						short* dst_c = (short*)(newBuffer + nPos + (TWO_BYTE_SAMPLE * 2));
-						short* dst_d = (short*)(newBuffer + nPos + (TWO_BYTE_SAMPLE * 4));
-
-						(*dst_a) = (*src);
-						(*dst_b) = (*src);
-						(*dst_c) = (*src);
-						(*dst_d) = (*src);
-
-						nPos += (sampleSize * 4);
-						pos += sampleSize;
-					}
-				}
-
-				buf = newBuffer;
-				len = new_len;
-				/* we're using the internal buffer on the heap now */
-				if ( uiBuffers[selectedBuffer].data != NULL )
-				{
-					delete uiBuffers[selectedBuffer].data;
-					uiBuffers[selectedBuffer].data = NULL;
-				}
-				uiBuffers[selectedBuffer].data = buf;
-			}
-
-			// ############## END MONO EXPANSION
-
-			// ############## STEREO EXPANSION
-
-			if(stereoExpand) {
-
-				// we're writing out twice as much data so
-				// increase this value again
-				const unsigned int new_len = len * 2;
-
-				// expand buffer here
-				char* newBuffer = new char[new_len];
-#ifdef _DEBUG
-				memset(newBuffer, 0, new_len);
-#endif
-
-				unsigned int nPos = 0;
-				const unsigned char sampleSize = 
-					((bitsPerSample == 8) ? TWO_BYTE_SAMPLE : FOUR_BYTE_SAMPLE);
-				
-				/* expand the samples out */
-				for(unsigned int pos=0; pos < len;)
-				{
-					if ( sampleSize == TWO_BYTE_SAMPLE )
-					{
-						const short* src = (short*)(buf + pos);
-						short* dst_a = (short*)(newBuffer + nPos);
-						short* dst_b = (short*)(newBuffer + nPos + TWO_BYTE_SAMPLE);
-
-						(*dst_a) = (*src);
-						(*dst_b) = (*src);
-					}
-					else
-					{
-						const unsigned int* src = 
-							(const unsigned int*)(buf + pos);
-						unsigned int* dst_a = 
-							(unsigned int*)(newBuffer + nPos);
-						unsigned int* dst_b = 
-							(unsigned int*)(newBuffer + nPos + FOUR_BYTE_SAMPLE);
-
-						(*dst_a) = (*src);
-						(*dst_b) = (*src);
-					}
-
-					nPos += (sampleSize * 2);
-					pos += sampleSize;
-				}
-
-				len = new_len;
-				buf = newBuffer;
-				/* we're using the internal buffer on the heap now */
-				if ( uiBuffers[selectedBuffer].data != NULL )
-				{
-					delete uiBuffers[selectedBuffer].data;
-					uiBuffers[selectedBuffer].data = NULL;
-				}
-				uiBuffers[selectedBuffer].data = buf;
-			}
-
-			buffer_free -= len;
 			total_written += len;
-			uiBuffers[selectedBuffer].size = len;
 
-			// ############## END STEREO EXPANSION
-#ifdef _DEBUG
-			sprintf_s(
-				dbg,
-				DEBUG_BUFFER_SIZE,
-				"Writing to OpenAL buffer,{%d} bytes", len);
-			log_debug_msg(dbg, __FILE__, __LINE__);
-#endif
-			// buffer the data with the correct format
-			alGetError();
-			alBufferData(uiNextBuffer, ulFormat, buf, len, sampleRate);
-			if( (err = alGetError()) != AL_NO_ERROR)
+			for ( char i=0; i < no_renderers ; i++ )
 			{
-				if(err == AL_OUT_OF_MEMORY) {
-					MessageBoxA(NULL, "Error Buffering - Out of Memory", "Error", MB_OK);
-				} else if(err == AL_INVALID_VALUE) {
-					MessageBoxA(NULL, "Error Buffering - Invalid Value", "Error", MB_OK);
-				} else if(err == AL_INVALID_ENUM) {
-					MessageBoxA(NULL, "Error Buffering - Invalid Enumeration", "Error", MB_OK);
-				} else if( err == AL_INVALID_NAME) {
-					MessageBoxA(NULL, "Error Buffering - Invalid Name", "Error", MB_OK);
-				} else {
-					char txt[200] = {'\0'};
-					sprintf_s(txt, "Error Buffering - Unknown Error [%d]", err);
-					MessageBoxA(NULL, txt, "Error", MB_OK);
-				}
-				this->onError();
+				// TODO
+				renderers[i]->Write(buf,len);
 			}
-
-			// add the buffer to the source queue
-			alGetError();
-			alSourceQueueBuffers(uiSource, 1, &uiNextBuffer);
-			if( (err = alGetError()) != AL_NO_ERROR)
-			{
-				if(err == AL_INVALID_NAME) {
-					MessageBoxA(NULL, "Error Queuing - Invalid Name", "Error", MB_OK);
-				} else if(err == AL_INVALID_OPERATION) {
-					MessageBoxA(NULL, "Error Queuing - Invalid Operation", "Error", MB_OK);
-				} else {
-					MessageBoxA(NULL, "Error Queuing - Unknown Error", "Error", MB_OK);
-				}
-				this->onError();
-			}
+			
 
 			/* now that there is data in the buffers check the play
 			state. if nothing is playing then either a buffer under-run
@@ -1113,14 +796,16 @@ namespace WinampOpenALOut {
 	*/
 	int Output_Wumpus::CanWrite() {
 		SYNC_START;
-		int r;
-		if(streamOpen) {
+		int r = EMPTY_THE_BUFFER;
+		if(streamOpen)
+		{
 
 			this->CheckProcessedBuffers();
 
-			r = ((buffers_free > 0) ? buffer_free : 0);
-		}else{
-			r = EMPTY_THE_BUFFER;
+			if ( no_renderers > 0 )
+			{
+				r = renderers[0]->CanWrite() ? renderers[0]->GetBufferFree() : EMPTY_THE_BUFFER;
+			}
 		}
 		SYNC_END;
 		
@@ -1164,14 +849,10 @@ namespace WinampOpenALOut {
 		// if this is un-paused during pre-buffering
 		// we may start to play data before it's ready
 		// and cause and under-run
-		if(streamOpen && !preBuffer)
+		
+		for ( char i=0 ; i < no_renderers ; i++ )
 		{
-			if(pause)
-			{
-				alSourcePause(uiSource);
-			}else{
-				alSourcePlay(uiSource);
-			}
+			renderers[i]->Pause(pause);
 		}
 
 		SYNC_END;
@@ -1205,9 +886,15 @@ namespace WinampOpenALOut {
 	*/
 	void Output_Wumpus::SetVolumeInternal(ALfloat newVolume)
 	{
-		if(newVolume <= VOLUME_MAX && newVolume >= VOLUME_MIN) {
+		if(newVolume <= VOLUME_MAX && newVolume >= VOLUME_MIN)
+		{
 			volume = newVolume;
-			alSourcef(uiSource,AL_GAIN, newVolume);
+			
+			for ( char i=0 ; i < no_renderers ; i++ )
+			{
+				renderers[i]->SetVolumeInternal(volume);
+			}
+
 			ConfigFile::WriteInteger(CONF_VOLUME, volume * VOLUME_DIVISOR);
 		}
 	}
@@ -1230,12 +917,16 @@ namespace WinampOpenALOut {
 	void Output_Wumpus::Flush(int tMs) {
 		SYNC_START;
 
-		// make sure we've stopped playing
-		alSourceStop(uiSource);
+		for ( char i=0 ; i < no_renderers ; i++ )
+		{
+			renderers[i]->Flush(tMs);
+		}
 
 		// calculate the number of bytes that will have been
 		// this will relocate to the current device at a set time
 		this->Relocate(Framework::getInstance()->GetCurrentDevice(), tMs);
+
+		CheckPlayState();
 
 		SYNC_END;
 	}
@@ -1251,6 +942,11 @@ namespace WinampOpenALOut {
 			((((sampleRate / ONE_SECOND_IN_MS) *
 			(bitsPerSample >> SHIFT_BITS_TO_BYTES)) *
 			numberOfChannels) * tMs);
+
+		for ( char i = 0 ; i < no_renderers ; i++ )
+		{
+			renderers[i]->SetPlayedTime(calcTime);
+		}
 
 		// reset played pointers
 		total_written = calcTime;
@@ -1304,18 +1000,20 @@ namespace WinampOpenALOut {
 			// every so often, no need to keep checking them
 			// if we know they're x'ms long
 			Time_Type currentTime = Clock::GetTime();
-			if(currentTime > lastCheckBuffers + lastCheckDelay)
-			{
-				CheckProcessedBuffers();
-				lastCheckBuffers = currentTime;
-			}
 
-			ALint deltaBytes;
-			// get the position in the currently playing buffer
-			alGetSourcei(uiSource, AL_BYTE_OFFSET, &deltaBytes);
+			CheckProcessedBuffers();
+			lastCheckBuffers = currentTime;
+
+			total_played = 0;
+			for( char i=0; i < no_renderers ; i++ )
+			{
+				total_played += (renderers[i]->GetPlayedTime() + renderers[i]->GetPosition());
+			}
+			
+			//total_played += (renderers[0]->GetPlayedTime() + renderers[0]->GetPosition());
 
 			// this works it out how many bytes it is
-			currentOutputTime = total_played + deltaBytes;
+			currentOutputTime = total_played;
 
 			// this converts bytes to ms and does 32bit part
 			currentOutputTime =

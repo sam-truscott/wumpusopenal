@@ -14,7 +14,7 @@ namespace WinampOpenALOut {
 			played_ms			= ptrOw->GetLastOutputTime();
 			written_bytes		= ptrOw->GetWrittenBytes();
 			played_bytes		= ptrOw->GetPlayedBytes();
-			buffer_percent_full = ptrOw->GetPcBufferFull();
+			/* TODO buffer_percent_full = ptrOw->GetPcBufferFull(); */
 
 			if ( buffer_percent_full > 100 )
 			{

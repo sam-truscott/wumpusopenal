@@ -458,6 +458,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Out_Renderer.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Out_Wumpus.cpp"
 				>
 				<FileConfiguration
@@ -528,6 +532,10 @@
 			</File>
 			<File
 				RelativePath=".\Out_Openal.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Out_Renderer.h"
 				>
 			</File>
 			<File

@@ -5,6 +5,7 @@
 #define __FCONSTANT const static float
 
 __CONSTANT MAX_NO_BUFFERS = 255;
+__CONSTANT MAX_RENDERERS = 6;
 
 // time constants
 __CONSTANT ZERO_TIME = 0;

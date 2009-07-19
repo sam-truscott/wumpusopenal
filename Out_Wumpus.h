@@ -1,4 +1,5 @@
-#pragma once
+#ifndef OUT_WUMPUS_H
+#define OUT_WUMPUS_H
 
 #include "Constants.h"
 #include "Framework\Framework.h"
@@ -8,13 +9,6 @@ namespace WinampOpenALOut
 {
 	public class Output_Wumpus
 	{
-		typedef struct
-		{
-			ALuint buffer_id;
-			bool available;
-			unsigned int size;
-			void* data;
-		} buffer_type;
 
 	public:
 		Output_Wumpus();
@@ -37,7 +31,6 @@ namespace WinampOpenALOut
 
 		void SwitchOutputDevice(int device);
 		
-
 		inline bool IsStreamOpen()						{ return streamOpen; }
 
 		inline unsigned int	GetSampleRate()				{ return sampleRate; }
@@ -67,15 +60,6 @@ namespace WinampOpenALOut
 
 		class Output_Effects* get_effects();
 
-		unsigned char GetPcBufferFull()
-		{ 
-			float r = (float)(bufferSize-buffer_free) / (float)bufferSize;
-			r *= 100;
-			int r2 = (int)(r+0.5f);
-			
-			return r2;
-		}
-
 	protected:
 
 		inline void onError();
@@ -102,9 +86,6 @@ namespace WinampOpenALOut
 		// as possible
 		bool			preBuffer;
 		unsigned int	preBufferNumber;
-
-		unsigned int	buffer_free;
-		unsigned int	buffers_free;
 
 		bool			xram_detected;
 		bool			xram_enabled;
@@ -143,15 +124,9 @@ namespace WinampOpenALOut
 		char		temp[TEMP_BUFFER_SIZE];
 		unsigned int temp_size;
 
-		// the open al buffers themselves
-		buffer_type	    uiBuffers[MAX_NO_BUFFERS];
-		// integer used to reference the open al source
-		ALuint		    uiSource;
-
 		unsigned int	bufferSize;
 
 		Time_Type		lastCheckBuffers;
-		Time_Type		lastCheckDelay;
 
 		// used to store the configuration buffer length
 		unsigned int	c_bufferLength;
@@ -159,7 +134,12 @@ namespace WinampOpenALOut
 		bool			stereoExpand;
 		bool			monoExpand;
 
+		class Output_Renderer* renderers[MAX_RENDERERS];
+		char			no_renderers;
+
 		class Output_Effects	*effects;
+
+		bool split_out;
 
 	private:
 
@@ -168,3 +148,5 @@ namespace WinampOpenALOut
 	};
 
 }
+
+#endif
