@@ -205,6 +205,11 @@ namespace WinampOpenALOut {
 
 		effects = new Output_Effects();
 
+		memset(
+			&speaker_matrix,
+			0,
+			sizeof(speaker_matrix_T));
+
 		for ( char i=0 ; i < MAX_RENDERERS ; i++ )
 		{
 			renderers[i] = NULL;
@@ -348,8 +353,40 @@ namespace WinampOpenALOut {
 			SetXRAMEnabled(false);
 		}
 
+		char setting[11];
+		strcpy_s(setting,11,"matrix_x_y\0");
+		for (char i=0 ; i < MAX_RENDERERS ; i++ )
+		{
+			setting[9] = i + '0';
+			setting[7] = 'x';	speaker_matrix.speakers[i].x = ConfigFile::ReadFloat(setting);
+			setting[7] = 'y';	speaker_matrix.speakers[i].y = ConfigFile::ReadFloat(setting);
+			setting[7] = 'z';	speaker_matrix.speakers[i].z = ConfigFile::ReadFloat(setting);
+		}
+
 		SYNC_END;
 
+	}
+
+	void Output_Wumpus::SetMatrix( speaker_matrix_T m )
+	{
+		speaker_matrix = m;
+		for( char i=0 ; i < no_renderers ; i++ )
+		{
+			if ( renderers[i] != NULL )
+			{
+				renderers[i]->SetMatrix( m.speakers[i] );
+			}
+		}
+
+		char setting[11];
+		strcpy_s(setting,11,"matrix_x_y\0");
+		for (char i=0 ; i < MAX_RENDERERS ; i++ )
+		{
+			setting[9] = i + '0';
+			setting[7] = 'x';	ConfigFile::WriteFloat( setting, speaker_matrix.speakers[i].x );
+			setting[7] = 'y';	ConfigFile::WriteFloat( setting, speaker_matrix.speakers[i].y );
+			setting[7] = 'z';	ConfigFile::WriteFloat( setting, speaker_matrix.speakers[i].z );
+		}
 	}
 
 	/*

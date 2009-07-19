@@ -16,17 +16,14 @@ Wumpus Out OpenAL v0.9.2
 	Place the out_openal.dll file in Winamp\Plugins directory
 	and select it as the Output plug-in (Plug-ins\Output).
 
-	Configuration
-	=============
-	None so far, the plug-in will use the Default audio device that
-	OpenAL suggests.
-
 	Features
 	========
 	* Mono, Stereo, Multi-channel (4, 5.1, 7.1) audio at 8bit/16bit.
 	* Hardware acceleration support
 	* Low CPU utilisation even with software rendering 
 	* Expand Mono and Stereo to 4.0 (small performance hit)
+	* 3D, move your speakers around
+	* Reverb effects
 
 	Known Issues
 	============
@@ -34,6 +31,11 @@ Wumpus Out OpenAL v0.9.2
 
 Change Log
 ==========
+
+	v0.9.3
+	======
+	* Added - seperate renderer support
+	* Splitting of data to renderers
 
 	v0.9.2
 	======

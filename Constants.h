@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CONSTANTS_H
+#define CONSTANTS_H
 
 #define __CONSTANT const static unsigned int
 #define __S_CONSTANT const static int
@@ -53,3 +54,17 @@ __FCONSTANT	VOLUME_MAX = 1.0;
 
 __CONSTANT IS_PLAYING = 1;
 __CONSTANT IS_NOT_PLAYING = 0;
+
+typedef struct
+{
+	float x;
+	float y;
+	float z;
+} speaker_T;
+
+typedef struct 
+{
+	speaker_T speakers[MAX_RENDERERS];
+} speaker_matrix_T;
+
+#endif

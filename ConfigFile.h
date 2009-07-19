@@ -27,6 +27,9 @@ namespace WinampOpenALOut {
 		static int ReadInteger(char *name);
 		static void WriteInteger(char *name, int i);
 
+		static float ReadFloat(char *name);
+		static void WriteFloat(char* name, float f);
+
 		static bool ReadBoolean(char *name);
 		static void WriteBoolean(char* name, bool v);
 

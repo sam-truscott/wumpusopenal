@@ -676,21 +676,13 @@ namespace WinampOpenALOut {
 	}
 
 	/*
-		setpan - INCOMPLETE
-
-		this procedure is invoked by winamp to set the pan
-	*/
-	void Output_Renderer::SetPan(int pan)
-	{
-	}
-
-	/*
 		flush
 
 		this procedure is invoked by winamp to flush the buffers
 		and start playing from time (t)ms.
 	*/
-	void Output_Renderer::Flush(int tMs) {
+	void Output_Renderer::Flush(int tMs)
+	{
 		SYNC_START;
 
 		// make sure we've stopped playing
@@ -711,6 +703,19 @@ namespace WinampOpenALOut {
 	Output_Effects* Output_Renderer::get_effects()
 	{
 		return this->effects;
+	}
+
+	void Output_Renderer::SetMatrix ( speaker_T speaker )
+	{
+		ALfloat x = ((float)speaker.x) / 255.0f;
+		ALfloat y = ((float)speaker.y) / 255.0f;
+		ALfloat z = ((float)speaker.z) / 255.0f;
+		alSource3f(
+			this->uiSource,
+			AL_POSITION,
+			x,
+			y,
+			z);
 	}
 
 }

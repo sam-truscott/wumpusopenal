@@ -45,21 +45,27 @@ namespace WinampOpenALOut
 		inline void SetConfBufferLength( unsigned int i) { c_bufferLength = i;}
 
 		inline bool IsStereoExpanded() { return stereoExpand;}
-		inline void SetStereoExpanded(bool expanded);
+		void SetStereoExpanded(bool expanded);
 
 		inline bool IsMonoExpanded() { return monoExpand;}
-		inline void SetMonoExpanded(bool expanded);
+		void SetMonoExpanded(bool expanded);
 
 		inline bool IsXRAMEnabled() { return xram_enabled; }
 		inline void SetXRAMEnabled( bool enabled );
 
 		inline bool IsSplit() { return split_out; }
-		inline void SetSplit ( bool split );
+		void SetSplit ( bool split );
 
 		inline bool	IsXRAMPresent() { return xram_detected; }
 
 		inline __int64 GetWrittenBytes() { return total_written; }
-		inline __int64 GetPlayedBytes() { return total_played; }	
+		inline __int64 GetPlayedBytes() { return total_played; }
+
+		void SetMatrix( speaker_matrix_T m );
+		inline speaker_matrix_T GetMatrix(void)
+		{
+			return speaker_matrix;
+		}
 
 		class Output_Effects* get_effects();
 
@@ -143,6 +149,8 @@ namespace WinampOpenALOut
 		class Output_Effects	*effects;
 
 		bool split_out;
+
+		speaker_matrix_T speaker_matrix;
 
 	private:
 

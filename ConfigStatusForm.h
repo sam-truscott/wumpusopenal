@@ -29,92 +29,7 @@ namespace WinampOpenALOut {
 	public ref class Config : public System::Windows::Forms::Form
 	{
 	public:
-		Config(class Output_Wumpus *aPtrOw)
-		{
-			InitializeComponent();
-
-			ptrOw = aPtrOw;
-			ptrForm = this;
-
-			overRide = false;
-
-			currentDevice = ConfigFile::ReadInteger(CONF_DEVICE);
-
-			// get a list of all the devices and add them to the combo
-			ALDeviceList *pDeviceList = Framework::getInstance()->ALFWGetDeviceList();
-			if ((pDeviceList) && (pDeviceList->GetNumDevices())) {
-				for (ALint i = 0; i < pDeviceList->GetNumDevices(); i++) {
-					if( i == pDeviceList->GetDefaultDevice()) {
-						comboBoxDevices->Items->Add("Default: " + gcnew String(pDeviceList->GetDeviceName(i)));
-					}else{
-						comboBoxDevices->Items->Add(gcnew String(pDeviceList->GetDeviceName(i)));
-					}
-				}
-			}
-
-			// if the current device is not set, use the default device
-			if(currentDevice == -1) {
-				comboBoxDevices->SelectedIndex = pDeviceList->GetDefaultDevice();
-				currentDevice = pDeviceList->GetDefaultDevice();
-			}else{
-				comboBoxDevices->SelectedIndex = currentDevice;
-			}
-
-			int buffer = ConfigFile::ReadInteger(CONF_BUFFER_LENGTH);
-			if ( buffer >= 250
-				|| buffer <= 4000)
-			{
-				trackBufferLength->Value = buffer;
-			}
-
-			// update their captions with values
-			labelBufferLength->Text = "Buffer Length (" + trackBufferLength->Value + "ms)";
-
-			checkBoxExpandMono->Checked = ptrOw->IsMonoExpanded();
-			checkBoxExpandStereo->Checked = ptrOw->IsStereoExpanded();
-			checkBoxXRAM->Checked = ptrOw->IsXRAMEnabled();
-
-			int i;
-			for ( i = 0 ; i < NO_OF_EFFECTS ; i++ )
-			{
-				this->comboBoxEffect->Items->Add( gcnew String( REVERB_NAMES_TABLE[i] ));
-			}
-
-			int efx_env = ConfigFile::ReadInteger(CONF_EFX_ENV);
-
-			if ( efx_env < EFX_REVERB_PRESET_GENERIC ||
-				 efx_env > EFX_REVERB_PRESET_SMALLWATERROOM )
-			{
-				efx_env = EFX_REVERB_PRESET_GENERIC;
-			}
-			this->comboBoxEffect->SelectedIndex = efx_env;
-
-			this->checkBoxEfxEnabled->Checked = ConfigFile::ReadBoolean(CONF_EFX_ENABLED);
-
-			this->checkBoxSplit->Checked = ptrOw->IsSplit();
-
-			ShowDeviceDetails();
-		}
-
-		void Load()
-		{
-			Show();
-			checkBoxExpandMono->Checked = ptrOw->IsMonoExpanded();
-			checkBoxExpandStereo->Checked = ptrOw->IsStereoExpanded();
-			if(ptrOw->IsXRAMPresent() == true)
-			{
-				checkBoxXRAM->Enabled = true;
-				checkBoxXRAM->Checked = ptrOw->IsXRAMEnabled();
-			}
-			else
-			{
-				checkBoxXRAM->Enabled = false;
-				checkBoxXRAM->Checked = false;
-			}
-			this->Visible = true;
-			Thread^ thread = gcnew Thread(gcnew ThreadStart(ThreadProcedure));
-            thread->Start();
-		}
+		Config(class Output_Wumpus *aPtrOw);
 
 		static Config^ GetInstance(Output_Wumpus *aPtrOw)
 		{
@@ -128,12 +43,17 @@ namespace WinampOpenALOut {
 			return ptrForm;
 		}
 
-		void Config::ShowDeviceDetails();
+		void ShowDeviceDetails();
+
+		void Load();
 
 	protected:
 
+	private: void ApplyChanges();
+
 		static void ThreadProcedure();
 		void DoUpdate();
+		void UpdateMatrix(char speaker, char xyz, Decimal value); 
 
 		Int32 currentDevice;
 
@@ -190,14 +110,74 @@ private: System::Windows::Forms::Button^  buttonReset;
 private: System::Windows::Forms::Button^  buttonOk;
 private: System::Windows::Forms::Button^  buttonCancel;
 private: System::Windows::Forms::Button^  buttonApply;
-private: System::Windows::Forms::NumericUpDown^  numericUpDown3;
-private: System::Windows::Forms::NumericUpDown^  numericUpDown2;
-private: System::Windows::Forms::NumericUpDown^  numericUpDown1;
-private: System::Windows::Forms::NumericUpDown^  numericUpDown8;
-private: System::Windows::Forms::NumericUpDown^  numericUpDown7;
-private: System::Windows::Forms::NumericUpDown^  numericUpDown6;
-private: System::Windows::Forms::NumericUpDown^  numericUpDown5;
-private: System::Windows::Forms::NumericUpDown^  numericUpDown4;
+private: System::Windows::Forms::NumericUpDown^  numFLy;
+
+
+private: System::Windows::Forms::NumericUpDown^  numFLx;
+private: System::Windows::Forms::NumericUpDown^  numRLz;
+
+
+private: System::Windows::Forms::NumericUpDown^  numFLz;
+private: System::Windows::Forms::NumericUpDown^  numRLy;
+
+
+private: System::Windows::Forms::NumericUpDown^  numRLx;
+private: System::Windows::Forms::NumericUpDown^  numSz;
+
+
+private: System::Windows::Forms::NumericUpDown^  numSy;
+
+private: System::Windows::Forms::NumericUpDown^  numSx;
+
+
+private: System::Windows::Forms::NumericUpDown^  numCz;
+
+private: System::Windows::Forms::NumericUpDown^  numCy;
+
+private: System::Windows::Forms::NumericUpDown^  numCx;
+private: System::Windows::Forms::NumericUpDown^  numRRz;
+
+
+
+private: System::Windows::Forms::NumericUpDown^  numRRy;
+
+private: System::Windows::Forms::NumericUpDown^  numRRx;
+
+private: System::Windows::Forms::NumericUpDown^  numFRz;
+
+private: System::Windows::Forms::NumericUpDown^  numFRy;
+
+private: System::Windows::Forms::NumericUpDown^  numFRx;
+
+private: System::Windows::Forms::Label^  label14;
+private: System::Windows::Forms::Label^  label13;
+private: System::Windows::Forms::Label^  label12;
+private: System::Windows::Forms::Label^  label11;
+private: System::Windows::Forms::Label^  label9;
+private: System::Windows::Forms::Label^  label2;
+private: System::Windows::Forms::Label^  label22;
+private: System::Windows::Forms::Label^  label23;
+private: System::Windows::Forms::Label^  label24;
+private: System::Windows::Forms::Label^  label25;
+private: System::Windows::Forms::Label^  label26;
+private: System::Windows::Forms::Label^  label27;
+private: System::Windows::Forms::Label^  label19;
+private: System::Windows::Forms::Label^  label20;
+private: System::Windows::Forms::Label^  label21;
+private: System::Windows::Forms::Label^  label18;
+private: System::Windows::Forms::Label^  label17;
+private: System::Windows::Forms::Label^  label15;
+private: System::Windows::Forms::Label^  label28;
+private: System::Windows::Forms::Label^  label29;
+private: System::Windows::Forms::Label^  label30;
+private: System::Windows::Forms::Label^  label31;
+private: System::Windows::Forms::Label^  label32;
+private: System::Windows::Forms::Label^  label33;
+
+
+
+
+
 
 
 
@@ -287,6 +267,48 @@ private: System::ComponentModel::IContainer^  components;
 			this->comboBoxDevices = (gcnew System::Windows::Forms::ComboBox());
 			this->label1 = (gcnew System::Windows::Forms::Label());
 			this->tabPageEffects = (gcnew System::Windows::Forms::TabPage());
+			this->label28 = (gcnew System::Windows::Forms::Label());
+			this->label29 = (gcnew System::Windows::Forms::Label());
+			this->label30 = (gcnew System::Windows::Forms::Label());
+			this->label31 = (gcnew System::Windows::Forms::Label());
+			this->label32 = (gcnew System::Windows::Forms::Label());
+			this->label33 = (gcnew System::Windows::Forms::Label());
+			this->label22 = (gcnew System::Windows::Forms::Label());
+			this->label23 = (gcnew System::Windows::Forms::Label());
+			this->label24 = (gcnew System::Windows::Forms::Label());
+			this->label25 = (gcnew System::Windows::Forms::Label());
+			this->label26 = (gcnew System::Windows::Forms::Label());
+			this->label27 = (gcnew System::Windows::Forms::Label());
+			this->label19 = (gcnew System::Windows::Forms::Label());
+			this->label20 = (gcnew System::Windows::Forms::Label());
+			this->label21 = (gcnew System::Windows::Forms::Label());
+			this->label18 = (gcnew System::Windows::Forms::Label());
+			this->label17 = (gcnew System::Windows::Forms::Label());
+			this->label15 = (gcnew System::Windows::Forms::Label());
+			this->label14 = (gcnew System::Windows::Forms::Label());
+			this->label13 = (gcnew System::Windows::Forms::Label());
+			this->label12 = (gcnew System::Windows::Forms::Label());
+			this->label11 = (gcnew System::Windows::Forms::Label());
+			this->label9 = (gcnew System::Windows::Forms::Label());
+			this->label2 = (gcnew System::Windows::Forms::Label());
+			this->numSz = (gcnew System::Windows::Forms::NumericUpDown());
+			this->numSy = (gcnew System::Windows::Forms::NumericUpDown());
+			this->numSx = (gcnew System::Windows::Forms::NumericUpDown());
+			this->numCz = (gcnew System::Windows::Forms::NumericUpDown());
+			this->numCy = (gcnew System::Windows::Forms::NumericUpDown());
+			this->numCx = (gcnew System::Windows::Forms::NumericUpDown());
+			this->numRRz = (gcnew System::Windows::Forms::NumericUpDown());
+			this->numRRy = (gcnew System::Windows::Forms::NumericUpDown());
+			this->numRRx = (gcnew System::Windows::Forms::NumericUpDown());
+			this->numFRz = (gcnew System::Windows::Forms::NumericUpDown());
+			this->numFRy = (gcnew System::Windows::Forms::NumericUpDown());
+			this->numFRx = (gcnew System::Windows::Forms::NumericUpDown());
+			this->numRLz = (gcnew System::Windows::Forms::NumericUpDown());
+			this->numFLz = (gcnew System::Windows::Forms::NumericUpDown());
+			this->numRLy = (gcnew System::Windows::Forms::NumericUpDown());
+			this->numRLx = (gcnew System::Windows::Forms::NumericUpDown());
+			this->numFLy = (gcnew System::Windows::Forms::NumericUpDown());
+			this->numFLx = (gcnew System::Windows::Forms::NumericUpDown());
 			this->checkBoxSplit = (gcnew System::Windows::Forms::CheckBox());
 			this->label3 = (gcnew System::Windows::Forms::Label());
 			this->checkBoxEfxEnabled = (gcnew System::Windows::Forms::CheckBox());
@@ -308,27 +330,29 @@ private: System::ComponentModel::IContainer^  components;
 			this->buttonOk = (gcnew System::Windows::Forms::Button());
 			this->buttonCancel = (gcnew System::Windows::Forms::Button());
 			this->buttonApply = (gcnew System::Windows::Forms::Button());
-			this->numericUpDown1 = (gcnew System::Windows::Forms::NumericUpDown());
-			this->numericUpDown2 = (gcnew System::Windows::Forms::NumericUpDown());
-			this->numericUpDown3 = (gcnew System::Windows::Forms::NumericUpDown());
-			this->numericUpDown4 = (gcnew System::Windows::Forms::NumericUpDown());
-			this->numericUpDown5 = (gcnew System::Windows::Forms::NumericUpDown());
-			this->numericUpDown6 = (gcnew System::Windows::Forms::NumericUpDown());
-			this->numericUpDown7 = (gcnew System::Windows::Forms::NumericUpDown());
-			this->numericUpDown8 = (gcnew System::Windows::Forms::NumericUpDown());
 			this->tabConfiguration->SuspendLayout();
 			this->tabPageConfig->SuspendLayout();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->trackBufferLength))->BeginInit();
 			this->tabPageEffects->SuspendLayout();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numSz))->BeginInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numSy))->BeginInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numSx))->BeginInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numCz))->BeginInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numCy))->BeginInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numCx))->BeginInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numRRz))->BeginInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numRRy))->BeginInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numRRx))->BeginInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numFRz))->BeginInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numFRy))->BeginInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numFRx))->BeginInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numRLz))->BeginInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numFLz))->BeginInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numRLy))->BeginInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numRLx))->BeginInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numFLy))->BeginInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numFLx))->BeginInit();
 			this->tabPageStatistics->SuspendLayout();
-			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numericUpDown1))->BeginInit();
-			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numericUpDown2))->BeginInit();
-			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numericUpDown3))->BeginInit();
-			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numericUpDown4))->BeginInit();
-			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numericUpDown5))->BeginInit();
-			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numericUpDown6))->BeginInit();
-			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numericUpDown7))->BeginInit();
-			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numericUpDown8))->BeginInit();
 			this->SuspendLayout();
 			// 
 			// tabConfiguration
@@ -466,14 +490,48 @@ private: System::ComponentModel::IContainer^  components;
 			// 
 			// tabPageEffects
 			// 
-			this->tabPageEffects->Controls->Add(this->numericUpDown8);
-			this->tabPageEffects->Controls->Add(this->numericUpDown7);
-			this->tabPageEffects->Controls->Add(this->numericUpDown6);
-			this->tabPageEffects->Controls->Add(this->numericUpDown5);
-			this->tabPageEffects->Controls->Add(this->numericUpDown4);
-			this->tabPageEffects->Controls->Add(this->numericUpDown3);
-			this->tabPageEffects->Controls->Add(this->numericUpDown2);
-			this->tabPageEffects->Controls->Add(this->numericUpDown1);
+			this->tabPageEffects->Controls->Add(this->label28);
+			this->tabPageEffects->Controls->Add(this->label29);
+			this->tabPageEffects->Controls->Add(this->label30);
+			this->tabPageEffects->Controls->Add(this->label31);
+			this->tabPageEffects->Controls->Add(this->label32);
+			this->tabPageEffects->Controls->Add(this->label33);
+			this->tabPageEffects->Controls->Add(this->label22);
+			this->tabPageEffects->Controls->Add(this->label23);
+			this->tabPageEffects->Controls->Add(this->label24);
+			this->tabPageEffects->Controls->Add(this->label25);
+			this->tabPageEffects->Controls->Add(this->label26);
+			this->tabPageEffects->Controls->Add(this->label27);
+			this->tabPageEffects->Controls->Add(this->label19);
+			this->tabPageEffects->Controls->Add(this->label20);
+			this->tabPageEffects->Controls->Add(this->label21);
+			this->tabPageEffects->Controls->Add(this->label18);
+			this->tabPageEffects->Controls->Add(this->label17);
+			this->tabPageEffects->Controls->Add(this->label15);
+			this->tabPageEffects->Controls->Add(this->label14);
+			this->tabPageEffects->Controls->Add(this->label13);
+			this->tabPageEffects->Controls->Add(this->label12);
+			this->tabPageEffects->Controls->Add(this->label11);
+			this->tabPageEffects->Controls->Add(this->label9);
+			this->tabPageEffects->Controls->Add(this->label2);
+			this->tabPageEffects->Controls->Add(this->numSz);
+			this->tabPageEffects->Controls->Add(this->numSy);
+			this->tabPageEffects->Controls->Add(this->numSx);
+			this->tabPageEffects->Controls->Add(this->numCz);
+			this->tabPageEffects->Controls->Add(this->numCy);
+			this->tabPageEffects->Controls->Add(this->numCx);
+			this->tabPageEffects->Controls->Add(this->numRRz);
+			this->tabPageEffects->Controls->Add(this->numRRy);
+			this->tabPageEffects->Controls->Add(this->numRRx);
+			this->tabPageEffects->Controls->Add(this->numFRz);
+			this->tabPageEffects->Controls->Add(this->numFRy);
+			this->tabPageEffects->Controls->Add(this->numFRx);
+			this->tabPageEffects->Controls->Add(this->numRLz);
+			this->tabPageEffects->Controls->Add(this->numFLz);
+			this->tabPageEffects->Controls->Add(this->numRLy);
+			this->tabPageEffects->Controls->Add(this->numRLx);
+			this->tabPageEffects->Controls->Add(this->numFLy);
+			this->tabPageEffects->Controls->Add(this->numFLx);
 			this->tabPageEffects->Controls->Add(this->checkBoxSplit);
 			this->tabPageEffects->Controls->Add(this->label3);
 			this->tabPageEffects->Controls->Add(this->checkBoxEfxEnabled);
@@ -485,6 +543,420 @@ private: System::ComponentModel::IContainer^  components;
 			this->tabPageEffects->TabIndex = 2;
 			this->tabPageEffects->Text = L"3D/Effects";
 			this->tabPageEffects->UseVisualStyleBackColor = true;
+			// 
+			// label28
+			// 
+			this->label28->AutoSize = true;
+			this->label28->Location = System::Drawing::Point(306, 236);
+			this->label28->Name = L"label28";
+			this->label28->Size = System::Drawing::Size(12, 13);
+			this->label28->TabIndex = 47;
+			this->label28->Text = L"z";
+			// 
+			// label29
+			// 
+			this->label29->AutoSize = true;
+			this->label29->Location = System::Drawing::Point(306, 210);
+			this->label29->Name = L"label29";
+			this->label29->Size = System::Drawing::Size(12, 13);
+			this->label29->TabIndex = 46;
+			this->label29->Text = L"y";
+			// 
+			// label30
+			// 
+			this->label30->AutoSize = true;
+			this->label30->Location = System::Drawing::Point(306, 186);
+			this->label30->Name = L"label30";
+			this->label30->Size = System::Drawing::Size(12, 13);
+			this->label30->TabIndex = 45;
+			this->label30->Text = L"x";
+			// 
+			// label31
+			// 
+			this->label31->AutoSize = true;
+			this->label31->Location = System::Drawing::Point(306, 136);
+			this->label31->Name = L"label31";
+			this->label31->Size = System::Drawing::Size(12, 13);
+			this->label31->TabIndex = 44;
+			this->label31->Text = L"z";
+			// 
+			// label32
+			// 
+			this->label32->AutoSize = true;
+			this->label32->Location = System::Drawing::Point(306, 110);
+			this->label32->Name = L"label32";
+			this->label32->Size = System::Drawing::Size(12, 13);
+			this->label32->TabIndex = 43;
+			this->label32->Text = L"y";
+			// 
+			// label33
+			// 
+			this->label33->AutoSize = true;
+			this->label33->Location = System::Drawing::Point(306, 86);
+			this->label33->Name = L"label33";
+			this->label33->Size = System::Drawing::Size(12, 13);
+			this->label33->TabIndex = 42;
+			this->label33->Text = L"x";
+			// 
+			// label22
+			// 
+			this->label22->AutoSize = true;
+			this->label22->Location = System::Drawing::Point(9, 236);
+			this->label22->Name = L"label22";
+			this->label22->Size = System::Drawing::Size(12, 13);
+			this->label22->TabIndex = 41;
+			this->label22->Text = L"z";
+			// 
+			// label23
+			// 
+			this->label23->AutoSize = true;
+			this->label23->Location = System::Drawing::Point(9, 210);
+			this->label23->Name = L"label23";
+			this->label23->Size = System::Drawing::Size(12, 13);
+			this->label23->TabIndex = 40;
+			this->label23->Text = L"y";
+			// 
+			// label24
+			// 
+			this->label24->AutoSize = true;
+			this->label24->Location = System::Drawing::Point(9, 186);
+			this->label24->Name = L"label24";
+			this->label24->Size = System::Drawing::Size(12, 13);
+			this->label24->TabIndex = 39;
+			this->label24->Text = L"x";
+			// 
+			// label25
+			// 
+			this->label25->AutoSize = true;
+			this->label25->Location = System::Drawing::Point(9, 136);
+			this->label25->Name = L"label25";
+			this->label25->Size = System::Drawing::Size(12, 13);
+			this->label25->TabIndex = 38;
+			this->label25->Text = L"z";
+			// 
+			// label26
+			// 
+			this->label26->AutoSize = true;
+			this->label26->Location = System::Drawing::Point(9, 110);
+			this->label26->Name = L"label26";
+			this->label26->Size = System::Drawing::Size(12, 13);
+			this->label26->TabIndex = 37;
+			this->label26->Text = L"y";
+			// 
+			// label27
+			// 
+			this->label27->AutoSize = true;
+			this->label27->Location = System::Drawing::Point(9, 86);
+			this->label27->Name = L"label27";
+			this->label27->Size = System::Drawing::Size(12, 13);
+			this->label27->TabIndex = 36;
+			this->label27->Text = L"x";
+			// 
+			// label19
+			// 
+			this->label19->AutoSize = true;
+			this->label19->Location = System::Drawing::Point(153, 238);
+			this->label19->Name = L"label19";
+			this->label19->Size = System::Drawing::Size(12, 13);
+			this->label19->TabIndex = 35;
+			this->label19->Text = L"z";
+			// 
+			// label20
+			// 
+			this->label20->AutoSize = true;
+			this->label20->Location = System::Drawing::Point(153, 212);
+			this->label20->Name = L"label20";
+			this->label20->Size = System::Drawing::Size(12, 13);
+			this->label20->TabIndex = 34;
+			this->label20->Text = L"y";
+			// 
+			// label21
+			// 
+			this->label21->AutoSize = true;
+			this->label21->Location = System::Drawing::Point(153, 188);
+			this->label21->Name = L"label21";
+			this->label21->Size = System::Drawing::Size(12, 13);
+			this->label21->TabIndex = 33;
+			this->label21->Text = L"x";
+			// 
+			// label18
+			// 
+			this->label18->AutoSize = true;
+			this->label18->Location = System::Drawing::Point(153, 138);
+			this->label18->Name = L"label18";
+			this->label18->Size = System::Drawing::Size(12, 13);
+			this->label18->TabIndex = 32;
+			this->label18->Text = L"z";
+			// 
+			// label17
+			// 
+			this->label17->AutoSize = true;
+			this->label17->Location = System::Drawing::Point(153, 112);
+			this->label17->Name = L"label17";
+			this->label17->Size = System::Drawing::Size(12, 13);
+			this->label17->TabIndex = 31;
+			this->label17->Text = L"y";
+			// 
+			// label15
+			// 
+			this->label15->AutoSize = true;
+			this->label15->Location = System::Drawing::Point(153, 88);
+			this->label15->Name = L"label15";
+			this->label15->Size = System::Drawing::Size(12, 13);
+			this->label15->TabIndex = 30;
+			this->label15->Text = L"x";
+			// 
+			// label14
+			// 
+			this->label14->AutoSize = true;
+			this->label14->Location = System::Drawing::Point(321, 172);
+			this->label14->Name = L"label14";
+			this->label14->Size = System::Drawing::Size(58, 13);
+			this->label14->TabIndex = 29;
+			this->label14->Text = L"Rear Right";
+			// 
+			// label13
+			// 
+			this->label13->AutoSize = true;
+			this->label13->Location = System::Drawing::Point(27, 172);
+			this->label13->Name = L"label13";
+			this->label13->Size = System::Drawing::Size(51, 13);
+			this->label13->TabIndex = 28;
+			this->label13->Text = L"Rear Left";
+			// 
+			// label12
+			// 
+			this->label12->AutoSize = true;
+			this->label12->Location = System::Drawing::Point(168, 172);
+			this->label12->Name = L"label12";
+			this->label12->Size = System::Drawing::Size(61, 13);
+			this->label12->TabIndex = 27;
+			this->label12->Text = L"Sub woofer";
+			// 
+			// label11
+			// 
+			this->label11->AutoSize = true;
+			this->label11->Location = System::Drawing::Point(321, 70);
+			this->label11->Name = L"label11";
+			this->label11->Size = System::Drawing::Size(59, 13);
+			this->label11->TabIndex = 26;
+			this->label11->Text = L"Front Right";
+			// 
+			// label9
+			// 
+			this->label9->AutoSize = true;
+			this->label9->Location = System::Drawing::Point(168, 70);
+			this->label9->Name = L"label9";
+			this->label9->Size = System::Drawing::Size(38, 13);
+			this->label9->TabIndex = 25;
+			this->label9->Text = L"Centre";
+			// 
+			// label2
+			// 
+			this->label2->AutoSize = true;
+			this->label2->Location = System::Drawing::Point(27, 70);
+			this->label2->Name = L"label2";
+			this->label2->Size = System::Drawing::Size(52, 13);
+			this->label2->TabIndex = 24;
+			this->label2->Text = L"Front Left";
+			// 
+			// numSz
+			// 
+			this->numSz->Increment = System::Decimal(gcnew cli::array< System::Int32 >(4) {25, 0, 0, 65536});
+			this->numSz->Location = System::Drawing::Point(171, 240);
+			this->numSz->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {255, 0, 0, 0});
+			this->numSz->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) {255, 0, 0, System::Int32::MinValue});
+			this->numSz->Name = L"numSz";
+			this->numSz->Size = System::Drawing::Size(67, 20);
+			this->numSz->TabIndex = 23;
+			this->numSz->ValueChanged += gcnew System::EventHandler(this, &Config::numSz_ValueChanged);
+			// 
+			// numSy
+			// 
+			this->numSy->Increment = System::Decimal(gcnew cli::array< System::Int32 >(4) {25, 0, 0, 65536});
+			this->numSy->Location = System::Drawing::Point(171, 214);
+			this->numSy->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {255, 0, 0, 0});
+			this->numSy->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) {255, 0, 0, System::Int32::MinValue});
+			this->numSy->Name = L"numSy";
+			this->numSy->Size = System::Drawing::Size(67, 20);
+			this->numSy->TabIndex = 22;
+			this->numSy->ValueChanged += gcnew System::EventHandler(this, &Config::numSy_ValueChanged);
+			// 
+			// numSx
+			// 
+			this->numSx->Increment = System::Decimal(gcnew cli::array< System::Int32 >(4) {25, 0, 0, 65536});
+			this->numSx->Location = System::Drawing::Point(171, 188);
+			this->numSx->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {255, 0, 0, 0});
+			this->numSx->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) {255, 0, 0, System::Int32::MinValue});
+			this->numSx->Name = L"numSx";
+			this->numSx->Size = System::Drawing::Size(67, 20);
+			this->numSx->TabIndex = 21;
+			this->numSx->ValueChanged += gcnew System::EventHandler(this, &Config::numSx_ValueChanged);
+			// 
+			// numCz
+			// 
+			this->numCz->Increment = System::Decimal(gcnew cli::array< System::Int32 >(4) {25, 0, 0, 65536});
+			this->numCz->Location = System::Drawing::Point(171, 138);
+			this->numCz->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {255, 0, 0, 0});
+			this->numCz->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) {255, 0, 0, System::Int32::MinValue});
+			this->numCz->Name = L"numCz";
+			this->numCz->Size = System::Drawing::Size(67, 20);
+			this->numCz->TabIndex = 20;
+			this->numCz->ValueChanged += gcnew System::EventHandler(this, &Config::numCz_ValueChanged);
+			// 
+			// numCy
+			// 
+			this->numCy->Increment = System::Decimal(gcnew cli::array< System::Int32 >(4) {25, 0, 0, 65536});
+			this->numCy->Location = System::Drawing::Point(171, 112);
+			this->numCy->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {255, 0, 0, 0});
+			this->numCy->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) {255, 0, 0, System::Int32::MinValue});
+			this->numCy->Name = L"numCy";
+			this->numCy->Size = System::Drawing::Size(67, 20);
+			this->numCy->TabIndex = 19;
+			this->numCy->ValueChanged += gcnew System::EventHandler(this, &Config::numCy_ValueChanged);
+			// 
+			// numCx
+			// 
+			this->numCx->Increment = System::Decimal(gcnew cli::array< System::Int32 >(4) {25, 0, 0, 65536});
+			this->numCx->Location = System::Drawing::Point(171, 86);
+			this->numCx->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {255, 0, 0, 0});
+			this->numCx->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) {255, 0, 0, System::Int32::MinValue});
+			this->numCx->Name = L"numCx";
+			this->numCx->Size = System::Drawing::Size(67, 20);
+			this->numCx->TabIndex = 18;
+			this->numCx->ValueChanged += gcnew System::EventHandler(this, &Config::numCx_ValueChanged);
+			// 
+			// numRRz
+			// 
+			this->numRRz->Increment = System::Decimal(gcnew cli::array< System::Int32 >(4) {25, 0, 0, 65536});
+			this->numRRz->Location = System::Drawing::Point(324, 240);
+			this->numRRz->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {255, 0, 0, 0});
+			this->numRRz->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) {255, 0, 0, System::Int32::MinValue});
+			this->numRRz->Name = L"numRRz";
+			this->numRRz->Size = System::Drawing::Size(67, 20);
+			this->numRRz->TabIndex = 17;
+			this->numRRz->ValueChanged += gcnew System::EventHandler(this, &Config::numRRz_ValueChanged);
+			// 
+			// numRRy
+			// 
+			this->numRRy->Increment = System::Decimal(gcnew cli::array< System::Int32 >(4) {25, 0, 0, 65536});
+			this->numRRy->Location = System::Drawing::Point(324, 214);
+			this->numRRy->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {255, 0, 0, 0});
+			this->numRRy->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) {255, 0, 0, System::Int32::MinValue});
+			this->numRRy->Name = L"numRRy";
+			this->numRRy->Size = System::Drawing::Size(67, 20);
+			this->numRRy->TabIndex = 16;
+			this->numRRy->ValueChanged += gcnew System::EventHandler(this, &Config::numRRy_ValueChanged);
+			// 
+			// numRRx
+			// 
+			this->numRRx->Increment = System::Decimal(gcnew cli::array< System::Int32 >(4) {25, 0, 0, 65536});
+			this->numRRx->Location = System::Drawing::Point(324, 188);
+			this->numRRx->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {255, 0, 0, 0});
+			this->numRRx->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) {255, 0, 0, System::Int32::MinValue});
+			this->numRRx->Name = L"numRRx";
+			this->numRRx->Size = System::Drawing::Size(67, 20);
+			this->numRRx->TabIndex = 15;
+			this->numRRx->ValueChanged += gcnew System::EventHandler(this, &Config::numRRx_ValueChanged);
+			// 
+			// numFRz
+			// 
+			this->numFRz->Increment = System::Decimal(gcnew cli::array< System::Int32 >(4) {25, 0, 0, 65536});
+			this->numFRz->Location = System::Drawing::Point(324, 138);
+			this->numFRz->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {255, 0, 0, 0});
+			this->numFRz->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) {255, 0, 0, System::Int32::MinValue});
+			this->numFRz->Name = L"numFRz";
+			this->numFRz->Size = System::Drawing::Size(67, 20);
+			this->numFRz->TabIndex = 14;
+			this->numFRz->ValueChanged += gcnew System::EventHandler(this, &Config::numFRz_ValueChanged);
+			// 
+			// numFRy
+			// 
+			this->numFRy->Increment = System::Decimal(gcnew cli::array< System::Int32 >(4) {25, 0, 0, 65536});
+			this->numFRy->Location = System::Drawing::Point(324, 112);
+			this->numFRy->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {255, 0, 0, 0});
+			this->numFRy->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) {255, 0, 0, System::Int32::MinValue});
+			this->numFRy->Name = L"numFRy";
+			this->numFRy->Size = System::Drawing::Size(67, 20);
+			this->numFRy->TabIndex = 13;
+			this->numFRy->ValueChanged += gcnew System::EventHandler(this, &Config::numFRy_ValueChanged);
+			// 
+			// numFRx
+			// 
+			this->numFRx->Increment = System::Decimal(gcnew cli::array< System::Int32 >(4) {25, 0, 0, 65536});
+			this->numFRx->Location = System::Drawing::Point(324, 86);
+			this->numFRx->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {255, 0, 0, 0});
+			this->numFRx->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) {255, 0, 0, System::Int32::MinValue});
+			this->numFRx->Name = L"numFRx";
+			this->numFRx->Size = System::Drawing::Size(67, 20);
+			this->numFRx->TabIndex = 12;
+			this->numFRx->ValueChanged += gcnew System::EventHandler(this, &Config::numFRx_ValueChanged);
+			// 
+			// numRLz
+			// 
+			this->numRLz->Increment = System::Decimal(gcnew cli::array< System::Int32 >(4) {25, 0, 0, 65536});
+			this->numRLz->Location = System::Drawing::Point(27, 240);
+			this->numRLz->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {255, 0, 0, 0});
+			this->numRLz->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) {255, 0, 0, System::Int32::MinValue});
+			this->numRLz->Name = L"numRLz";
+			this->numRLz->Size = System::Drawing::Size(67, 20);
+			this->numRLz->TabIndex = 11;
+			this->numRLz->ValueChanged += gcnew System::EventHandler(this, &Config::numRLz_ValueChanged);
+			// 
+			// numFLz
+			// 
+			this->numFLz->Increment = System::Decimal(gcnew cli::array< System::Int32 >(4) {25, 0, 0, 65536});
+			this->numFLz->Location = System::Drawing::Point(27, 138);
+			this->numFLz->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {255, 0, 0, 0});
+			this->numFLz->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) {255, 0, 0, System::Int32::MinValue});
+			this->numFLz->Name = L"numFLz";
+			this->numFLz->Size = System::Drawing::Size(67, 20);
+			this->numFLz->TabIndex = 10;
+			this->numFLz->ValueChanged += gcnew System::EventHandler(this, &Config::numFLz_ValueChanged);
+			// 
+			// numRLy
+			// 
+			this->numRLy->Increment = System::Decimal(gcnew cli::array< System::Int32 >(4) {25, 0, 0, 65536});
+			this->numRLy->Location = System::Drawing::Point(27, 214);
+			this->numRLy->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {255, 0, 0, 0});
+			this->numRLy->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) {255, 0, 0, System::Int32::MinValue});
+			this->numRLy->Name = L"numRLy";
+			this->numRLy->Size = System::Drawing::Size(67, 20);
+			this->numRLy->TabIndex = 9;
+			this->numRLy->ValueChanged += gcnew System::EventHandler(this, &Config::numRLy_ValueChanged);
+			// 
+			// numRLx
+			// 
+			this->numRLx->Increment = System::Decimal(gcnew cli::array< System::Int32 >(4) {25, 0, 0, 65536});
+			this->numRLx->Location = System::Drawing::Point(27, 188);
+			this->numRLx->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {255, 0, 0, 0});
+			this->numRLx->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) {255, 0, 0, System::Int32::MinValue});
+			this->numRLx->Name = L"numRLx";
+			this->numRLx->Size = System::Drawing::Size(67, 20);
+			this->numRLx->TabIndex = 8;
+			this->numRLx->ValueChanged += gcnew System::EventHandler(this, &Config::numRLx_ValueChanged);
+			// 
+			// numFLy
+			// 
+			this->numFLy->Increment = System::Decimal(gcnew cli::array< System::Int32 >(4) {25, 0, 0, 65536});
+			this->numFLy->Location = System::Drawing::Point(27, 112);
+			this->numFLy->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {255, 0, 0, 0});
+			this->numFLy->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) {255, 0, 0, System::Int32::MinValue});
+			this->numFLy->Name = L"numFLy";
+			this->numFLy->Size = System::Drawing::Size(67, 20);
+			this->numFLy->TabIndex = 5;
+			this->numFLy->ValueChanged += gcnew System::EventHandler(this, &Config::numFLy_ValueChanged);
+			// 
+			// numFLx
+			// 
+			this->numFLx->Increment = System::Decimal(gcnew cli::array< System::Int32 >(4) {25, 0, 0, 65536});
+			this->numFLx->Location = System::Drawing::Point(27, 86);
+			this->numFLx->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {255, 0, 0, 0});
+			this->numFLx->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) {255, 0, 0, System::Int32::MinValue});
+			this->numFLx->Name = L"numFLx";
+			this->numFLx->Size = System::Drawing::Size(67, 20);
+			this->numFLx->TabIndex = 4;
+			this->numFLx->ValueChanged += gcnew System::EventHandler(this, &Config::numFLx_ValueChanged);
 			// 
 			// checkBoxSplit
 			// 
@@ -695,62 +1167,6 @@ private: System::ComponentModel::IContainer^  components;
 			this->buttonApply->UseVisualStyleBackColor = true;
 			this->buttonApply->Click += gcnew System::EventHandler(this, &Config::buttonApply_Click_1);
 			// 
-			// numericUpDown1
-			// 
-			this->numericUpDown1->Location = System::Drawing::Point(6, 63);
-			this->numericUpDown1->Name = L"numericUpDown1";
-			this->numericUpDown1->Size = System::Drawing::Size(64, 20);
-			this->numericUpDown1->TabIndex = 4;
-			// 
-			// numericUpDown2
-			// 
-			this->numericUpDown2->Location = System::Drawing::Point(79, 63);
-			this->numericUpDown2->Name = L"numericUpDown2";
-			this->numericUpDown2->Size = System::Drawing::Size(67, 20);
-			this->numericUpDown2->TabIndex = 5;
-			// 
-			// numericUpDown3
-			// 
-			this->numericUpDown3->Location = System::Drawing::Point(255, 63);
-			this->numericUpDown3->Name = L"numericUpDown3";
-			this->numericUpDown3->Size = System::Drawing::Size(64, 20);
-			this->numericUpDown3->TabIndex = 6;
-			// 
-			// numericUpDown4
-			// 
-			this->numericUpDown4->Location = System::Drawing::Point(328, 63);
-			this->numericUpDown4->Name = L"numericUpDown4";
-			this->numericUpDown4->Size = System::Drawing::Size(67, 20);
-			this->numericUpDown4->TabIndex = 7;
-			// 
-			// numericUpDown5
-			// 
-			this->numericUpDown5->Location = System::Drawing::Point(6, 219);
-			this->numericUpDown5->Name = L"numericUpDown5";
-			this->numericUpDown5->Size = System::Drawing::Size(64, 20);
-			this->numericUpDown5->TabIndex = 8;
-			// 
-			// numericUpDown6
-			// 
-			this->numericUpDown6->Location = System::Drawing::Point(79, 219);
-			this->numericUpDown6->Name = L"numericUpDown6";
-			this->numericUpDown6->Size = System::Drawing::Size(67, 20);
-			this->numericUpDown6->TabIndex = 9;
-			// 
-			// numericUpDown7
-			// 
-			this->numericUpDown7->Location = System::Drawing::Point(255, 219);
-			this->numericUpDown7->Name = L"numericUpDown7";
-			this->numericUpDown7->Size = System::Drawing::Size(64, 20);
-			this->numericUpDown7->TabIndex = 10;
-			// 
-			// numericUpDown8
-			// 
-			this->numericUpDown8->Location = System::Drawing::Point(328, 219);
-			this->numericUpDown8->Name = L"numericUpDown8";
-			this->numericUpDown8->Size = System::Drawing::Size(67, 20);
-			this->numericUpDown8->TabIndex = 11;
-			// 
 			// Config
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
@@ -776,16 +1192,26 @@ private: System::ComponentModel::IContainer^  components;
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->trackBufferLength))->EndInit();
 			this->tabPageEffects->ResumeLayout(false);
 			this->tabPageEffects->PerformLayout();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numSz))->EndInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numSy))->EndInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numSx))->EndInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numCz))->EndInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numCy))->EndInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numCx))->EndInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numRRz))->EndInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numRRy))->EndInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numRRx))->EndInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numFRz))->EndInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numFRy))->EndInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numFRx))->EndInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numRLz))->EndInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numFLz))->EndInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numRLy))->EndInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numRLx))->EndInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numFLy))->EndInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numFLx))->EndInit();
 			this->tabPageStatistics->ResumeLayout(false);
 			this->tabPageStatistics->PerformLayout();
-			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numericUpDown1))->EndInit();
-			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numericUpDown2))->EndInit();
-			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numericUpDown3))->EndInit();
-			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numericUpDown4))->EndInit();
-			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numericUpDown5))->EndInit();
-			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numericUpDown6))->EndInit();
-			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numericUpDown7))->EndInit();
-			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numericUpDown8))->EndInit();
 			this->ResumeLayout(false);
 
 		}
@@ -800,56 +1226,7 @@ private: System::Void trackBufferLength_Scroll(System::Object^  sender, System::
 			 labelBufferLength->Text = "Buffer Length (" + trackBufferLength->Value + "ms)";
 		 }
 private: System::Void buttonApply_Click_1(System::Object^  sender, System::EventArgs^  e) {
-			 Int32 newDevice = comboBoxDevices->SelectedIndex;
-			if(newDevice != currentDevice && newDevice != -1) {
-				// if we've changed device switch device and save
-				ConfigFile::WriteInteger(CONF_DEVICE, newDevice);
-				currentDevice = newDevice;
-				ptrOw->SwitchOutputDevice(currentDevice);
-			}
-			if(ptrOw->GetConfBufferLength() != trackBufferLength->Value) {
-				// if we've changed the buffer length stop playback and change it
-				ptrOw->SetConfBufferLength(trackBufferLength->Value);
-				ConfigFile::WriteInteger(CONF_BUFFER_LENGTH, trackBufferLength->Value);
-				ptrOw->SwitchOutputDevice(currentDevice);
-			}
-			
-			// store settings regarding effects
-			if(ptrOw->IsMonoExpanded() != checkBoxExpandMono->Checked
-				|| ptrOw->IsStereoExpanded() != checkBoxExpandStereo->Checked) {
-					
-					ptrOw->SetStereoExpanded(checkBoxExpandStereo->Checked);
-					ptrOw->SetMonoExpanded(checkBoxExpandMono->Checked);
-					ptrOw->SwitchOutputDevice(currentDevice);
-			}
-
-			if(ptrOw->IsXRAMEnabled() != checkBoxXRAM->Checked)
-			{
-				ptrOw->SetXRAMEnabled(checkBoxXRAM->Checked);
-			}
-
-			if(ptrOw->get_effects()->get_current_effect() != comboBoxEffect->SelectedIndex)
-			{
-				ptrOw->get_effects()->set_current_effect((effects_list)comboBoxEffect->SelectedIndex);
-				ConfigFile::WriteInteger(CONF_EFX_ENV, comboBoxEffect->SelectedIndex);
-			}
-
-			if(ptrOw->get_effects()->is_enabled() != checkBoxEfxEnabled->Checked)
-			{
-				ptrOw->get_effects()->set_enabled(checkBoxEfxEnabled->Checked);
-				ConfigFile::WriteBoolean(CONF_EFX_ENABLED, checkBoxEfxEnabled->Checked);
-			}
-
-			if ( ptrOw->IsSplit() != checkBoxSplit->Checked )
-			{
-				ptrOw->SetSplit( checkBoxSplit->Checked );
-			}
-
-			ConfigFile::WriteBoolean(CONF_MONO_EXPAND, checkBoxExpandMono->Checked);
-			ConfigFile::WriteBoolean(CONF_STEREO_EXPAND, checkBoxExpandStereo->Checked);
-			ConfigFile::WriteBoolean(CONF_XRAM_ENABLED, checkBoxXRAM->Checked);
-			
-			ShowDeviceDetails();
+			 ApplyChanges();
 		 }
 private: System::Void buttonOk_Click_1(System::Object^  sender, System::EventArgs^  e) {
 			 // call the apply button	
@@ -876,6 +1253,60 @@ private: System::Void buttonReset_Click_1(System::Object^  sender, System::Event
 private: System::Void Config_Unload(System::Object^  sender, System::EventArgs^  e) {
 			 overRide = true;
 			 loaded = false;
+		 }
+private: System::Void numFLx_ValueChanged(System::Object^  sender, System::EventArgs^  e) {
+			 UpdateMatrix(0,0,numFLx->Value);
+		 }
+private: System::Void numFLy_ValueChanged(System::Object^  sender, System::EventArgs^  e) {
+			 UpdateMatrix(0,1,numFLy->Value);
+		 }
+private: System::Void numFLz_ValueChanged(System::Object^  sender, System::EventArgs^  e) {
+			 UpdateMatrix(0,2,numFLz->Value);
+		 }
+private: System::Void numFRx_ValueChanged(System::Object^  sender, System::EventArgs^  e) {
+			 UpdateMatrix(1,0,numFRx->Value);
+		 }
+private: System::Void numFRy_ValueChanged(System::Object^  sender, System::EventArgs^  e) {
+			 UpdateMatrix(1,1,numFRy->Value);
+		 }
+private: System::Void numFRz_ValueChanged(System::Object^  sender, System::EventArgs^  e) {
+			 UpdateMatrix(1,2,numFRz->Value);
+		 }
+private: System::Void numRLx_ValueChanged(System::Object^  sender, System::EventArgs^  e) {
+			 UpdateMatrix(2,0,numRLx->Value);
+		 }
+private: System::Void numRLy_ValueChanged(System::Object^  sender, System::EventArgs^  e) {
+			 UpdateMatrix(2,1,numRLy->Value);
+		 }
+private: System::Void numRLz_ValueChanged(System::Object^  sender, System::EventArgs^  e) {
+			 UpdateMatrix(2,2,numRLz->Value);
+		 }
+private: System::Void numRRx_ValueChanged(System::Object^  sender, System::EventArgs^  e) {
+			 UpdateMatrix(3,0,numRRx->Value);
+		 }
+private: System::Void numRRy_ValueChanged(System::Object^  sender, System::EventArgs^  e) {
+			 UpdateMatrix(3,1,numRRy->Value);
+		 }
+private: System::Void numRRz_ValueChanged(System::Object^  sender, System::EventArgs^  e) {
+			 UpdateMatrix(3,2,numRRz->Value);
+		 }
+private: System::Void numCx_ValueChanged(System::Object^  sender, System::EventArgs^  e) {
+			 UpdateMatrix(4,0,numCx->Value);
+		 }
+private: System::Void numCy_ValueChanged(System::Object^  sender, System::EventArgs^  e) {
+			 UpdateMatrix(4,1,numCy->Value);
+		 }
+private: System::Void numCz_ValueChanged(System::Object^  sender, System::EventArgs^  e) {
+			 UpdateMatrix(4,2,numCz->Value);
+		 }
+private: System::Void numSx_ValueChanged(System::Object^  sender, System::EventArgs^  e) {
+			 UpdateMatrix(5,0,numSx->Value);
+		 }
+private: System::Void numSy_ValueChanged(System::Object^  sender, System::EventArgs^  e) {
+			 UpdateMatrix(5,1,numSy->Value);
+		 }
+private: System::Void numSz_ValueChanged(System::Object^  sender, System::EventArgs^  e) {
+			 UpdateMatrix(5,2,numSz->Value);
 		 }
 };
 }

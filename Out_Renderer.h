@@ -72,6 +72,8 @@ namespace WinampOpenALOut
 			return deltaBytes;
 		}
 
+		void SetMatrix ( speaker_T speaker );
+
 	protected:
 
 		inline void onError();
