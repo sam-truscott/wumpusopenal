@@ -14,7 +14,6 @@ namespace WinampOpenALOut {
 			played_ms			= ptrOw->GetLastOutputTime();
 			written_bytes		= ptrOw->GetWrittenBytes();
 			played_bytes		= ptrOw->GetPlayedBytes();
-			/* TODO buffer_percent_full = ptrOw->GetPcBufferFull(); */
 
 			if ( buffer_percent_full > 100 )
 			{
@@ -46,7 +45,6 @@ namespace WinampOpenALOut {
 			labelWrittenB->Text = gcnew System::String("" + written_bytes);
 			labelPlayedB->Text = gcnew System::String("" + played_bytes);
 			labelLatency->Text = gcnew System::String("" + (written_ms - played_ms) );
-			progressBar1->Value = buffer_percent_full;
 		}catch(...) {
 			overRide = true;
 		}

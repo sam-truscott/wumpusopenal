@@ -53,6 +53,9 @@ namespace WinampOpenALOut
 		inline bool IsXRAMEnabled() { return xram_enabled; }
 		inline void SetXRAMEnabled( bool enabled );
 
+		inline bool IsSplit() { return split_out; }
+		inline void SetSplit ( bool split );
+
 		inline bool	IsXRAMPresent() { return xram_detected; }
 
 		inline __int64 GetWrittenBytes() { return total_written; }

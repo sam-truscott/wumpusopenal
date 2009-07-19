@@ -260,6 +260,8 @@ namespace WinampOpenALOut {
 			volume = 1.0f;
 		}
 
+		split_out = ConfigFile::ReadBoolean(CONF_SPLIT);
+
 		bool efx_enabled = ConfigFile::ReadBoolean(CONF_EFX_ENABLED);
 		effects_list efx_env = EFX_REVERB_PRESET_GENERIC;
 			
@@ -452,7 +454,7 @@ namespace WinampOpenALOut {
 			{
 				renderers[i] = new Output_Renderer(c_bufferLength, i);
 				renderers[i]->SetXRAMEnabled(true);
-				renderers[i]->Open(samplerate,numchannels,bitspersamp,0,0);
+				renderers[i]->Open(samplerate,1,bitspersamp,0,0);
 				no_renderers++;
 			}
 		}
@@ -757,10 +759,51 @@ namespace WinampOpenALOut {
 
 			total_written += len;
 
-			for ( char i=0; i < no_renderers ; i++ )
+			if ( split_out)
 			{
-				// TODO
-				renderers[i]->Write(buf,len);
+				char* buffers[MAX_RENDERERS];
+				memset(buffers,0, sizeof(char*) * MAX_RENDERERS);
+
+				for ( int i=0; i < no_renderers ; i++ )
+				{
+					const unsigned int csize = len / no_renderers;
+					buffers[i] = new char[csize];
+					memset(buffers[i],0,csize);
+				
+					if ( bitsPerSample == 8 )
+					{
+						/* TODO */
+					}
+					else
+					{
+						/* create buffers for src/dst*/
+						short *dst = (short*)buffers[i], *src = (short*)buf;
+						/* offset the channel number */
+						src+=i;
+
+						/* work out top range */
+						const short* to = dst + (csize / 2);
+
+						/* copy over */
+						while(dst < to)
+						{
+							*dst = *src;
+							dst++;
+							src += no_renderers;
+						}
+					}
+
+					renderers[i]->Write(buffers[i],csize);
+				}
+				
+				delete buf;
+			}
+			else
+			{
+				for ( char i=0; i < no_renderers ; i++ )
+				{				
+					renderers[i]->Write(buf,len);
+				}
 			}
 			
 
@@ -1040,6 +1083,12 @@ namespace WinampOpenALOut {
 	{ 
 		stereoExpand = expanded;
 		ConfigFile::WriteBoolean(CONF_STEREO_EXPAND,stereoExpand);
+	}
+
+	void Output_Wumpus::SetSplit ( bool split )
+	{
+		split_out = split;
+		ConfigFile::WriteBoolean(CONF_SPLIT,split_out);
 	}
 
 	void Output_Wumpus::SetXRAMEnabled( bool enabled )

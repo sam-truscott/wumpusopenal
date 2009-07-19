@@ -12,6 +12,7 @@ namespace WinampOpenALOut {
 #define CONF_EFX_ENABLED "EffectsEnabled"
 #define CONF_EFX_ENV "EffectEnvironment"
 #define CONF_PITCH "OpenALPitch"
+#define CONF_SPLIT "Enable3D"
 
 	public class ConfigFile {
 

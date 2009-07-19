@@ -91,6 +91,8 @@ namespace WinampOpenALOut {
 
 			this->checkBoxEfxEnabled->Checked = ConfigFile::ReadBoolean(CONF_EFX_ENABLED);
 
+			this->checkBoxSplit->Checked = ptrOw->IsSplit();
+
 			ShowDeviceDetails();
 		}
 
@@ -152,13 +154,13 @@ private: System::Windows::Forms::TabPage^  tabPageConfig;
 private: System::Windows::Forms::CheckBox^  checkBoxExpandStereo;
 private: System::Windows::Forms::CheckBox^  checkBoxExpandMono;
 private: System::Windows::Forms::Label^  label4;
-private: System::Windows::Forms::Button^  buttonReset;
+
 private: System::Windows::Forms::Label^  labelBufferLength;
 private: System::Windows::Forms::TrackBar^  trackBufferLength;
 
-private: System::Windows::Forms::Button^  buttonOk;
-private: System::Windows::Forms::Button^  buttonCancel;
-private: System::Windows::Forms::Button^  buttonApply;
+
+
+
 private: System::Windows::Forms::ListBox^  listBoxExtensions;
 private: System::Windows::Forms::Label^  label16;
 private: System::Windows::Forms::ComboBox^  comboBoxDevices;
@@ -170,8 +172,8 @@ private: System::Windows::Forms::TabPage^  tabPageStatistics;
 private: System::Windows::Forms::Label^  label7;
 private: System::Windows::Forms::Label^  label6;
 private: System::Windows::Forms::Label^  label5;
-private: System::Windows::Forms::ProgressBar^  progressBar1;
-private: System::Windows::Forms::Label^  label2;
+
+
 private: System::Windows::Forms::Label^  labelLatency;
 private: System::Windows::Forms::Label^  labelPlayedMs;
 private: System::Windows::Forms::Label^  labelWrittenMs;
@@ -183,6 +185,20 @@ private: System::Windows::Forms::TabPage^  tabPageEffects;
 private: System::Windows::Forms::CheckBox^  checkBoxEfxEnabled;
 private: System::Windows::Forms::ComboBox^  comboBoxEffect;
 private: System::Windows::Forms::Label^  label3;
+private: System::Windows::Forms::CheckBox^  checkBoxSplit;
+private: System::Windows::Forms::Button^  buttonReset;
+private: System::Windows::Forms::Button^  buttonOk;
+private: System::Windows::Forms::Button^  buttonCancel;
+private: System::Windows::Forms::Button^  buttonApply;
+private: System::Windows::Forms::NumericUpDown^  numericUpDown3;
+private: System::Windows::Forms::NumericUpDown^  numericUpDown2;
+private: System::Windows::Forms::NumericUpDown^  numericUpDown1;
+private: System::Windows::Forms::NumericUpDown^  numericUpDown8;
+private: System::Windows::Forms::NumericUpDown^  numericUpDown7;
+private: System::Windows::Forms::NumericUpDown^  numericUpDown6;
+private: System::Windows::Forms::NumericUpDown^  numericUpDown5;
+private: System::Windows::Forms::NumericUpDown^  numericUpDown4;
+
 
 
 
@@ -264,17 +280,14 @@ private: System::ComponentModel::IContainer^  components;
 			this->checkBoxExpandStereo = (gcnew System::Windows::Forms::CheckBox());
 			this->checkBoxExpandMono = (gcnew System::Windows::Forms::CheckBox());
 			this->label4 = (gcnew System::Windows::Forms::Label());
-			this->buttonReset = (gcnew System::Windows::Forms::Button());
 			this->labelBufferLength = (gcnew System::Windows::Forms::Label());
 			this->trackBufferLength = (gcnew System::Windows::Forms::TrackBar());
-			this->buttonOk = (gcnew System::Windows::Forms::Button());
-			this->buttonCancel = (gcnew System::Windows::Forms::Button());
-			this->buttonApply = (gcnew System::Windows::Forms::Button());
 			this->listBoxExtensions = (gcnew System::Windows::Forms::ListBox());
 			this->label16 = (gcnew System::Windows::Forms::Label());
 			this->comboBoxDevices = (gcnew System::Windows::Forms::ComboBox());
 			this->label1 = (gcnew System::Windows::Forms::Label());
 			this->tabPageEffects = (gcnew System::Windows::Forms::TabPage());
+			this->checkBoxSplit = (gcnew System::Windows::Forms::CheckBox());
 			this->label3 = (gcnew System::Windows::Forms::Label());
 			this->checkBoxEfxEnabled = (gcnew System::Windows::Forms::CheckBox());
 			this->comboBoxEffect = (gcnew System::Windows::Forms::ComboBox());
@@ -289,26 +302,44 @@ private: System::ComponentModel::IContainer^  components;
 			this->label7 = (gcnew System::Windows::Forms::Label());
 			this->label6 = (gcnew System::Windows::Forms::Label());
 			this->label5 = (gcnew System::Windows::Forms::Label());
-			this->progressBar1 = (gcnew System::Windows::Forms::ProgressBar());
-			this->label2 = (gcnew System::Windows::Forms::Label());
 			this->toolTipWarning = (gcnew System::Windows::Forms::ToolTip(this->components));
 			this->toolTipInfo = (gcnew System::Windows::Forms::ToolTip(this->components));
+			this->buttonReset = (gcnew System::Windows::Forms::Button());
+			this->buttonOk = (gcnew System::Windows::Forms::Button());
+			this->buttonCancel = (gcnew System::Windows::Forms::Button());
+			this->buttonApply = (gcnew System::Windows::Forms::Button());
+			this->numericUpDown1 = (gcnew System::Windows::Forms::NumericUpDown());
+			this->numericUpDown2 = (gcnew System::Windows::Forms::NumericUpDown());
+			this->numericUpDown3 = (gcnew System::Windows::Forms::NumericUpDown());
+			this->numericUpDown4 = (gcnew System::Windows::Forms::NumericUpDown());
+			this->numericUpDown5 = (gcnew System::Windows::Forms::NumericUpDown());
+			this->numericUpDown6 = (gcnew System::Windows::Forms::NumericUpDown());
+			this->numericUpDown7 = (gcnew System::Windows::Forms::NumericUpDown());
+			this->numericUpDown8 = (gcnew System::Windows::Forms::NumericUpDown());
 			this->tabConfiguration->SuspendLayout();
 			this->tabPageConfig->SuspendLayout();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->trackBufferLength))->BeginInit();
 			this->tabPageEffects->SuspendLayout();
 			this->tabPageStatistics->SuspendLayout();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numericUpDown1))->BeginInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numericUpDown2))->BeginInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numericUpDown3))->BeginInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numericUpDown4))->BeginInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numericUpDown5))->BeginInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numericUpDown6))->BeginInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numericUpDown7))->BeginInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numericUpDown8))->BeginInit();
 			this->SuspendLayout();
 			// 
 			// tabConfiguration
 			// 
 			this->tabConfiguration->Controls->Add(this->tabPageConfig);
-			/* this->tabConfiguration->Controls->Add(this->tabPageEffects); */
+			this->tabConfiguration->Controls->Add(this->tabPageEffects);
 			this->tabConfiguration->Controls->Add(this->tabPageStatistics);
 			this->tabConfiguration->Location = System::Drawing::Point(12, 12);
 			this->tabConfiguration->Name = L"tabConfiguration";
 			this->tabConfiguration->SelectedIndex = 0;
-			this->tabConfiguration->Size = System::Drawing::Size(409, 390);
+			this->tabConfiguration->Size = System::Drawing::Size(409, 361);
 			this->tabConfiguration->TabIndex = 0;
 			// 
 			// tabPageConfig
@@ -317,12 +348,8 @@ private: System::ComponentModel::IContainer^  components;
 			this->tabPageConfig->Controls->Add(this->checkBoxExpandStereo);
 			this->tabPageConfig->Controls->Add(this->checkBoxExpandMono);
 			this->tabPageConfig->Controls->Add(this->label4);
-			this->tabPageConfig->Controls->Add(this->buttonReset);
 			this->tabPageConfig->Controls->Add(this->labelBufferLength);
 			this->tabPageConfig->Controls->Add(this->trackBufferLength);
-			this->tabPageConfig->Controls->Add(this->buttonOk);
-			this->tabPageConfig->Controls->Add(this->buttonCancel);
-			this->tabPageConfig->Controls->Add(this->buttonApply);
 			this->tabPageConfig->Controls->Add(this->listBoxExtensions);
 			this->tabPageConfig->Controls->Add(this->label16);
 			this->tabPageConfig->Controls->Add(this->comboBoxDevices);
@@ -330,7 +357,7 @@ private: System::ComponentModel::IContainer^  components;
 			this->tabPageConfig->Location = System::Drawing::Point(4, 22);
 			this->tabPageConfig->Name = L"tabPageConfig";
 			this->tabPageConfig->Padding = System::Windows::Forms::Padding(3);
-			this->tabPageConfig->Size = System::Drawing::Size(401, 364);
+			this->tabPageConfig->Size = System::Drawing::Size(401, 335);
 			this->tabPageConfig->TabIndex = 0;
 			this->tabPageConfig->Text = L"Configuration";
 			this->tabPageConfig->UseVisualStyleBackColor = true;
@@ -379,16 +406,6 @@ private: System::ComponentModel::IContainer^  components;
 			this->label4->Size = System::Drawing::Size(0, 13);
 			this->label4->TabIndex = 13;
 			// 
-			// buttonReset
-			// 
-			this->buttonReset->Location = System::Drawing::Point(38, 335);
-			this->buttonReset->Name = L"buttonReset";
-			this->buttonReset->Size = System::Drawing::Size(114, 23);
-			this->buttonReset->TabIndex = 12;
-			this->buttonReset->Text = L"Restore to Defaults";
-			this->buttonReset->UseVisualStyleBackColor = true;
-			this->buttonReset->Click += gcnew System::EventHandler(this, &Config::buttonReset_Click);
-			// 
 			// labelBufferLength
 			// 
 			this->labelBufferLength->AutoSize = true;
@@ -412,36 +429,6 @@ private: System::ComponentModel::IContainer^  components;
 			this->toolTipInfo->SetToolTip(this->trackBufferLength, L"Control the maximum amount of data for OpenAL to buffer in RAM");
 			this->trackBufferLength->Value = 2000;
 			this->trackBufferLength->Scroll += gcnew System::EventHandler(this, &Config::trackBufferLength_Scroll);
-			// 
-			// buttonOk
-			// 
-			this->buttonOk->Location = System::Drawing::Point(239, 335);
-			this->buttonOk->Name = L"buttonOk";
-			this->buttonOk->Size = System::Drawing::Size(75, 23);
-			this->buttonOk->TabIndex = 6;
-			this->buttonOk->Text = L"Ok";
-			this->buttonOk->UseVisualStyleBackColor = true;
-			this->buttonOk->Click += gcnew System::EventHandler(this, &Config::buttonOk_Click);
-			// 
-			// buttonCancel
-			// 
-			this->buttonCancel->Location = System::Drawing::Point(320, 335);
-			this->buttonCancel->Name = L"buttonCancel";
-			this->buttonCancel->Size = System::Drawing::Size(75, 23);
-			this->buttonCancel->TabIndex = 5;
-			this->buttonCancel->Text = L"Cancel";
-			this->buttonCancel->UseVisualStyleBackColor = true;
-			this->buttonCancel->Click += gcnew System::EventHandler(this, &Config::buttonCancel_Click);
-			// 
-			// buttonApply
-			// 
-			this->buttonApply->Location = System::Drawing::Point(158, 335);
-			this->buttonApply->Name = L"buttonApply";
-			this->buttonApply->Size = System::Drawing::Size(75, 23);
-			this->buttonApply->TabIndex = 4;
-			this->buttonApply->Text = L"Apply";
-			this->buttonApply->UseVisualStyleBackColor = true;
-			this->buttonApply->Click += gcnew System::EventHandler(this, &Config::buttonApply_Click);
 			// 
 			// listBoxExtensions
 			// 
@@ -479,16 +466,37 @@ private: System::ComponentModel::IContainer^  components;
 			// 
 			// tabPageEffects
 			// 
+			this->tabPageEffects->Controls->Add(this->numericUpDown8);
+			this->tabPageEffects->Controls->Add(this->numericUpDown7);
+			this->tabPageEffects->Controls->Add(this->numericUpDown6);
+			this->tabPageEffects->Controls->Add(this->numericUpDown5);
+			this->tabPageEffects->Controls->Add(this->numericUpDown4);
+			this->tabPageEffects->Controls->Add(this->numericUpDown3);
+			this->tabPageEffects->Controls->Add(this->numericUpDown2);
+			this->tabPageEffects->Controls->Add(this->numericUpDown1);
+			this->tabPageEffects->Controls->Add(this->checkBoxSplit);
 			this->tabPageEffects->Controls->Add(this->label3);
 			this->tabPageEffects->Controls->Add(this->checkBoxEfxEnabled);
 			this->tabPageEffects->Controls->Add(this->comboBoxEffect);
 			this->tabPageEffects->Location = System::Drawing::Point(4, 22);
 			this->tabPageEffects->Name = L"tabPageEffects";
 			this->tabPageEffects->Padding = System::Windows::Forms::Padding(3);
-			this->tabPageEffects->Size = System::Drawing::Size(401, 364);
+			this->tabPageEffects->Size = System::Drawing::Size(401, 335);
 			this->tabPageEffects->TabIndex = 2;
-			this->tabPageEffects->Text = L"Effects";
+			this->tabPageEffects->Text = L"3D/Effects";
 			this->tabPageEffects->UseVisualStyleBackColor = true;
+			// 
+			// checkBoxSplit
+			// 
+			this->checkBoxSplit->AutoSize = true;
+			this->checkBoxSplit->Location = System::Drawing::Point(6, 40);
+			this->checkBoxSplit->Name = L"checkBoxSplit";
+			this->checkBoxSplit->Size = System::Drawing::Size(133, 17);
+			this->checkBoxSplit->TabIndex = 3;
+			this->checkBoxSplit->Text = L"Enable 3D and Effects";
+			this->toolTipWarning->SetToolTip(this->checkBoxSplit, L"This requires the plug-in to seperate the data into Mono streams, CPU usage will " 
+				L"increase.");
+			this->checkBoxSplit->UseVisualStyleBackColor = true;
 			// 
 			// label3
 			// 
@@ -502,7 +510,7 @@ private: System::ComponentModel::IContainer^  components;
 			// checkBoxEfxEnabled
 			// 
 			this->checkBoxEfxEnabled->AutoSize = true;
-			this->checkBoxEfxEnabled->Location = System::Drawing::Point(6, 40);
+			this->checkBoxEfxEnabled->Location = System::Drawing::Point(6, 273);
 			this->checkBoxEfxEnabled->Name = L"checkBoxEfxEnabled";
 			this->checkBoxEfxEnabled->Size = System::Drawing::Size(101, 17);
 			this->checkBoxEfxEnabled->TabIndex = 1;
@@ -512,7 +520,7 @@ private: System::ComponentModel::IContainer^  components;
 			// comboBoxEffect
 			// 
 			this->comboBoxEffect->FormattingEnabled = true;
-			this->comboBoxEffect->Location = System::Drawing::Point(6, 72);
+			this->comboBoxEffect->Location = System::Drawing::Point(6, 305);
 			this->comboBoxEffect->Name = L"comboBoxEffect";
 			this->comboBoxEffect->Size = System::Drawing::Size(389, 21);
 			this->comboBoxEffect->TabIndex = 0;
@@ -529,12 +537,10 @@ private: System::ComponentModel::IContainer^  components;
 			this->tabPageStatistics->Controls->Add(this->label7);
 			this->tabPageStatistics->Controls->Add(this->label6);
 			this->tabPageStatistics->Controls->Add(this->label5);
-			this->tabPageStatistics->Controls->Add(this->progressBar1);
-			this->tabPageStatistics->Controls->Add(this->label2);
 			this->tabPageStatistics->Location = System::Drawing::Point(4, 22);
 			this->tabPageStatistics->Name = L"tabPageStatistics";
 			this->tabPageStatistics->Padding = System::Windows::Forms::Padding(3);
-			this->tabPageStatistics->Size = System::Drawing::Size(401, 364);
+			this->tabPageStatistics->Size = System::Drawing::Size(401, 335);
 			this->tabPageStatistics->TabIndex = 1;
 			this->tabPageStatistics->Text = L"Statistics";
 			this->tabPageStatistics->UseVisualStyleBackColor = true;
@@ -542,7 +548,7 @@ private: System::ComponentModel::IContainer^  components;
 			// labelPlayedB
 			// 
 			this->labelPlayedB->AutoSize = true;
-			this->labelPlayedB->Location = System::Drawing::Point(251, 65);
+			this->labelPlayedB->Location = System::Drawing::Point(251, 35);
 			this->labelPlayedB->Name = L"labelPlayedB";
 			this->labelPlayedB->Size = System::Drawing::Size(13, 13);
 			this->labelPlayedB->TabIndex = 11;
@@ -552,7 +558,7 @@ private: System::ComponentModel::IContainer^  components;
 			// labelWrittenB
 			// 
 			this->labelWrittenB->AutoSize = true;
-			this->labelWrittenB->Location = System::Drawing::Point(250, 43);
+			this->labelWrittenB->Location = System::Drawing::Point(250, 13);
 			this->labelWrittenB->Name = L"labelWrittenB";
 			this->labelWrittenB->Size = System::Drawing::Size(13, 13);
 			this->labelWrittenB->TabIndex = 10;
@@ -562,7 +568,7 @@ private: System::ComponentModel::IContainer^  components;
 			// label8
 			// 
 			this->label8->AutoSize = true;
-			this->label8->Location = System::Drawing::Point(184, 65);
+			this->label8->Location = System::Drawing::Point(184, 35);
 			this->label8->Name = L"label8";
 			this->label8->Size = System::Drawing::Size(61, 13);
 			this->label8->TabIndex = 9;
@@ -572,7 +578,7 @@ private: System::ComponentModel::IContainer^  components;
 			// label10
 			// 
 			this->label10->AutoSize = true;
-			this->label10->Location = System::Drawing::Point(184, 43);
+			this->label10->Location = System::Drawing::Point(184, 13);
 			this->label10->Name = L"label10";
 			this->label10->Size = System::Drawing::Size(60, 13);
 			this->label10->TabIndex = 8;
@@ -582,7 +588,7 @@ private: System::ComponentModel::IContainer^  components;
 			// labelLatency
 			// 
 			this->labelLatency->AutoSize = true;
-			this->labelLatency->Location = System::Drawing::Point(86, 88);
+			this->labelLatency->Location = System::Drawing::Point(86, 58);
 			this->labelLatency->Name = L"labelLatency";
 			this->labelLatency->Size = System::Drawing::Size(13, 13);
 			this->labelLatency->TabIndex = 7;
@@ -592,7 +598,7 @@ private: System::ComponentModel::IContainer^  components;
 			// labelPlayedMs
 			// 
 			this->labelPlayedMs->AutoSize = true;
-			this->labelPlayedMs->Location = System::Drawing::Point(86, 65);
+			this->labelPlayedMs->Location = System::Drawing::Point(86, 35);
 			this->labelPlayedMs->Name = L"labelPlayedMs";
 			this->labelPlayedMs->Size = System::Drawing::Size(13, 13);
 			this->labelPlayedMs->TabIndex = 6;
@@ -602,7 +608,7 @@ private: System::ComponentModel::IContainer^  components;
 			// labelWrittenMs
 			// 
 			this->labelWrittenMs->AutoSize = true;
-			this->labelWrittenMs->Location = System::Drawing::Point(86, 43);
+			this->labelWrittenMs->Location = System::Drawing::Point(86, 13);
 			this->labelWrittenMs->Name = L"labelWrittenMs";
 			this->labelWrittenMs->Size = System::Drawing::Size(13, 13);
 			this->labelWrittenMs->TabIndex = 5;
@@ -612,7 +618,7 @@ private: System::ComponentModel::IContainer^  components;
 			// label7
 			// 
 			this->label7->AutoSize = true;
-			this->label7->Location = System::Drawing::Point(6, 88);
+			this->label7->Location = System::Drawing::Point(6, 58);
 			this->label7->Name = L"label7";
 			this->label7->Size = System::Drawing::Size(74, 13);
 			this->label7->TabIndex = 4;
@@ -622,7 +628,7 @@ private: System::ComponentModel::IContainer^  components;
 			// label6
 			// 
 			this->label6->AutoSize = true;
-			this->label6->Location = System::Drawing::Point(6, 65);
+			this->label6->Location = System::Drawing::Point(6, 35);
 			this->label6->Name = L"label6";
 			this->label6->Size = System::Drawing::Size(68, 13);
 			this->label6->TabIndex = 3;
@@ -632,32 +638,12 @@ private: System::ComponentModel::IContainer^  components;
 			// label5
 			// 
 			this->label5->AutoSize = true;
-			this->label5->Location = System::Drawing::Point(6, 43);
+			this->label5->Location = System::Drawing::Point(6, 13);
 			this->label5->Name = L"label5";
 			this->label5->Size = System::Drawing::Size(70, 13);
 			this->label5->TabIndex = 2;
 			this->label5->Text = L"Written (Ms): ";
 			this->toolTipInfo->SetToolTip(this->label5, L"Amount of data written (Milliseconds)");
-			// 
-			// progressBar1
-			// 
-			this->progressBar1->Location = System::Drawing::Point(70, 12);
-			this->progressBar1->Name = L"progressBar1";
-			this->progressBar1->Size = System::Drawing::Size(325, 22);
-			this->progressBar1->TabIndex = 1;
-			this->toolTipInfo->SetToolTip(this->progressBar1, L"The amount of data in OpenALs buffers. Won\'t always be full because Winamp doesn\'" 
-				L"t write full packets.");
-			// 
-			// label2
-			// 
-			this->label2->AutoSize = true;
-			this->label2->Location = System::Drawing::Point(6, 12);
-			this->label2->Name = L"label2";
-			this->label2->Size = System::Drawing::Size(58, 13);
-			this->label2->TabIndex = 0;
-			this->label2->Text = L"Buffer Size";
-			this->toolTipInfo->SetToolTip(this->label2, L"The amount of data in OpenALs buffers. Won\'t always be full because Winamp doesn\'" 
-				L"t write full packets.");
 			// 
 			// toolTipWarning
 			// 
@@ -669,11 +655,111 @@ private: System::ComponentModel::IContainer^  components;
 			this->toolTipInfo->ToolTipIcon = System::Windows::Forms::ToolTipIcon::Info;
 			this->toolTipInfo->ToolTipTitle = L"Information";
 			// 
+			// buttonReset
+			// 
+			this->buttonReset->Location = System::Drawing::Point(67, 379);
+			this->buttonReset->Name = L"buttonReset";
+			this->buttonReset->Size = System::Drawing::Size(114, 23);
+			this->buttonReset->TabIndex = 16;
+			this->buttonReset->Text = L"Restore to Defaults";
+			this->buttonReset->UseVisualStyleBackColor = true;
+			this->buttonReset->Click += gcnew System::EventHandler(this, &Config::buttonReset_Click_1);
+			// 
+			// buttonOk
+			// 
+			this->buttonOk->Location = System::Drawing::Point(268, 379);
+			this->buttonOk->Name = L"buttonOk";
+			this->buttonOk->Size = System::Drawing::Size(75, 23);
+			this->buttonOk->TabIndex = 15;
+			this->buttonOk->Text = L"Ok";
+			this->buttonOk->UseVisualStyleBackColor = true;
+			this->buttonOk->Click += gcnew System::EventHandler(this, &Config::buttonOk_Click_1);
+			// 
+			// buttonCancel
+			// 
+			this->buttonCancel->Location = System::Drawing::Point(349, 379);
+			this->buttonCancel->Name = L"buttonCancel";
+			this->buttonCancel->Size = System::Drawing::Size(75, 23);
+			this->buttonCancel->TabIndex = 14;
+			this->buttonCancel->Text = L"Cancel";
+			this->buttonCancel->UseVisualStyleBackColor = true;
+			this->buttonCancel->Click += gcnew System::EventHandler(this, &Config::buttonCancel_Click_1);
+			// 
+			// buttonApply
+			// 
+			this->buttonApply->Location = System::Drawing::Point(187, 379);
+			this->buttonApply->Name = L"buttonApply";
+			this->buttonApply->Size = System::Drawing::Size(75, 23);
+			this->buttonApply->TabIndex = 13;
+			this->buttonApply->Text = L"Apply";
+			this->buttonApply->UseVisualStyleBackColor = true;
+			this->buttonApply->Click += gcnew System::EventHandler(this, &Config::buttonApply_Click_1);
+			// 
+			// numericUpDown1
+			// 
+			this->numericUpDown1->Location = System::Drawing::Point(6, 63);
+			this->numericUpDown1->Name = L"numericUpDown1";
+			this->numericUpDown1->Size = System::Drawing::Size(64, 20);
+			this->numericUpDown1->TabIndex = 4;
+			// 
+			// numericUpDown2
+			// 
+			this->numericUpDown2->Location = System::Drawing::Point(79, 63);
+			this->numericUpDown2->Name = L"numericUpDown2";
+			this->numericUpDown2->Size = System::Drawing::Size(67, 20);
+			this->numericUpDown2->TabIndex = 5;
+			// 
+			// numericUpDown3
+			// 
+			this->numericUpDown3->Location = System::Drawing::Point(255, 63);
+			this->numericUpDown3->Name = L"numericUpDown3";
+			this->numericUpDown3->Size = System::Drawing::Size(64, 20);
+			this->numericUpDown3->TabIndex = 6;
+			// 
+			// numericUpDown4
+			// 
+			this->numericUpDown4->Location = System::Drawing::Point(328, 63);
+			this->numericUpDown4->Name = L"numericUpDown4";
+			this->numericUpDown4->Size = System::Drawing::Size(67, 20);
+			this->numericUpDown4->TabIndex = 7;
+			// 
+			// numericUpDown5
+			// 
+			this->numericUpDown5->Location = System::Drawing::Point(6, 219);
+			this->numericUpDown5->Name = L"numericUpDown5";
+			this->numericUpDown5->Size = System::Drawing::Size(64, 20);
+			this->numericUpDown5->TabIndex = 8;
+			// 
+			// numericUpDown6
+			// 
+			this->numericUpDown6->Location = System::Drawing::Point(79, 219);
+			this->numericUpDown6->Name = L"numericUpDown6";
+			this->numericUpDown6->Size = System::Drawing::Size(67, 20);
+			this->numericUpDown6->TabIndex = 9;
+			// 
+			// numericUpDown7
+			// 
+			this->numericUpDown7->Location = System::Drawing::Point(255, 219);
+			this->numericUpDown7->Name = L"numericUpDown7";
+			this->numericUpDown7->Size = System::Drawing::Size(64, 20);
+			this->numericUpDown7->TabIndex = 10;
+			// 
+			// numericUpDown8
+			// 
+			this->numericUpDown8->Location = System::Drawing::Point(328, 219);
+			this->numericUpDown8->Name = L"numericUpDown8";
+			this->numericUpDown8->Size = System::Drawing::Size(67, 20);
+			this->numericUpDown8->TabIndex = 11;
+			// 
 			// Config
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->ClientSize = System::Drawing::Size(433, 414);
+			this->Controls->Add(this->buttonReset);
+			this->Controls->Add(this->buttonOk);
+			this->Controls->Add(this->buttonCancel);
+			this->Controls->Add(this->buttonApply);
 			this->Controls->Add(this->tabConfiguration);
 			this->FormBorderStyle = System::Windows::Forms::FormBorderStyle::FixedSingle;
 			this->MaximizeBox = false;
@@ -692,84 +778,104 @@ private: System::ComponentModel::IContainer^  components;
 			this->tabPageEffects->PerformLayout();
 			this->tabPageStatistics->ResumeLayout(false);
 			this->tabPageStatistics->PerformLayout();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numericUpDown1))->EndInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numericUpDown2))->EndInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numericUpDown3))->EndInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numericUpDown4))->EndInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numericUpDown5))->EndInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numericUpDown6))->EndInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numericUpDown7))->EndInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numericUpDown8))->EndInit();
 			this->ResumeLayout(false);
 
 		}
 #pragma endregion
-	private: System::Void buttonApply_Click(System::Object^  sender, System::EventArgs^  e) {
-				Int32 newDevice = comboBoxDevices->SelectedIndex;
-				if(newDevice != currentDevice && newDevice != -1) {
-					// if we've changed device switch device and save
-					ConfigFile::WriteInteger(CONF_DEVICE, newDevice);
-					currentDevice = newDevice;
-					ptrOw->SwitchOutputDevice(currentDevice);
-				}
-				if(ptrOw->GetConfBufferLength() != trackBufferLength->Value) {
-					// if we've changed the buffer length stop playback and change it
-					ptrOw->SetConfBufferLength(trackBufferLength->Value);
-					ConfigFile::WriteInteger(CONF_BUFFER_LENGTH, trackBufferLength->Value);
-					ptrOw->SwitchOutputDevice(currentDevice);
-				}
-				
-				// store settings regarding effects
-				if(ptrOw->IsMonoExpanded() != checkBoxExpandMono->Checked
-					|| ptrOw->IsStereoExpanded() != checkBoxExpandStereo->Checked) {
-						
-						ptrOw->SetStereoExpanded(checkBoxExpandStereo->Checked);
-						ptrOw->SetMonoExpanded(checkBoxExpandMono->Checked);
-						ptrOw->SwitchOutputDevice(currentDevice);
-				}
-
-				if(ptrOw->IsXRAMEnabled() != checkBoxXRAM->Checked)
-				{
-					ptrOw->SetXRAMEnabled(checkBoxXRAM->Checked);
-				}
-
-				if(ptrOw->get_effects()->get_current_effect() != comboBoxEffect->SelectedIndex)
-				{
-					ptrOw->get_effects()->set_current_effect((effects_list)comboBoxEffect->SelectedIndex);
-					ConfigFile::WriteInteger(CONF_EFX_ENV, comboBoxEffect->SelectedIndex);
-				}
-
-				if(ptrOw->get_effects()->is_enabled() != checkBoxEfxEnabled->Checked)
-				{
-					ptrOw->get_effects()->set_enabled(checkBoxEfxEnabled->Checked);
-					ConfigFile::WriteBoolean(CONF_EFX_ENABLED, checkBoxEfxEnabled->Checked);
-				}
-
-				ConfigFile::WriteBoolean(CONF_MONO_EXPAND, checkBoxExpandMono->Checked);
-				ConfigFile::WriteBoolean(CONF_STEREO_EXPAND, checkBoxExpandStereo->Checked);
-				ConfigFile::WriteBoolean(CONF_XRAM_ENABLED, checkBoxXRAM->Checked);
-				
-				ShowDeviceDetails();
-			 }
 private: System::Void buttonCancel_Click(System::Object^  sender, System::EventArgs^  e) {
 			 overRide = true;
 			 loaded = false;
 			 ptrForm->Close();
 		 }
-private: System::Void buttonOk_Click(System::Object^  sender, System::EventArgs^  e) {	 	
-			// call the apply button	
-			this->buttonApply_Click(sender, e);
+
+private: System::Void trackBufferLength_Scroll(System::Object^  sender, System::EventArgs^  e) {
+			 labelBufferLength->Text = "Buffer Length (" + trackBufferLength->Value + "ms)";
+		 }
+private: System::Void buttonApply_Click_1(System::Object^  sender, System::EventArgs^  e) {
+			 Int32 newDevice = comboBoxDevices->SelectedIndex;
+			if(newDevice != currentDevice && newDevice != -1) {
+				// if we've changed device switch device and save
+				ConfigFile::WriteInteger(CONF_DEVICE, newDevice);
+				currentDevice = newDevice;
+				ptrOw->SwitchOutputDevice(currentDevice);
+			}
+			if(ptrOw->GetConfBufferLength() != trackBufferLength->Value) {
+				// if we've changed the buffer length stop playback and change it
+				ptrOw->SetConfBufferLength(trackBufferLength->Value);
+				ConfigFile::WriteInteger(CONF_BUFFER_LENGTH, trackBufferLength->Value);
+				ptrOw->SwitchOutputDevice(currentDevice);
+			}
+			
+			// store settings regarding effects
+			if(ptrOw->IsMonoExpanded() != checkBoxExpandMono->Checked
+				|| ptrOw->IsStereoExpanded() != checkBoxExpandStereo->Checked) {
+					
+					ptrOw->SetStereoExpanded(checkBoxExpandStereo->Checked);
+					ptrOw->SetMonoExpanded(checkBoxExpandMono->Checked);
+					ptrOw->SwitchOutputDevice(currentDevice);
+			}
+
+			if(ptrOw->IsXRAMEnabled() != checkBoxXRAM->Checked)
+			{
+				ptrOw->SetXRAMEnabled(checkBoxXRAM->Checked);
+			}
+
+			if(ptrOw->get_effects()->get_current_effect() != comboBoxEffect->SelectedIndex)
+			{
+				ptrOw->get_effects()->set_current_effect((effects_list)comboBoxEffect->SelectedIndex);
+				ConfigFile::WriteInteger(CONF_EFX_ENV, comboBoxEffect->SelectedIndex);
+			}
+
+			if(ptrOw->get_effects()->is_enabled() != checkBoxEfxEnabled->Checked)
+			{
+				ptrOw->get_effects()->set_enabled(checkBoxEfxEnabled->Checked);
+				ConfigFile::WriteBoolean(CONF_EFX_ENABLED, checkBoxEfxEnabled->Checked);
+			}
+
+			if ( ptrOw->IsSplit() != checkBoxSplit->Checked )
+			{
+				ptrOw->SetSplit( checkBoxSplit->Checked );
+			}
+
+			ConfigFile::WriteBoolean(CONF_MONO_EXPAND, checkBoxExpandMono->Checked);
+			ConfigFile::WriteBoolean(CONF_STEREO_EXPAND, checkBoxExpandStereo->Checked);
+			ConfigFile::WriteBoolean(CONF_XRAM_ENABLED, checkBoxXRAM->Checked);
+			
+			ShowDeviceDetails();
+		 }
+private: System::Void buttonOk_Click_1(System::Object^  sender, System::EventArgs^  e) {
+			 // call the apply button	
+			this->buttonApply_Click_1(sender, e);
 
 			// close the form
 			overRide = true;
 			loaded = false;
 			ptrForm->Close();
 		 }
-private: System::Void Config_Unload(System::Object^  sender, System::EventArgs^  e) {
+private: System::Void buttonCancel_Click_1(System::Object^  sender, System::EventArgs^  e) {
 			 overRide = true;
 			 loaded = false;
+			 ptrForm->Close();
 		 }
-private: System::Void trackBufferLength_Scroll(System::Object^  sender, System::EventArgs^  e) {
-			 labelBufferLength->Text = "Buffer Length (" + trackBufferLength->Value + "ms)";
-		 }
-private: System::Void buttonReset_Click(System::Object^  sender, System::EventArgs^  e) {
+private: System::Void buttonReset_Click_1(System::Object^  sender, System::EventArgs^  e) {
 			 trackBufferLength->Value = DEFC_BUFFER_LENGTH;
 			 labelBufferLength->Text = "Buffer Length (" + trackBufferLength->Value + "ms)";
 			 checkBoxXRAM->Checked = false;
 			 checkBoxExpandMono->Checked = false;
 			 checkBoxExpandStereo->Checked = false;
+			 checkBoxSplit->Checked = false;
+		 }
+private: System::Void Config_Unload(System::Object^  sender, System::EventArgs^  e) {
+			 overRide = true;
+			 loaded = false;
 		 }
 };
 }
