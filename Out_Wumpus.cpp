@@ -410,7 +410,7 @@ namespace WinampOpenALOut {
 		delete effects;
 		effects = NULL;
 
-		ConfigFile::WriteInteger(CONF_VOLUME, volume * VOLUME_DIVISOR);
+		ConfigFile::WriteInteger(CONF_VOLUME, (int)(volume * VOLUME_DIVISOR) );
 
 		// shutdown openal
 		Framework::getInstance()->ALFWShutdownOpenAL();
@@ -485,12 +485,17 @@ namespace WinampOpenALOut {
 			use_xram = true;
 		}
 
+		if( effects!= NULL)
+		{
+			effects->setup();
+		}
+
 		no_renderers = 0;
 		if ( split_out == true )
 		{
-			for ( unsigned int i=0 ; i < numberOfChannels ; i++ )
+			for ( unsigned char i=0 ; i < numberOfChannels ; i++ )
 			{
-				renderers[i] = new Output_Renderer(c_bufferLength, i);
+				renderers[i] = new Output_Renderer(c_bufferLength, i, effects);
 				renderers[i]->SetXRAMEnabled(true);
 				renderers[i]->Open(samplerate,1,bitspersamp,0,0);
 				no_renderers++;
@@ -498,7 +503,7 @@ namespace WinampOpenALOut {
 		}
 		else
 		{
-			renderers[0] = new Output_Renderer(c_bufferLength, 0);
+			renderers[0] = new Output_Renderer(c_bufferLength, 0, effects);
 			renderers[0]->SetXRAMEnabled(true);
 			renderers[0]->Open(samplerate,numchannels,bitspersamp,0,0);
 			no_renderers++;
@@ -973,19 +978,19 @@ namespace WinampOpenALOut {
 				renderers[i]->SetVolumeInternal(volume);
 			}
 
-			ConfigFile::WriteInteger(CONF_VOLUME, volume * VOLUME_DIVISOR);
+			ConfigFile::WriteInteger(CONF_VOLUME, (int)(volume * VOLUME_DIVISOR) );
 		}
 	}
 
 	/*
-		setpan - INCOMPLETE
+		setpan
 
 		this procedure is invoked by winamp to set the pan
 	*/
 	void Output_Wumpus::SetPan(int pan)
 	{
 		ALfloat f = pan/255.0f; 
-		alListener3f(AL_POSITION, -f ,1.0,1.0);
+		alListener3f(AL_POSITION, -f ,0.0,0.0);
 	}
 
 	/*

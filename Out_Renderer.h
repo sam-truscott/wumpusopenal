@@ -21,7 +21,8 @@ namespace WinampOpenALOut
 	public:
 		Output_Renderer(
 			unsigned int buffer_len,
-			unsigned char a_channel);
+			unsigned char a_channel,
+			class Output_Effects* the_effects);
 		~Output_Renderer();
 		int	Open(int samplerate, int numchannels, int bitspersamp, int bufferlenms, int prebufferms);
 		void Close();

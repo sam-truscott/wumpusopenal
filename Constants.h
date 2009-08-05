@@ -1,8 +1,6 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
-#define _DEBUG
-
 #define __CONSTANT const static unsigned int
 #define __S_CONSTANT const static int
 #define __FCONSTANT const static float

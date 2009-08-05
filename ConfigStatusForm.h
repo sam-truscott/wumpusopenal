@@ -969,6 +969,7 @@ private: System::ComponentModel::IContainer^  components;
 			this->toolTipWarning->SetToolTip(this->checkBoxSplit, L"This requires the plug-in to seperate the data into Mono streams, CPU usage will " 
 				L"increase.");
 			this->checkBoxSplit->UseVisualStyleBackColor = true;
+			this->checkBoxSplit->CheckedChanged += gcnew System::EventHandler(this, &Config::checkBoxSplit_CheckedChanged);
 			// 
 			// label3
 			// 
@@ -1307,6 +1308,12 @@ private: System::Void numSy_ValueChanged(System::Object^  sender, System::EventA
 		 }
 private: System::Void numSz_ValueChanged(System::Object^  sender, System::EventArgs^  e) {
 			 UpdateMatrix(5,2,numSz->Value);
+		 }
+private: System::Void checkBoxSplit_CheckedChanged(System::Object^  sender, System::EventArgs^  e) {
+			 if ( checkBoxSplit->Checked == false )
+			 {
+				 checkBoxEfxEnabled->Checked = false;
+			 }
 		 }
 };
 }

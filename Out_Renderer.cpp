@@ -11,15 +11,17 @@
 #define SYNC_START EnterCriticalSection(&criticalSection)
 #define SYNC_END LeaveCriticalSection(&criticalSection)
 
-namespace WinampOpenALOut {
+namespace WinampOpenALOut
+{
 
 	Output_Renderer::Output_Renderer(
 		unsigned int buffer_len,
-		unsigned char a_channel)
+		unsigned char a_channel,
+		Output_Effects* the_effects)
 	{
 		// make sure all the pointers are set to zero
 		c_bufferLength = buffer_len;
-		effects = NULL;
+		effects = the_effects;
 		this->channel = a_channel;
 		played = 0;
 		uiSource = 0;
@@ -399,7 +401,7 @@ namespace WinampOpenALOut {
 		/* Effects */
 		if ( effects != NULL )
 		{
-			effects->set_source(uiSource);
+			effects->add_source(uiSource);
 		}
 
 		// set the volume for the source
@@ -697,6 +699,10 @@ namespace WinampOpenALOut {
 		if ( WINVER > 0x0600 )
 		{
 			xram_enabled = false;
+		}
+		else
+		{
+			xram_enabled = enabled;
 		}
 	}
 

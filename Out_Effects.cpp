@@ -57,9 +57,14 @@ namespace WinampOpenALOut {
 	{
 		is_on = false;
 		is_loaded = false;
+		
+		channels = 0;
+		for(unsigned char c = 0; c < 8 ; c++ )
+		{
+			uiSource[c] = 0;
+		}
 
 		effect = EFX_REVERB_PRESET_GENERIC;
-		uiSource = 0;
 		uiEffectSlot = 0;
 		uiEffect = 0;
 		memset(
@@ -76,10 +81,8 @@ namespace WinampOpenALOut {
 		}
 	}
 
-	void Output_Effects::set_source(ALuint the_source)
+	void Output_Effects::setup(void)
 	{
-		uiSource = the_source;
-
 		if ( this->is_on == true )
 		{
 			if ( this->is_loaded == true )
@@ -100,9 +103,6 @@ namespace WinampOpenALOut {
 						if (SetEFXEAXReverbProperties(&efxReverb, uiEffect))
 						{
 							alAuxiliaryEffectSloti(uiEffectSlot, AL_EFFECTSLOT_EFFECT, uiEffect);
-
-							alSource3i(uiSource, AL_AUXILIARY_SEND_FILTER, uiEffectSlot, 0, AL_FILTER_NULL);
-
 							this->is_loaded = true;
 						}
 					}
@@ -111,11 +111,22 @@ namespace WinampOpenALOut {
 		}
 	}
 
+	void Output_Effects::add_source(ALuint the_source)
+	{
+		uiSource[channels++] = the_source;
+		alSource3i(the_source, AL_AUXILIARY_SEND_FILTER, uiEffectSlot, 0, AL_FILTER_NULL);
+	}
+
 	void Output_Effects::on_close(void)
 	{
 		if ( this->is_loaded == true )
 		{
-			alSource3i(uiSource, AL_AUXILIARY_SEND_FILTER, AL_EFFECTSLOT_NULL, 0, AL_FILTER_NULL);
+			for( unsigned char c = 0; c < channels ; c++ )
+			{
+				alSource3i(uiSource[c], AL_AUXILIARY_SEND_FILTER, AL_EFFECTSLOT_NULL, 0, AL_FILTER_NULL);
+			}
+
+			channels = 0;
 			alAuxiliaryEffectSloti(uiEffectSlot, AL_EFFECTSLOT_EFFECT, AL_EFFECT_NULL);
 			alDeleteEffects(1, &uiEffect);
 			alDeleteAuxiliaryEffectSlots(1, &uiEffectSlot);
@@ -131,9 +142,17 @@ namespace WinampOpenALOut {
 
 	void Output_Effects::set_current_effect(effects_list an_effect)
 	{
+		unsigned char old_channels = channels;
+		
 		this->on_close();
 		effect = an_effect;
-		this->set_source(uiSource);
+
+		this->setup();
+
+		for(unsigned char c = 0 ; c < old_channels ; c++ )
+		{
+			this->add_source(uiSource[c]);
+		}
 	}
 
 	bool Output_Effects::is_enabled(void)
@@ -151,9 +170,16 @@ namespace WinampOpenALOut {
 
 		if ( enable != is_on )
 		{
+			unsigned char old_channels = channels;
+
 			this->on_close();
 			is_on = enable;
-			this->set_source(uiSource);
+			this->setup();
+	
+			for(unsigned char c = 0 ; c < old_channels ; c++ )
+			{
+				this->add_source(uiSource[c]);
+			}
 		}
 	}
 

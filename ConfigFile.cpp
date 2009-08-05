@@ -46,7 +46,7 @@ namespace WinampOpenALOut {
 		
 		float retVal = 0.0f;
 		if(strlen(buf)>0) {
-			retVal = atof(buf);
+			retVal = (float)atof(buf);
 		}
 		return retVal;
 	}

@@ -239,20 +239,8 @@ namespace WinampOpenALOut {
 		if (Framework::getInstance()->ALFWIsXRAMSupported() == AL_TRUE) {
 			listBoxExtensions->Items->Add("Present: EAX-RAM");
 		}else{
-			listBoxExtensions->Items->Add("Absent: EAX-RAM [values below must be > 0]");
+			listBoxExtensions->Items->Add("Absent: EAX-RAM");
 		}
-
-		unsigned int setaddr = (unsigned int)alGetProcAddress("EAXSetBufferMode");
-		unsigned int getaddr = (unsigned int)alGetProcAddress("EAXGetBufferMode");
-
-		listBoxExtensions->Items->Add("\tDetected? " + alIsExtensionPresent("EAX-RAM"));
-		listBoxExtensions->Items->Add("\tEAXSetBufferMode: " + setaddr);
-		listBoxExtensions->Items->Add("\tEAXGetBufferMode: " + getaddr);
-		listBoxExtensions->Items->Add("\tAL_EAX_RAM_SIZE: " + alGetEnumValue("AL_EAX_RAM_SIZE"));
-		listBoxExtensions->Items->Add("\tAL_EAX_RAM_FREE: " + alGetEnumValue("AL_EAX_RAM_FREE"));
-		listBoxExtensions->Items->Add("\tAL_STORAGE_AUTOMATIC: " + alGetEnumValue("AL_STORAGE_AUTOMATIC"));
-		listBoxExtensions->Items->Add("\tAL_STORAGE_HARDWARE: " + alGetEnumValue("AL_STORAGE_HARDWARE"));
-		listBoxExtensions->Items->Add("\tAL_STORAGE_ACCESSIBLE: " + alGetEnumValue("AL_STORAGE_ACCESSIBLE"));
 
 		if (alcIsExtensionPresent(pDevice, "ALC_EXT_EFX") == AL_TRUE) {
 			listBoxExtensions->Items->Add("Present: ALC_EXT_EFX");

@@ -11,13 +11,13 @@ Global
 		Manager = AnkhSVN - Subversion Support for Visual Studio
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debugging|Win32 = Debugging|Win32
+		Debug|Win32 = Debug|Win32
 		Release (debug)|Win32 = Release (debug)|Win32
 		Release|Win32 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{3B29D613-DE3B-43B1-A9AD-77A81D3C744D}.Debugging|Win32.ActiveCfg = Debugging|Win32
-		{3B29D613-DE3B-43B1-A9AD-77A81D3C744D}.Debugging|Win32.Build.0 = Debugging|Win32
+		{3B29D613-DE3B-43B1-A9AD-77A81D3C744D}.Debug|Win32.ActiveCfg = Debug|Win32
+		{3B29D613-DE3B-43B1-A9AD-77A81D3C744D}.Debug|Win32.Build.0 = Debug|Win32
 		{3B29D613-DE3B-43B1-A9AD-77A81D3C744D}.Release (debug)|Win32.ActiveCfg = Release (debug)|Win32
 		{3B29D613-DE3B-43B1-A9AD-77A81D3C744D}.Release (debug)|Win32.Build.0 = Release (debug)|Win32
 		{3B29D613-DE3B-43B1-A9AD-77A81D3C744D}.Release|Win32.ActiveCfg = Release|Win32

@@ -115,7 +115,8 @@ namespace WinampOpenALOut
 			Output_Effects();
 			~Output_Effects();
 
-			void set_source(ALuint the_source);
+			void setup(void);
+			void add_source(ALuint the_source);
 			void on_close(void);
 
 			effects_list get_current_effect(void);
@@ -131,7 +132,8 @@ namespace WinampOpenALOut
 
 			effects_list effect;
 
-			ALuint		uiSource;
+			ALuint		uiSource[8];
+			unsigned char channels;
 			ALuint		uiEffectSlot;
 			ALuint		uiEffect;
 			EFXEAXREVERBPROPERTIES efxReverb;

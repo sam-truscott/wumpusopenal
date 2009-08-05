@@ -1,7 +1,7 @@
 Wumpus Out OpenAL is copyright (c) 2009 by Sam Truscott.
 =======================================================
 
-Wumpus Out OpenAL v0.9.2
+Wumpus Out OpenAL v0.9.4
 ========================
 
 	Requirements
@@ -31,6 +31,10 @@ Wumpus Out OpenAL v0.9.2
 
 Change Log
 ==========
+
+	v0.9.4
+	======
+	* Added effects (reverb)
 
 	v0.9.3
 	======
