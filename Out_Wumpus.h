@@ -133,8 +133,6 @@ namespace WinampOpenALOut
 		char		temp[TEMP_BUFFER_SIZE];
 		unsigned int temp_size;
 
-		unsigned int	bufferSize;
-
 		Time_Type		lastCheckBuffers;
 
 		// used to store the configuration buffer length

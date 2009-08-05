@@ -24,6 +24,12 @@ namespace WinampOpenALOut {
 		total_played = ZERO_TIME;
 		currentOutputTime = ZERO_TIME;
 		currentWrittenTime = ZERO_TIME;
+		effects = NULL;
+
+		for ( char i=0 ; i < MAX_RENDERERS ; i++ )
+		{
+			renderers[i] = NULL;
+		}
 	}
 
 	Output_Wumpus::~Output_Wumpus() {
@@ -209,11 +215,6 @@ namespace WinampOpenALOut {
 			&speaker_matrix,
 			0,
 			sizeof(speaker_matrix_T));
-
-		for ( char i=0 ; i < MAX_RENDERERS ; i++ )
-		{
-			renderers[i] = NULL;
-		}
 
 		Clock::Initialise();
 
@@ -487,7 +488,7 @@ namespace WinampOpenALOut {
 		no_renderers = 0;
 		if ( split_out == true )
 		{
-			for ( char i=0 ; i < numberOfChannels ; i++ )
+			for ( unsigned int i=0 ; i < numberOfChannels ; i++ )
 			{
 				renderers[i] = new Output_Renderer(c_bufferLength, i);
 				renderers[i]->SetXRAMEnabled(true);
@@ -507,9 +508,8 @@ namespace WinampOpenALOut {
 		sprintf_s(
 			dbg,
 			DEBUG_BUFFER_SIZE,
-			"-> Using {%d} buffers for total size of {%d}", 
-			noBuffers,
-			bufferSize);
+			"-> Using {%d} buffers", 
+			noBuffers);
 		this->log_debug_msg(dbg, __FILE__, __LINE__);
 #endif
 
@@ -606,8 +606,6 @@ namespace WinampOpenALOut {
 	int Output_Wumpus::Write(char *buf, int len)
 	{
 		SYNC_START;
-
-		ALenum err;
 
 		// if the buffer is valid (non-NULL)
 		if (buf) {

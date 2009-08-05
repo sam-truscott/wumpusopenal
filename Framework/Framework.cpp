@@ -166,7 +166,7 @@ ALboolean Framework::ALFWShutdownOpenAL()
 	alcCloseDevice(pDevice);
 
 	delete pDeviceList;
-	pDeviceList = 0;
+	pDeviceList = NULL;
 
 	return AL_TRUE;
 }

@@ -37,15 +37,6 @@ namespace WinampOpenALOut
 		class Output_Effects* get_effects();
 		void SetXRAMEnabled( bool enabled );
 
-		inline unsigned char GetPcBufferFull()
-		{ 
-			float r = (float)(bufferSize-buffer_free) / (float)bufferSize;
-			r *= 100;
-			int r2 = (int)(r+0.5f);
-			
-			return r2;
-		}
-
 		inline unsigned int GetBufferFree(void)
 		{
 			return buffer_free;

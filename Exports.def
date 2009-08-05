@@ -1,16 +1,16 @@
 LIBRARY	"out_openal"
 EXPORTS
-	_Config	@1
-	_About	@2
-	_Initialise	@3
-	_Quit	@4
-	_Open	@6
-	_Close	@7
-	_Write	@8
-	_CanWrite	@9
-	_IsPlaying	@10
-	_Pause	@11
-	_SetVolume	@12
-	_SetPan	@13
-	_Flush	@14
+	WAOP_Config	@1
+	WAOP_About	@2
+	WAOP_Initialise	@3
+	WAOP_Quit	@4
+	WAOP_Open	@6
+	WAOP_Close	@7
+	WAOP_Write	@8
+	WAOP_CanWrite	@9
+	WAOP_IsPlaying	@10
+	WAOP_Pause	@11
+	WAOP_SetVolume	@12
+	WAOP_SetPan	@13
+	WAOP_Flush	@14
 	
