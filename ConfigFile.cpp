@@ -85,10 +85,10 @@ namespace WinampOpenALOut {
 
 	void ConfigFile::Initialise(HWND hMainWindow)
 	{
-		char *p;
+		char *p = 0;
 		if (hMainWindow 
 		   && (p = (char *)SendMessage(hMainWindow, WM_WA_IPC, 0, IPC_GETINIFILE))
-		   &&  p!= (char *)1){
+		   &&  (p!= (char *)1) ){
 			strcpy_s(INI_FILE,MAX_PATH, p);
 			strcpy_s(INI_FILE,MAX_PATH, p);
 		}else{

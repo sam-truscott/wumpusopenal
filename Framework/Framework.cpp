@@ -199,6 +199,32 @@ ALboolean Framework::ALFWIsXRAMSupported()
 	return bXRAM;
 }
 
+ALboolean Framework::ALFWIsXRAMSupportedDevice(ALCdevice *device)
+{
+	ALboolean bXRAM = AL_FALSE;
+
+	if (alcIsExtensionPresent(device,"EAX-RAM") == AL_TRUE)
+	{
+		// Get X-RAM Function pointers
+		eaxSetBufferMode = (EAXSetBufferMode)alcGetProcAddress(device,"EAXSetBufferMode");
+		eaxGetBufferMode = (EAXGetBufferMode)alcGetProcAddress(device,"EAXGetBufferMode");
+
+		if (eaxSetBufferMode && eaxGetBufferMode)
+		{
+			eXRAMSize = alcGetEnumValue(device,"AL_EAX_RAM_SIZE");
+			eXRAMFree = alcGetEnumValue(device,"AL_EAX_RAM_FREE");
+			eXRAMAuto = alcGetEnumValue(device,"AL_STORAGE_AUTOMATIC");
+			eXRAMHardware = alcGetEnumValue(device,"AL_STORAGE_HARDWARE");
+			eXRAMAccessible = alcGetEnumValue(device,"AL_STORAGE_ACCESSIBLE");
+
+			if (eXRAMSize && eXRAMFree && eXRAMAuto && eXRAMHardware && eXRAMAccessible)
+				bXRAM = AL_TRUE;
+		}
+	}
+
+	return bXRAM;
+}
+
 ALboolean Framework::ALFWIsEFXSupported()
 {
 	ALCdevice *pDevice = NULL;

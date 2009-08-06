@@ -19,18 +19,48 @@ namespace WinampOpenALOut
 		unsigned char a_channel,
 		Output_Effects* the_effects)
 	{
+		InitializeCriticalSection(&criticalSection);
+
+		SYNC_START;
+
 		// make sure all the pointers are set to zero
 		c_bufferLength = buffer_len;
 		effects = the_effects;
 		this->channel = a_channel;
+
+		isPlaying = false;
+		streamOpen = false;
+		buffer_free = 0;
+		buffers_free = 0;
+		sampleRate = 0;
+		numberOfChannels = 0;
+		bitsPerSample = 0;
+		noBuffers = 0;
+		bytesPerSampleChannel = 0;
+		volume = 0;
 		played = 0;
 		uiSource = 0;
 		lastPause = 0;
+		ulFormat = 0;
+		bufferSize = 0;
+		lastCheckBuffers = 0;
+		lastCheckDelay = 0;
+
+		for (unsigned char c = 0 ; c < MAX_NO_BUFFERS ; c++ )
+		{
+			memset(
+				&uiBuffers[c],
+				0,
+				sizeof(buffer_type));
+		}
+
+		SYNC_END;
 	}
 
 	Output_Renderer::~Output_Renderer()
 	{
 		//ensure everything in memory is deleted
+		DeleteCriticalSection(&criticalSection);
 	}
 
 	void Output_Renderer::fmemcpy(char* dest, int destPos, char* src, int srcPos, int size)
@@ -704,11 +734,6 @@ namespace WinampOpenALOut
 		{
 			xram_enabled = enabled;
 		}
-	}
-
-	Output_Effects* Output_Renderer::get_effects()
-	{
-		return this->effects;
 	}
 
 	void Output_Renderer::SetMatrix ( speaker_T speaker )

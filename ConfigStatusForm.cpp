@@ -236,7 +236,7 @@ namespace WinampOpenALOut {
 		// get the device
 		ALCdevice* pDevice = alcGetContextsDevice(alcGetCurrentContext());
 		
-		if (Framework::getInstance()->ALFWIsXRAMSupported() == AL_TRUE) {
+		if (Framework::getInstance()->ALFWIsXRAMSupportedDevice(pDevice) == AL_TRUE) {
 			listBoxExtensions->Items->Add("Present: EAX-RAM");
 		}else{
 			listBoxExtensions->Items->Add("Absent: EAX-RAM");

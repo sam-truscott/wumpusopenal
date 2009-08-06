@@ -12,14 +12,11 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
-		Release (debug)|Win32 = Release (debug)|Win32
 		Release|Win32 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{3B29D613-DE3B-43B1-A9AD-77A81D3C744D}.Debug|Win32.ActiveCfg = Debug|Win32
 		{3B29D613-DE3B-43B1-A9AD-77A81D3C744D}.Debug|Win32.Build.0 = Debug|Win32
-		{3B29D613-DE3B-43B1-A9AD-77A81D3C744D}.Release (debug)|Win32.ActiveCfg = Release (debug)|Win32
-		{3B29D613-DE3B-43B1-A9AD-77A81D3C744D}.Release (debug)|Win32.Build.0 = Release (debug)|Win32
 		{3B29D613-DE3B-43B1-A9AD-77A81D3C744D}.Release|Win32.ActiveCfg = Release|Win32
 		{3B29D613-DE3B-43B1-A9AD-77A81D3C744D}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection

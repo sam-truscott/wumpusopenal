@@ -35,7 +35,6 @@ namespace WinampOpenALOut
 
 		void SwitchOutputDevice(int device);	
 		inline bool IsStreamOpen()						{ return streamOpen; }
-		class Output_Effects* get_effects();
 		void SetXRAMEnabled( bool enabled );
 
 		inline unsigned int GetBufferFree(void)

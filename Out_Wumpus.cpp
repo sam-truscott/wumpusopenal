@@ -26,10 +26,37 @@ namespace WinampOpenALOut {
 		currentWrittenTime = ZERO_TIME;
 		effects = NULL;
 
+		no_renderers = 0;
 		for ( char i=0 ; i < MAX_RENDERERS ; i++ )
 		{
 			renderers[i] = NULL;
 		}
+
+		isPlaying = false;
+		streamOpen = false;
+		preBuffer = false;
+		preBufferNumber = 0;
+		xram_detected = false;
+		xram_enabled = false;
+
+		sampleRate = 0;
+		numberOfChannels = 0;
+		bitsPerSample = 0;
+		noBuffers = 0;
+		bytesPerSampleChannel = 0;
+		lastPause = 0;
+		volume = 0;
+
+		temp_size = 0;
+		memset(
+			temp,
+			0,
+			MAXIMUM_BUFFER_SIZE);
+
+		c_bufferLength = 0;
+		monoExpand = false;
+		stereoExpand = false;
+		split_out = false;
 	}
 
 	Output_Wumpus::~Output_Wumpus() {
@@ -188,13 +215,17 @@ namespace WinampOpenALOut {
 	{
 		MessageBoxA(hwnd,"Wumpus OpenAL Output Plug-in "
 			PI_VER "\nCompiled on " __DATE__ " - " __TIME__
-			"\n(c) 2008 Sam Truscott\n\n"
+			"\n(c) 2009 Sam Truscott\n"
+			"\n"
 			"Download latest version and source code (GPL)\n"
-			"https://sourceforge.net/projects/winampopenalout/\n\n"
+			"https://sourceforge.net/projects/winampopenalout/\n"
+			"\n"
 			"Thanks to:\n"
 			"\tTinuva\n"
 			"\tsoddit112\n"
 			"\tGoujon\n"
+			"\n"
+			"In memory of Alex Cicciu, 2009\n"
 			,"About",MB_OK);
 	}
 
@@ -799,18 +830,18 @@ namespace WinampOpenALOut {
 
 			total_written += len;
 
-			if ( split_out)
+			if ( split_out == true )
 			{
 				char* buffers[MAX_RENDERERS];
 				memset(buffers,0, sizeof(char*) * MAX_RENDERERS);
 
-				for ( int i=0; i < no_renderers ; i++ )
+				for ( char i=0; i < no_renderers ; i++ )
 				{
 					const unsigned int csize = len / no_renderers;
 					buffers[i] = new char[csize];
 					memset(buffers[i],0,csize);
 				
-					if ( bitsPerSample == 8 )
+					if ( bitsPerSample == EIGHT_BIT_PER_SAMPLE )
 					{
 						/* TODO */
 					}
@@ -845,7 +876,6 @@ namespace WinampOpenALOut {
 					renderers[i]->Write(buf,len);
 				}
 			}
-			
 
 			/* now that there is data in the buffers check the play
 			state. if nothing is playing then either a buffer under-run
