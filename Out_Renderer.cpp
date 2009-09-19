@@ -713,7 +713,7 @@ namespace WinampOpenALOut
 		this procedure is invoked by winamp to flush the buffers
 		and start playing from time (t)ms.
 	*/
-	void Output_Renderer::Flush(int tMs)
+	void Output_Renderer::Flush()
 	{
 		SYNC_START;
 

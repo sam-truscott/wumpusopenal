@@ -31,7 +31,7 @@ namespace WinampOpenALOut
 		int IsPlaying();
 		int Pause(int pause);
 		void SetPan(int newPan);
-		void Flush(int newTimeMs);
+		void Flush();
 
 		void SwitchOutputDevice(int device);	
 		inline bool IsStreamOpen()						{ return streamOpen; }
@@ -58,7 +58,7 @@ namespace WinampOpenALOut
 
 		inline ALint GetPosition()
 		{
-			ALint deltaBytes;
+			ALint deltaBytes = 0;
 			alGetSourcei(uiSource, AL_BYTE_OFFSET, &deltaBytes);
 			return deltaBytes;
 		}

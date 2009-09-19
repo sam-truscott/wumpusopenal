@@ -1064,17 +1064,17 @@ namespace WinampOpenALOut {
 		this procedure is invoked by winamp to flush the buffers
 		and start playing from time (t)ms.
 	*/
-	void Output_Wumpus::Flush(int tMs) {
+	void Output_Wumpus::Flush(int newTimeMs) {
 		SYNC_START;
 
 		for ( char i=0 ; i < no_renderers ; i++ )
 		{
-			renderers[i]->Flush(tMs);
+			renderers[i]->Flush();
 		}
 
 		// calculate the number of bytes that will have been
 		// this will relocate to the current device at a set time
-		this->Relocate(Framework::getInstance()->GetCurrentDevice(), tMs,split_out);
+		this->Relocate(Framework::getInstance()->GetCurrentDevice(), newTimeMs,split_out);
 
 		CheckPlayState();
 
@@ -1095,7 +1095,7 @@ namespace WinampOpenALOut {
 
 		for ( char i = 0 ; i < no_renderers ; i++ )
 		{
-			renderers[i]->SetPlayedTime(calcTime);
+			renderers[i]->SetPlayedTime(calcTime / no_renderers);
 		}
 
 		// reset played pointers
