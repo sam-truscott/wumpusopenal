@@ -255,7 +255,10 @@ namespace WinampOpenALOut {
 
 		if ( alIsExtensionPresent("EAX-RAM") == AL_FALSE )
 		{
-			listBoxExtensions->Items->Add("\tMissing XRAM Extension");
+			listBoxExtensions->Items->Add("\tDevice(s) missing XRAM Extension - not supported by OpenAL.");
+			listBoxExtensions->Items->Add("\tThis either means it's not supported by your card or OpenAL");
+			listBoxExtensions->Items->Add("\tis out of date. Try the latest version.");
+			listBoxExtensions->Items->Add("\thttp://connect.creativelabs.com/openal/Downloads/oalinst.zip");
 		}
 		else
 		{
@@ -295,40 +298,6 @@ namespace WinampOpenALOut {
 		}else{
 			listBoxExtensions->Items->Add("Absent: ALC_EXT_EFX");
 		}
-
-		/*if (alcIsExtensionPresent(pDevice, "EAX2.0") == AL_TRUE) {
-			listBoxExtensions->Items->Add("Present: EAX 2.0");
-		}else{
-			listBoxExtensions->Items->Add("Absent: EAX 2.0");
-		}
-
-
-		if (alcIsExtensionPresent(pDevice, "EAX3.0") == AL_TRUE) {
-			listBoxExtensions->Items->Add("Present: EAX 3.0");
-		}else{
-			listBoxExtensions->Items->Add("Absent: EAX 3.0");
-		}
-
-
-		if (alcIsExtensionPresent(pDevice, "EAX4.0") == AL_TRUE) {
-			listBoxExtensions->Items->Add("Present: EAX 4.0");
-		}else{
-			listBoxExtensions->Items->Add("Absent: EAX 4.0");
-		}
-
-
-		if (alcIsExtensionPresent(pDevice, "EAX5.0") == AL_TRUE) {
-			listBoxExtensions->Items->Add("Present: EAX 5.0");
-		}else{
-			listBoxExtensions->Items->Add("Absent: EAX 5.0");
-		}
-
-		if (alIsExtensionPresent( "AL_EXT_float32") == AL_TRUE) {
-			listBoxExtensions->Items->Add("Present: AL_EXT_FLOAT32");
-		}else{
-			listBoxExtensions->Items->Add("Absent: AL_EXT_FLOAT32");
-		}*/
-
 	}
 
 	void Config::UpdateMatrix(char speaker, char xyz, Decimal value)
