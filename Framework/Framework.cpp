@@ -176,6 +176,14 @@ ALboolean Framework::ALFWShutdownOpenAL()
 ALboolean Framework::ALFWIsXRAMSupported()
 {
 	ALboolean bXRAM = AL_FALSE;
+
+	eXRAMSize = NULL;
+	eXRAMFree = NULL;
+	eXRAMAuto = NULL;
+	eXRAMHardware = NULL;
+	eXRAMAccessible = NULL;
+	eaxSetBufferMode = NULL;
+	eaxGetBufferMode = NULL;
 	
 	if (alIsExtensionPresent("EAX-RAM") == AL_TRUE)
 	{

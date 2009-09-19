@@ -39,13 +39,16 @@ namespace WinampOpenALOut {
 		return retVal;
 	}
 
-	float ConfigFile::ReadFloat(char *name)
+	float ConfigFile::ReadFloat(char *name, bool* valid)
 	{
 		char buf[10] = {'\0'};
 		ConfigFile::ReadString(name, buf, DEFAULT_SIZE);
 		
-		float retVal = 0.0f;
+		float retVal = -0.0f;
+		*valid = false;
+
 		if(strlen(buf)>0) {
+			*valid = true;
 			retVal = (float)atof(buf);
 		}
 		return retVal;

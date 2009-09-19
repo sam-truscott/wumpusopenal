@@ -30,6 +30,7 @@ namespace WinampOpenALOut
 		int GetWrittenTime();
 
 		void SwitchOutputDevice(int device);
+		void SwitchOutputDevice(int device, bool isSplit);
 		
 		inline bool IsStreamOpen()						{ return streamOpen; }
 
@@ -72,7 +73,7 @@ namespace WinampOpenALOut
 	protected:
 
 		inline void onError();
-		void Relocate(int device, int currentPosition);
+		void Relocate(int device, int currentPosition, bool isSplit);
 
 		void CheckProcessedBuffers();
 		void CheckPlayState();

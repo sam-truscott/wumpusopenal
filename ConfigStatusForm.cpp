@@ -117,6 +117,12 @@ namespace WinampOpenALOut {
 	void Config::ApplyChanges()
 	{
 		Int32 newDevice = comboBoxDevices->SelectedIndex;
+
+		if ( ptrOw->IsSplit() != checkBoxSplit->Checked )
+		{
+			ptrOw->SetSplit( checkBoxSplit->Checked );
+		}
+
 		if(newDevice != currentDevice && newDevice != -1) {
 			// if we've changed device switch device and save
 			ConfigFile::WriteInteger(CONF_DEVICE, newDevice);
@@ -154,11 +160,6 @@ namespace WinampOpenALOut {
 		{
 			ptrOw->get_effects()->set_enabled(checkBoxEfxEnabled->Checked);
 			ConfigFile::WriteBoolean(CONF_EFX_ENABLED, checkBoxEfxEnabled->Checked);
-		}
-
-		if ( ptrOw->IsSplit() != checkBoxSplit->Checked )
-		{
-			ptrOw->SetSplit( checkBoxSplit->Checked );
 		}
 
 		ptrOw->SetMatrix(matrix);
@@ -236,10 +237,57 @@ namespace WinampOpenALOut {
 		// get the device
 		ALCdevice* pDevice = alcGetContextsDevice(alcGetCurrentContext());
 		
-		if (Framework::getInstance()->ALFWIsXRAMSupportedDevice(pDevice) == AL_TRUE) {
+		if (Framework::getInstance()->ALFWIsXRAMSupported() == AL_TRUE) {
 			listBoxExtensions->Items->Add("Present: EAX-RAM");
 		}else{
 			listBoxExtensions->Items->Add("Absent: EAX-RAM");
+		}
+
+		if ( eXRAMSize != NULL )
+		{
+			listBoxExtensions->Items->Add("XRAM Size: " + alGetInteger(eXRAMSize)/(1024*1024) + "MB" );
+		}
+
+		if ( eXRAMFree != NULL )
+		{
+			listBoxExtensions->Items->Add("XRAM Free: " + alGetInteger(eXRAMFree)/(1024*1024) + "MB" );
+		}
+
+		if ( alIsExtensionPresent("EAX-RAM") == AL_FALSE )
+		{
+			listBoxExtensions->Items->Add("\tMissing XRAM Extension");
+		}
+		else
+		{
+			if ( eaxGetBufferMode == NULL )
+			{
+				listBoxExtensions->Items->Add("\teaxGetBufferMode not found");
+			}
+			if ( eaxSetBufferMode == NULL )
+			{
+				listBoxExtensions->Items->Add("\teaxSetBufferMode not found");
+			}
+			if ( eXRAMAuto == NULL )
+			{
+				listBoxExtensions->Items->Add("\teXRAMAuto not found");
+			}
+			if ( eXRAMHardware == NULL )
+			{
+				listBoxExtensions->Items->Add("\teXRAMHardware not found");
+			}
+			if ( eXRAMAccessible == NULL )
+			{
+				listBoxExtensions->Items->Add("\teXRAMAccessible not found");
+			}
+			if ( eXRAMSize == NULL )
+			{
+				listBoxExtensions->Items->Add("\teXRAMSize not found");
+			}
+			if ( eXRAMFree == NULL )
+			{
+				listBoxExtensions->Items->Add("\teXRAMFree not found");
+			}
+			
 		}
 
 		if (alcIsExtensionPresent(pDevice, "ALC_EXT_EFX") == AL_TRUE) {

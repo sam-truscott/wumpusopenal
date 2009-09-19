@@ -173,6 +173,9 @@ private: System::Windows::Forms::Label^  label30;
 private: System::Windows::Forms::Label^  label31;
 private: System::Windows::Forms::Label^  label32;
 private: System::Windows::Forms::Label^  label33;
+private: System::Windows::Forms::Label^  label36;
+private: System::Windows::Forms::Label^  label35;
+private: System::Windows::Forms::Label^  label34;
 
 
 
@@ -330,6 +333,9 @@ private: System::ComponentModel::IContainer^  components;
 			this->buttonOk = (gcnew System::Windows::Forms::Button());
 			this->buttonCancel = (gcnew System::Windows::Forms::Button());
 			this->buttonApply = (gcnew System::Windows::Forms::Button());
+			this->label34 = (gcnew System::Windows::Forms::Label());
+			this->label35 = (gcnew System::Windows::Forms::Label());
+			this->label36 = (gcnew System::Windows::Forms::Label());
 			this->tabConfiguration->SuspendLayout();
 			this->tabPageConfig->SuspendLayout();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->trackBufferLength))->BeginInit();
@@ -391,11 +397,12 @@ private: System::ComponentModel::IContainer^  components;
 			this->checkBoxXRAM->AutoSize = true;
 			this->checkBoxXRAM->Location = System::Drawing::Point(6, 256);
 			this->checkBoxXRAM->Name = L"checkBoxXRAM";
-			this->checkBoxXRAM->Size = System::Drawing::Size(187, 17);
+			this->checkBoxXRAM->Size = System::Drawing::Size(266, 17);
 			this->checkBoxXRAM->TabIndex = 16;
-			this->checkBoxXRAM->Text = L"Use XRAM (small performance hit)";
+			this->checkBoxXRAM->Text = L"Use XRAM (use 4000ms buffer for maximum effect)";
 			this->toolTipWarning->SetToolTip(this->checkBoxXRAM, L"XRAM isn\'t designed for streaming as there\'s a CPU hit constantly uploading small" 
-				L" bits of data. You can use XRAM but it isn\'t recommended.");
+				L" bits of data. Therefore use the largest buffer size as small buffer sizes will " 
+				L"cause issues!");
 			this->checkBoxXRAM->UseVisualStyleBackColor = true;
 			// 
 			// checkBoxExpandStereo
@@ -403,9 +410,9 @@ private: System::ComponentModel::IContainer^  components;
 			this->checkBoxExpandStereo->AutoSize = true;
 			this->checkBoxExpandStereo->Location = System::Drawing::Point(6, 302);
 			this->checkBoxExpandStereo->Name = L"checkBoxExpandStereo";
-			this->checkBoxExpandStereo->Size = System::Drawing::Size(276, 17);
+			this->checkBoxExpandStereo->Size = System::Drawing::Size(234, 17);
 			this->checkBoxExpandStereo->TabIndex = 15;
-			this->checkBoxExpandStereo->Text = L"Expand Stereo to 4.0 (also has small performance hit)";
+			this->checkBoxExpandStereo->Text = L"Expand Stereo to 4.0 (small performance hit)";
 			this->toolTipWarning->SetToolTip(this->checkBoxExpandStereo, L"This expands Stereo (2.0) sound out to Quad (4.0) sound. Data has to be copied in" 
 				L" RAM so there\'s a performance cost.");
 			this->checkBoxExpandStereo->UseVisualStyleBackColor = true;
@@ -415,9 +422,9 @@ private: System::ComponentModel::IContainer^  components;
 			this->checkBoxExpandMono->AutoSize = true;
 			this->checkBoxExpandMono->Location = System::Drawing::Point(6, 279);
 			this->checkBoxExpandMono->Name = L"checkBoxExpandMono";
-			this->checkBoxExpandMono->Size = System::Drawing::Size(262, 17);
+			this->checkBoxExpandMono->Size = System::Drawing::Size(230, 17);
 			this->checkBoxExpandMono->TabIndex = 14;
-			this->checkBoxExpandMono->Text = L"Expand Mono to 4.0 (again, small performance hit)";
+			this->checkBoxExpandMono->Text = L"Expand Mono to 4.0 (small performance hit)";
 			this->toolTipWarning->SetToolTip(this->checkBoxExpandMono, L"This expands Mono (1.0) sound out to Quad (4.0) sound. Data has to be copied in R" 
 				L"AM so there\'s a performance cost.");
 			this->checkBoxExpandMono->UseVisualStyleBackColor = true;
@@ -490,6 +497,9 @@ private: System::ComponentModel::IContainer^  components;
 			// 
 			// tabPageEffects
 			// 
+			this->tabPageEffects->Controls->Add(this->label36);
+			this->tabPageEffects->Controls->Add(this->label35);
+			this->tabPageEffects->Controls->Add(this->label34);
 			this->tabPageEffects->Controls->Add(this->label28);
 			this->tabPageEffects->Controls->Add(this->label29);
 			this->tabPageEffects->Controls->Add(this->label30);
@@ -963,9 +973,9 @@ private: System::ComponentModel::IContainer^  components;
 			this->checkBoxSplit->AutoSize = true;
 			this->checkBoxSplit->Location = System::Drawing::Point(6, 40);
 			this->checkBoxSplit->Name = L"checkBoxSplit";
-			this->checkBoxSplit->Size = System::Drawing::Size(133, 17);
+			this->checkBoxSplit->Size = System::Drawing::Size(136, 17);
 			this->checkBoxSplit->TabIndex = 3;
-			this->checkBoxSplit->Text = L"Enable 3D and Effects";
+			this->checkBoxSplit->Text = L"Enable 3D and Effects ";
 			this->toolTipWarning->SetToolTip(this->checkBoxSplit, L"This requires the plug-in to seperate the data into Mono streams, CPU usage will " 
 				L"increase.");
 			this->checkBoxSplit->UseVisualStyleBackColor = true;
@@ -1168,6 +1178,33 @@ private: System::ComponentModel::IContainer^  components;
 			this->buttonApply->UseVisualStyleBackColor = true;
 			this->buttonApply->Click += gcnew System::EventHandler(this, &Config::buttonApply_Click_1);
 			// 
+			// label34
+			// 
+			this->label34->AutoSize = true;
+			this->label34->Location = System::Drawing::Point(153, 24);
+			this->label34->Name = L"label34";
+			this->label34->Size = System::Drawing::Size(92, 13);
+			this->label34->TabIndex = 48;
+			this->label34->Text = L"-x is left, +x is right";
+			// 
+			// label35
+			// 
+			this->label35->AutoSize = true;
+			this->label35->Location = System::Drawing::Point(153, 37);
+			this->label35->Name = L"label35";
+			this->label35->Size = System::Drawing::Size(96, 13);
+			this->label35->TabIndex = 49;
+			this->label35->Text = L"-y is down, +y is up";
+			// 
+			// label36
+			// 
+			this->label36->AutoSize = true;
+			this->label36->Location = System::Drawing::Point(153, 50);
+			this->label36->Name = L"label36";
+			this->label36->Size = System::Drawing::Size(117, 13);
+			this->label36->TabIndex = 50;
+			this->label36->Text = L"-z is forward, +z is back";
+			// 
 			// Config
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
@@ -1250,6 +1287,7 @@ private: System::Void buttonReset_Click_1(System::Object^  sender, System::Event
 			 checkBoxExpandMono->Checked = false;
 			 checkBoxExpandStereo->Checked = false;
 			 checkBoxSplit->Checked = false;
+			 //numFRx->Text =
 		 }
 private: System::Void Config_Unload(System::Object^  sender, System::EventArgs^  e) {
 			 overRide = true;

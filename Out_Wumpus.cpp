@@ -10,6 +10,16 @@
 	#include <crtdbg.h>
 #endif
 
+static const float DEFAULT_MATRIX[MAX_RENDERERS][3] = 
+{
+	{-12.50	,0.0,	-10.0},
+	{12.50	,0.0,	-10.0},
+	{0.0	,0.0,	0.0},
+	{0.0	,0.0,	0.0},
+	{0.0	,0.0,	0.0},
+	{0.0	,0.0,	0.0}
+};
+
 #define SYNC_START EnterCriticalSection(&criticalSection)
 #define SYNC_END LeaveCriticalSection(&criticalSection)
 
@@ -106,16 +116,16 @@ namespace WinampOpenALOut {
 
 	void Output_Wumpus::SwitchOutputDevice(int device)
 	{
-		for ( char i=0 ; i<no_renderers ; i++)
-		{
-			this->renderers[i]->Close();
-		}
-
-		/* stop the source so we dont hear anthing else */
-		this->Relocate(device, GetOutputTime());
+		SwitchOutputDevice(device, split_out);
 	}
 
-	void Output_Wumpus::Relocate(int device, int currentPosition) {
+	void Output_Wumpus::SwitchOutputDevice(int device, bool isSplit)
+	{
+		/* stop the source so we dont hear anthing else */
+		this->Relocate(device, GetOutputTime(),isSplit);
+	}
+
+	void Output_Wumpus::Relocate(int device, int currentPosition, bool isSplit) {
 
 		SYNC_START;
 
@@ -141,6 +151,8 @@ namespace WinampOpenALOut {
 			// re-initialise openal
 			Framework::getInstance()->ALFWInitOpenAL(device);
 		}
+
+		split_out = isSplit;
 		
 		if(tempStreamOpen) 
 		{
@@ -372,8 +384,8 @@ namespace WinampOpenALOut {
 					dbg,
 					DEBUG_BUFFER_SIZE,
 					"-> Detect XRAM, Size {%d}MB, Free {%d}MB",
-					alGetEnumValue("AL_EAX_RAM_SIZE") / (1024 * 1024),
-					alGetEnumValue("AL_EAX_RAM_FREE") / (1024 * 1024) );
+					alGetInteger(eXRAMSize) / (1024 * 1024),
+					alGetInteger(eXRAMFree) / (1024 * 1024) );
 				this->log_debug_msg(dbg, __FILE__, __LINE__);
 #endif
 				this->xram_detected = true;
@@ -390,9 +402,32 @@ namespace WinampOpenALOut {
 		for (char i=0 ; i < MAX_RENDERERS ; i++ )
 		{
 			setting[9] = i + '0';
-			setting[7] = 'x';	speaker_matrix.speakers[i].x = ConfigFile::ReadFloat(setting);
-			setting[7] = 'y';	speaker_matrix.speakers[i].y = ConfigFile::ReadFloat(setting);
-			setting[7] = 'z';	speaker_matrix.speakers[i].z = ConfigFile::ReadFloat(setting);
+			bool valid = false;
+			float temp;
+			setting[7] = 'x';
+			temp = ConfigFile::ReadFloat(setting, &valid);
+			if ( valid )
+			{
+				speaker_matrix.speakers[i].x = temp;
+			} else {
+				speaker_matrix.speakers[i].x = DEFAULT_MATRIX[i][0];
+			}
+			setting[7] = 'y';
+			temp = ConfigFile::ReadFloat(setting, &valid);
+			if ( valid )
+			{
+				speaker_matrix.speakers[i].y = temp;
+			} else {
+				speaker_matrix.speakers[i].y = DEFAULT_MATRIX[i][1];
+			}
+			setting[7] = 'z';
+			temp = ConfigFile::ReadFloat(setting, &valid);
+			if ( valid )
+			{
+				speaker_matrix.speakers[i].z = temp;
+			} else {
+				speaker_matrix.speakers[i].z = DEFAULT_MATRIX[i][2];
+			}
 		}
 
 		SYNC_END;
@@ -1017,9 +1052,9 @@ namespace WinampOpenALOut {
 
 		this procedure is invoked by winamp to set the pan
 	*/
-	void Output_Wumpus::SetPan(int pan)
+	void Output_Wumpus::SetPan(int newPan)
 	{
-		ALfloat f = pan/255.0f; 
+		ALfloat f = ((ALfloat)newPan)/255.0f; 
 		alListener3f(AL_POSITION, -f ,0.0,0.0);
 	}
 
@@ -1039,7 +1074,7 @@ namespace WinampOpenALOut {
 
 		// calculate the number of bytes that will have been
 		// this will relocate to the current device at a set time
-		this->Relocate(Framework::getInstance()->GetCurrentDevice(), tMs);
+		this->Relocate(Framework::getInstance()->GetCurrentDevice(), tMs,split_out);
 
 		CheckPlayState();
 
@@ -1125,11 +1160,9 @@ namespace WinampOpenALOut {
 				total_played += (renderers[i]->GetPlayedTime() + renderers[i]->GetPosition());
 			}
 			
-			//total_played += (renderers[0]->GetPlayedTime() + renderers[0]->GetPosition());
 
 			// this works it out how many bytes it is
 			currentOutputTime = total_played;
-
 			// this converts bytes to ms and does 32bit part
 			currentOutputTime =
 				get_current_output_time(currentOutputTime, sampleRate)
@@ -1159,8 +1192,8 @@ namespace WinampOpenALOut {
 
 	void Output_Wumpus::SetSplit ( bool split )
 	{
-		split_out = split;
 		ConfigFile::WriteBoolean(CONF_SPLIT,split_out);
+		SwitchOutputDevice(Framework::getInstance()->GetCurrentDevice(),split);
 	}
 
 	void Output_Wumpus::SetXRAMEnabled( bool enabled )
