@@ -200,7 +200,9 @@ ALboolean Framework::ALFWIsXRAMSupported()
 			eXRAMAccessible = alGetEnumValue("AL_STORAGE_ACCESSIBLE");
 
 			if (eXRAMSize && eXRAMFree && eXRAMAuto && eXRAMHardware && eXRAMAccessible)
+			{
 				bXRAM = AL_TRUE;
+			}
 		}
 	}
 

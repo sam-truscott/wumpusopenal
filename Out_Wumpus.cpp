@@ -562,7 +562,7 @@ namespace WinampOpenALOut {
 			for ( unsigned char i=0 ; i < numberOfChannels ; i++ )
 			{
 				renderers[i] = new Output_Renderer(c_bufferLength, i, effects);
-				renderers[i]->SetXRAMEnabled(true);
+				renderers[i]->SetXRAMEnabled(use_xram);
 				renderers[i]->Open(samplerate,1,bitspersamp,0,0);
 				no_renderers++;
 			}
@@ -570,7 +570,7 @@ namespace WinampOpenALOut {
 		else
 		{
 			renderers[0] = new Output_Renderer(c_bufferLength, 0, effects);
-			renderers[0]->SetXRAMEnabled(true);
+			renderers[0]->SetXRAMEnabled(use_xram);
 			renderers[0]->Open(samplerate,numchannels,bitspersamp,0,0);
 			no_renderers++;
 		}
@@ -598,20 +598,6 @@ namespace WinampOpenALOut {
 
 		// allocate some buffers
 		alGetError();
-
-#ifdef _DEBUG
-		if ( xram_detected == true && 
-				xram_enabled == true )
-		{
-			sprintf_s(
-				dbg, 
-				DEBUG_BUFFER_SIZE, 
-				"--> {%d} Buffers from {%d} were stored in XRAM OK", 
-				in_xram_ok, 
-				noBuffers);
-			log_debug_msg(dbg, __FILE__, __LINE__);
-		}
-#endif
 
 		// set the volume for the source
 		this->SetVolumeInternal(volume);
