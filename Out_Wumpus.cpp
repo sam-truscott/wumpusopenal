@@ -1192,7 +1192,7 @@ namespace WinampOpenALOut {
 
 	void Output_Wumpus::SetSplit ( bool split )
 	{
-		ConfigFile::WriteBoolean(CONF_SPLIT,split_out);
+		ConfigFile::WriteBoolean(CONF_SPLIT,split);
 		SwitchOutputDevice(Framework::getInstance()->GetCurrentDevice(),split);
 	}
 
@@ -1206,6 +1206,7 @@ namespace WinampOpenALOut {
 
 		xram_enabled = enabled;
 		ConfigFile::WriteBoolean(CONF_XRAM_ENABLED,xram_enabled);
+		SwitchOutputDevice(Framework::getInstance()->GetCurrentDevice(),split_out);
 	}
 
 	Output_Effects* Output_Wumpus::get_effects()

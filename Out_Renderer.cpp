@@ -348,7 +348,9 @@ namespace WinampOpenALOut
 
 			/* if xram is enabled write the buffer to XRAM */
 			if ( xram_enabled == true &&
-				alGetEnumValue("AL_EAX_RAM_FREE") > 0)
+				alGetEnumValue("AL_EAX_RAM_FREE") > 0 &&
+				eaxSetBufferMode > NULL &&
+				eXRAMHardware > NULL)
 			{
 				ALboolean inhw = eaxSetBufferMode(
 					1,
