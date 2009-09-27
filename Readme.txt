@@ -1,7 +1,7 @@
 Wumpus Out OpenAL is copyright (c) 2009 by Sam Truscott.
 =======================================================
 
-Wumpus Out OpenAL v0.9.5
+Wumpus Out OpenAL v0.9.6
 ========================
 
 	Requirements
@@ -31,6 +31,11 @@ Wumpus Out OpenAL v0.9.5
 
 Change Log
 ==========
+
+	v0.9.6
+	======
+	* Fixed - XRAM detection/utilisation
+	* Fixed - Audio cut off at the end
 
 	v0.9.5
 	======

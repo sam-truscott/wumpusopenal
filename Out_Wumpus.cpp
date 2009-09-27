@@ -189,10 +189,13 @@ namespace WinampOpenALOut {
 
 	void Output_Wumpus::CheckPlayState()
 	{
-		/* TODO */
+		this->isPlaying = false;
+
 		for ( char i=0 ; i < no_renderers ; i++ )
 		{
 			this->renderers[i]->CheckPlayState();
+
+			this->isPlaying |= this->renderers[i]->IsPlaying();
 		}
 	}
 
@@ -864,7 +867,21 @@ namespace WinampOpenALOut {
 				
 					if ( bitsPerSample == EIGHT_BIT_PER_SAMPLE )
 					{
-						/* TODO */
+						/* create buffers for src/dst*/
+						char *dst = (char*)buffers[i], *src = (char*)buf;
+						/* offset the channel number */
+						src+=i;
+
+						/* work out top range */
+						const char* to = dst + (csize);
+
+						/* copy over */
+						while(dst < to)
+						{
+							*dst = *src;
+							dst++;
+							src += no_renderers;
+						}
 					}
 					else
 					{
