@@ -399,7 +399,7 @@ private: System::ComponentModel::IContainer^  components;
 			this->checkBoxXRAM->Name = L"checkBoxXRAM";
 			this->checkBoxXRAM->Size = System::Drawing::Size(266, 17);
 			this->checkBoxXRAM->TabIndex = 16;
-			this->checkBoxXRAM->Text = L"Use XRAM (use 4000ms buffer for maximum effect)";
+			this->checkBoxXRAM->Text = L"Use XRAM (use 8000ms buffer for maximum effect)";
 			this->toolTipWarning->SetToolTip(this->checkBoxXRAM, L"XRAM isn\'t designed for streaming as there\'s a CPU hit constantly uploading small" 
 				L" bits of data. Therefore use the largest buffer size as small buffer sizes will " 
 				L"cause issues!");
@@ -450,7 +450,7 @@ private: System::ComponentModel::IContainer^  components;
 			// 
 			this->trackBufferLength->LargeChange = 500;
 			this->trackBufferLength->Location = System::Drawing::Point(9, 50);
-			this->trackBufferLength->Maximum = 4000;
+			this->trackBufferLength->Maximum = 8000;
 			this->trackBufferLength->Minimum = 250;
 			this->trackBufferLength->Name = L"trackBufferLength";
 			this->trackBufferLength->Size = System::Drawing::Size(386, 45);

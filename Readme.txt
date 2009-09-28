@@ -1,7 +1,7 @@
 Wumpus Out OpenAL is copyright (c) 2009 by Sam Truscott.
 =======================================================
 
-Wumpus Out OpenAL v0.9.6
+Wumpus Out OpenAL v0.9.7
 ========================
 
 	Requirements
@@ -24,14 +24,21 @@ Wumpus Out OpenAL v0.9.6
 	* Expand Mono and Stereo to 4.0 (small performance hit)
 	* 3D, move your speakers around
 	* Reverb effects
+	* XRAM support
 
 	Known Issues
 	============
-	* No 24bit audio support
+	* No 24bit audio support, OpenAL doesn't support it
 
 Change Log
 ==========
 
+	v0.9.7
+	======
+	* Added - mono & stereo expansion back in
+	* Changed - maximum buffer size to 8 seconds (8000ms)
+		to better support XRAM
+	
 	v0.9.6
 	======
 	* Fixed - XRAM detection/utilisation
