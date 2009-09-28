@@ -133,7 +133,7 @@ namespace WinampOpenALOut {
 		// and the format of the data
 		unsigned int tempSampleRate = sampleRate;
 		unsigned int tempBitsPerSample = bitsPerSample;
-		unsigned int tempNumberOfChannels = numberOfChannels;
+		unsigned int tempNumberOfChannels = originalNumberOfChannels;
 
 		// shut down the thread and wait for it to shutdown
 		bool tempStreamOpen = streamOpen;
@@ -559,6 +559,17 @@ namespace WinampOpenALOut {
 			effects->setup();
 		}
 
+		/* stereo and mono expansion */
+		originalNumberOfChannels = this->numberOfChannels;
+		if ( this->stereoExpand && this->numberOfChannels == 2)
+		{
+			this->numberOfChannels += 2;
+		}
+		else if ( this->monoExpand && this->numberOfChannels == 1)
+		{
+			this->numberOfChannels += 3;
+		}
+
 		no_renderers = 0;
 		if ( split_out == true )
 		{
@@ -574,7 +585,7 @@ namespace WinampOpenALOut {
 		{
 			renderers[0] = new Output_Renderer(c_bufferLength, 0, effects);
 			renderers[0]->SetXRAMEnabled(use_xram);
-			renderers[0]->Open(samplerate,numchannels,bitspersamp,0,0);
+			renderers[0]->Open(samplerate,this->numberOfChannels,bitspersamp,0,0);
 			no_renderers++;
 		}
 
@@ -734,123 +745,111 @@ namespace WinampOpenALOut {
 				temp_size = 0; 
 			}
 			
-//			// ############## MONO EXPANSION
-//
-//			if(monoExpand) {
-//				// we're writing out four as much data so
-//				// increase this value by three more times
-//				const unsigned int new_len = (len*4);
-//
-//				// expand buffer here
-//				char* newBuffer = new char[new_len];
-//#ifdef _DEBUG
-//				memset(newBuffer, 0, new_len);
-//#endif
-//
-//				// set relative value to zero
-//				unsigned int nPos = 0;
-//
-//				const unsigned char sampleSize = 
-//					((bitsPerSample == 8) ? ONE_BYTE_SAMPLE : TWO_BYTE_SAMPLE);
-//				
-//				/* expand the samples out */
-//				for(unsigned int pos=0; pos < len; pos++) {
-//
-//					if ( sampleSize == ONE_BYTE_SAMPLE)
-//					{
-//						newBuffer[nPos++] = buf[pos];
-//						newBuffer[nPos++] = buf[pos];
-//						newBuffer[nPos++] = buf[pos];
-//						newBuffer[nPos++] = buf[pos];
-//					}
-//					else
-//					{
-//						const short* src = (short*)(buf + pos);
-//						short* dst_a = (short*)(newBuffer + nPos);
-//						short* dst_b = (short*)(newBuffer + nPos + TWO_BYTE_SAMPLE);
-//						short* dst_c = (short*)(newBuffer + nPos + (TWO_BYTE_SAMPLE * 2));
-//						short* dst_d = (short*)(newBuffer + nPos + (TWO_BYTE_SAMPLE * 4));
-//
-//						(*dst_a) = (*src);
-//						(*dst_b) = (*src);
-//						(*dst_c) = (*src);
-//						(*dst_d) = (*src);
-//
-//						nPos += (sampleSize * 4);
-//						pos += sampleSize;
-//					}
-//				}
-//
-//				buf = newBuffer;
-//				len = new_len;
-//				/* we're using the internal buffer on the heap now */
-//				if ( uiBuffers[selectedBuffer].data != NULL )
-//				{
-//					delete uiBuffers[selectedBuffer].data;
-//					uiBuffers[selectedBuffer].data = NULL;
-//				}
-//				uiBuffers[selectedBuffer].data = buf;
-//			}
-//
-//			// ############## END MONO EXPANSION
-//
-//			// ############## STEREO EXPANSION
-//
-//			if(stereoExpand) {
-//
-//				// we're writing out twice as much data so
-//				// increase this value again
-//				const unsigned int new_len = len * 2;
-//
-//				// expand buffer here
-//				char* newBuffer = new char[new_len];
-//#ifdef _DEBUG
-//				memset(newBuffer, 0, new_len);
-//#endif
-//
-//				unsigned int nPos = 0;
-//				const unsigned char sampleSize = 
-//					((bitsPerSample == 8) ? TWO_BYTE_SAMPLE : FOUR_BYTE_SAMPLE);
-//				
-//				/* expand the samples out */
-//				for(unsigned int pos=0; pos < len;)
-//				{
-//					if ( sampleSize == TWO_BYTE_SAMPLE )
-//					{
-//						const short* src = (short*)(buf + pos);
-//						short* dst_a = (short*)(newBuffer + nPos);
-//						short* dst_b = (short*)(newBuffer + nPos + TWO_BYTE_SAMPLE);
-//
-//						(*dst_a) = (*src);
-//						(*dst_b) = (*src);
-//					}
-//					else
-//					{
-//						const unsigned int* src = 
-//							(const unsigned int*)(buf + pos);
-//						unsigned int* dst_a = 
-//							(unsigned int*)(newBuffer + nPos);
-//						unsigned int* dst_b = 
-//							(unsigned int*)(newBuffer + nPos + FOUR_BYTE_SAMPLE);
-//
-//						(*dst_a) = (*src);
-//						(*dst_b) = (*src);
-//					}
-//
-//					nPos += (sampleSize * 2);
-//					pos += sampleSize;
-//				}
-//
-//				len = new_len;
-//				buf = newBuffer;
-//				/* we're using the internal buffer on the heap now */
-//				if ( uiBuffers[selectedBuffer].data != NULL )
-//				{
-//					delete uiBuffers[selectedBuffer].data;
-//					uiBuffers[selectedBuffer].data = NULL;
-//				}
-//				uiBuffers[selectedBuffer].data = buf;
-//			}
+			// ############## MONO EXPANSION
+
+			if(monoExpand) {
+				// we're writing out four as much data so
+				// increase this value by three more times
+				const unsigned int new_len = (len*4);
+
+				// expand buffer here
+				char* newBuffer = new char[new_len];
+#ifdef _DEBUG
+				memset(newBuffer, 0, new_len);
+#endif
+
+				// set relative value to zero
+				int nPos = 0;
+
+				const unsigned char sampleSize = 
+					((bitsPerSample == 8) ? ONE_BYTE_SAMPLE : TWO_BYTE_SAMPLE);
+				
+				/* expand the samples out */
+				for(int pos=0; pos < len; pos++) {
+
+					if ( sampleSize == ONE_BYTE_SAMPLE)
+					{
+						newBuffer[nPos++] = buf[pos];
+						newBuffer[nPos++] = buf[pos];
+						newBuffer[nPos++] = buf[pos];
+						newBuffer[nPos++] = buf[pos];
+					}
+					else
+					{
+						const short* src = (short*)(buf + pos);
+						short* dst_a = (short*)(newBuffer + nPos);
+						short* dst_b = (short*)(newBuffer + nPos + TWO_BYTE_SAMPLE);
+						short* dst_c = (short*)(newBuffer + nPos + (TWO_BYTE_SAMPLE * 2));
+						short* dst_d = (short*)(newBuffer + nPos + (TWO_BYTE_SAMPLE * 4));
+
+						(*dst_a) = (*src);
+						(*dst_b) = (*src);
+						(*dst_c) = (*src);
+						(*dst_d) = (*src);
+
+						nPos += (sampleSize * 4);
+						pos += sampleSize;
+					}
+				}
+
+				delete buf;
+				buf = newBuffer;
+				len = new_len;
+			}
+
+			// ############## END MONO EXPANSION
+
+			// ############## STEREO EXPANSION
+
+			if(stereoExpand) {
+
+				// we're writing out twice as much data so
+				// increase this value again
+				const unsigned int new_len = len * 2;
+
+				// expand buffer here
+				char* newBuffer = new char[new_len];
+#ifdef _DEBUG
+				memset(newBuffer, 0, new_len);
+#endif
+
+				int nPos = 0;
+				const unsigned char sampleSize = 
+					((bitsPerSample == 8) ? TWO_BYTE_SAMPLE : FOUR_BYTE_SAMPLE);
+				
+				/* expand the samples out */
+				for(int pos=0; pos < len;)
+				{
+					if ( sampleSize == TWO_BYTE_SAMPLE )
+					{
+						const short* src = (short*)(buf + pos);
+						short* dst_a = (short*)(newBuffer + nPos);
+						short* dst_b = (short*)(newBuffer + nPos + TWO_BYTE_SAMPLE);
+
+						(*dst_a) = (*src);
+						(*dst_b) = (*src);
+					}
+					else
+					{
+						const unsigned int* src = 
+							(const unsigned int*)(buf + pos);
+						unsigned int* dst_a = 
+							(unsigned int*)(newBuffer + nPos);
+						unsigned int* dst_b = 
+							(unsigned int*)(newBuffer + nPos + FOUR_BYTE_SAMPLE);
+
+						(*dst_a) = (*src);
+						(*dst_b) = (*src);
+					}
+
+					nPos += (sampleSize * 2);
+					pos += sampleSize;
+				}
+
+				len = new_len;
+				delete buf;
+				buf = newBuffer;
+			}
 
 			total_written += len;
 

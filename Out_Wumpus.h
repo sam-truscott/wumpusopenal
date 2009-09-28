@@ -104,6 +104,7 @@ namespace WinampOpenALOut
 		unsigned int	sampleRate;
 		// integer to store the number of channels
 		unsigned int	numberOfChannels;
+		unsigned int	originalNumberOfChannels;
 		// integer to store the bits per second
 		unsigned int	bitsPerSample;
 		// integer to store the number of buffers we'll use
