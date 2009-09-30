@@ -50,7 +50,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				Optimization="3"
+				Optimization="2"
 				InlineFunctionExpansion="2"
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
@@ -86,17 +86,16 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="&quot;$(OPENAL_SDK_DIR)\libs\Win32\OpenAL32.lib&quot; &quot;$(OPENAL_SDK_DIR)\libs\Win32\EFX-Util_MTDLL\EFX-Util.lib&quot;"
 				OutputFile="$(PROGRAMFILES)\Winamp\Plugins\out_openal.dll"
-				Version="0.9.0"
+				Version="0.9.7"
 				LinkIncremental="1"
 				IgnoreDefaultLibraryNames=""
 				ModuleDefinitionFile="Exports.def"
-				SubSystem="1"
+				SubSystem="2"
 				LargeAddressAware="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
 				LinkTimeCodeGeneration="1"
 				ImportLibrary=".\Release/out_openal.lib"
-				TargetMachine="1"
 			/>
 			<Tool
 				Name="VCALinkTool"
