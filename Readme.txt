@@ -1,8 +1,8 @@
 Wumpus Out OpenAL is copyright (c) 2009 by Sam Truscott.
 =======================================================
 
-Wumpus Out OpenAL v0.9.7
-========================
+Wumpus Out OpenAL v0.9.7.1
+==========================
 
 	Requirements
 	============
@@ -33,10 +33,10 @@ Wumpus Out OpenAL v0.9.7
 Change Log
 ==========
 
-	v0.9.7
+	v0.9.7.1
 	======
 	* Added - mono & stereo expansion back in
-	* Changed - maximum buffer size to 8 seconds (8000ms)
+	* Changed - maximum buffer size to 6 seconds (6000ms)
 		to better support XRAM
 	
 	v0.9.6

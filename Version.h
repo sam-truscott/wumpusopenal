@@ -1,4 +1,4 @@
-#define PI_VER2 "v0.9.7"
+#define PI_VER2 "v0.9.7.1"
 
 #ifdef __alpha
 #define PI_VER PI_VER2 " (AXP)"
