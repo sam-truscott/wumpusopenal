@@ -180,7 +180,6 @@ namespace WinampOpenALOut {
 
 	void Output_Wumpus::CheckProcessedBuffers() 
 	{
-		/* TODO */
 		for ( char i=0 ; i < no_renderers ; i++ )
 		{
 			this->renderers[i]->CheckProcessedBuffers();
@@ -531,6 +530,7 @@ namespace WinampOpenALOut {
 		lastPause = 0;
 
 		temp_size = 0;
+		memset(temp, 0, sizeof(temp));
 
 		// determine the size of the buffer
 		bytesPerSampleChannel = ((bitsPerSample >> SHIFT_BITS_TO_BYTES)*numberOfChannels);
@@ -663,6 +663,8 @@ namespace WinampOpenALOut {
 		total_written = ZERO_TIME;
 		lastOutputTime = ZERO_TIME;
 		lastWrittenTime = ZERO_TIME;
+		temp_size = 0;
+		memset(temp, 0, sizeof(temp));
 
 		SYNC_END;
 
