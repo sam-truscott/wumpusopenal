@@ -255,10 +255,6 @@
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 			>
 			<File
-				RelativePath=".\Clock.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\ConfigFile.cpp"
 				>
 				<FileConfiguration
@@ -362,10 +358,6 @@
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl"
 			>
-			<File
-				RelativePath=".\Clock.h"
-				>
-			</File>
 			<File
 				RelativePath=".\ConfigFile.h"
 				>

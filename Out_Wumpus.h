@@ -3,7 +3,6 @@
 
 #include "Constants.h"
 #include "Framework\Framework.h"
-#include "Clock.h"
 
 namespace WinampOpenALOut
 {
@@ -52,7 +51,7 @@ namespace WinampOpenALOut
 		void SetMonoExpanded(bool expanded);
 
 		inline bool IsXRAMEnabled() { return xram_enabled; }
-		inline void SetXRAMEnabled( bool enabled );
+		void SetXRAMEnabled( bool enabled );
 
 		inline bool IsSplit() { return split_out; }
 		void SetSplit ( bool split );
@@ -133,9 +132,7 @@ namespace WinampOpenALOut
 		int			lastWrittenTime;
 #define TEMP_BUFFER_SIZE MAXIMUM_BUFFER_SIZE * 2
 		char		temp[TEMP_BUFFER_SIZE];
-		unsigned int temp_size;
-
-		Time_Type		lastCheckBuffers;
+		int temp_size;
 
 		// used to store the configuration buffer length
 		unsigned int	c_bufferLength;

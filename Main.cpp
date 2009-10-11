@@ -50,6 +50,7 @@ void WAOP_Initialise()
 {
 	//_CrtSetBreakAlloc(220);
 	//_CrtSetBreakAlloc(202);
+	//_CrtSetBreakAlloc(280);
 
 	if(outputWumpus)
 	{

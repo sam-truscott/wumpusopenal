@@ -4,7 +4,6 @@
 #include "al.h"
 #include "Constants.h"
 #include "Framework\Framework.h"
-#include "Clock.h"
 
 namespace WinampOpenALOut
 {
@@ -28,7 +27,7 @@ namespace WinampOpenALOut
 		void Close();
 		int Write(char *buf, int len);
 		int CanWrite();
-		int IsPlaying();
+		bool IsPlaying();
 		int Pause(int pause);
 		void SetPan(int newPan);
 		void Flush();
@@ -111,9 +110,6 @@ namespace WinampOpenALOut
 
 		unsigned int	bufferSize;
 
-		Time_Type		lastCheckBuffers;
-		Time_Type		lastCheckDelay;
-
 		class Output_Effects	*effects;
 
 	private:
@@ -122,7 +118,6 @@ namespace WinampOpenALOut
 		unsigned long long played;
 
 		void log_debug_msg(char* msg, char* file = __FILE__, int line = __LINE__);
-		inline void fmemcpy(char* dest, int destPos, char* src, int srcPos, int size);
 	};
 
 }

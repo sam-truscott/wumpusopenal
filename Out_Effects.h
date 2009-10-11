@@ -115,7 +115,7 @@ namespace WinampOpenALOut
 			Output_Effects();
 			~Output_Effects();
 
-			void setup(void);
+			bool setup(void);
 			void add_source(ALuint the_source);
 			void on_close(void);
 
@@ -123,7 +123,7 @@ namespace WinampOpenALOut
 			void set_current_effect(effects_list an_effect);
 
 			bool is_enabled(void);
-			void set_enabled(bool enable);
+			bool set_enabled(bool enable);
 
 		private:
 

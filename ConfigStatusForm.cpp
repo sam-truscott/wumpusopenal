@@ -158,8 +158,11 @@ namespace WinampOpenALOut {
 
 		if(ptrOw->get_effects()->is_enabled() != checkBoxEfxEnabled->Checked)
 		{
-			ptrOw->get_effects()->set_enabled(checkBoxEfxEnabled->Checked);
-			ConfigFile::WriteBoolean(CONF_EFX_ENABLED, checkBoxEfxEnabled->Checked);
+			if ( !ptrOw->get_effects()->set_enabled(checkBoxEfxEnabled->Checked) )
+			{
+				checkBoxEfxEnabled->Checked = false;
+				ptrOw->get_effects()->set_enabled(false);
+			}
 		}
 
 		ptrOw->SetMatrix(matrix);
@@ -167,6 +170,7 @@ namespace WinampOpenALOut {
 		ConfigFile::WriteBoolean(CONF_MONO_EXPAND, checkBoxExpandMono->Checked);
 		ConfigFile::WriteBoolean(CONF_STEREO_EXPAND, checkBoxExpandStereo->Checked);
 		ConfigFile::WriteBoolean(CONF_XRAM_ENABLED, checkBoxXRAM->Checked);
+		ConfigFile::WriteBoolean(CONF_EFX_ENABLED, checkBoxEfxEnabled->Checked);
 		
 		ShowDeviceDetails();
 	}

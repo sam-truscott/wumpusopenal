@@ -43,16 +43,8 @@ namespace WinampOpenALOut
 		lastPause = 0;
 		ulFormat = 0;
 		bufferSize = 0;
-		lastCheckBuffers = 0;
-		lastCheckDelay = 0;
 
-		for (unsigned char c = 0 ; c < MAX_NO_BUFFERS ; c++ )
-		{
-			memset(
-				&uiBuffers[c],
-				0,
-				sizeof(buffer_type));
-		}
+		memset(uiBuffers, 0, sizeof(buffer_type) & MAX_NO_BUFFERS);
 
 		SYNC_END;
 	}
@@ -60,17 +52,9 @@ namespace WinampOpenALOut
 	Output_Renderer::~Output_Renderer()
 	{
 		//ensure everything in memory is deleted
-		DeleteCriticalSection(&criticalSection);
-	}
-
-	void Output_Renderer::fmemcpy(char* dest, int destPos, char* src, int srcPos, int size)
-	{
-		// get a pointer to the memory data with an offset
-		void* ptr = (void*)&dest[destPos];
-		void* ptrSrc = (void*)&src[srcPos];
-
-		// now copy from this position onwards
-		memcpy_s(ptr, MAXIMUM_BUFFER_SIZE, ptrSrc, size);
+		//SYNC_START;
+		//SYNC_END;
+		//DeleteCriticalSection(&criticalSection);
 	}
 
 	void Output_Renderer::onError()
@@ -162,8 +146,8 @@ namespace WinampOpenALOut
 
 	void Output_Renderer::CheckPlayState() {
 
-		ALint			iState;
-		ALint			iQueuedBuffers;
+		ALint			iState = AL_SOURCE_STATE;
+		ALint			iQueuedBuffers = 0;
 
 		/*
 			can the current state of the source
@@ -206,6 +190,16 @@ namespace WinampOpenALOut
 				if(!lastPause)
 				{
 					alSourcePlay(uiSource);
+
+#ifdef _DEBUGGING
+					char dbg[DEBUG_BUFFER_SIZE] = {'\0'};
+					sprintf_s(
+						dbg,
+						DEBUG_BUFFER_SIZE,
+						"-> Renderer started to play!");
+					this->log_debug_msg(dbg, __FILE__, __LINE__);
+#endif
+
 					isPlaying = true;
 				}
 			} else {
@@ -218,7 +212,7 @@ namespace WinampOpenALOut
 	void Output_Renderer::log_debug_msg(char* msg, char* file, int line)
 	{
 		/* basic logging to file - only if we're in debug mode */
-#ifdef _DEBUG
+#ifdef _DEBUGGING
 		FILE *debug_file = NULL;
 		fopen_s(&debug_file, "out_openal.log", "a+");
 		fprintf_s(debug_file,"%s, %d - %s\n", file, line, msg);
@@ -244,7 +238,7 @@ namespace WinampOpenALOut
 			SYNC_END;
 			return -1;
 		}
-#ifdef _DEBUG
+#ifdef _DEBUGGING
 		char dbg[DEBUG_BUFFER_SIZE] = {'\0'};
 		sprintf_s(
 			dbg,
@@ -287,6 +281,8 @@ namespace WinampOpenALOut
 		// reset the play position back to zero
 		lastPause = 0;
 
+		played = 0;
+
 		// determine the size of the buffer
 		bytesPerSampleChannel = ((bitsPerSample >> SHIFT_BITS_TO_BYTES)*numberOfChannels);
 
@@ -306,7 +302,7 @@ namespace WinampOpenALOut
 		this->buffer_free = noBuffers * MAXIMUM_BUFFER_SIZE;
 		buffers_free = noBuffers;
 
-#ifdef _DEBUG
+#ifdef _DEBUGGING
 		sprintf_s(
 			dbg,
 			DEBUG_BUFFER_SIZE,
@@ -315,19 +311,6 @@ namespace WinampOpenALOut
 			bufferSize);
 		this->log_debug_msg(dbg, __FILE__, __LINE__);
 #endif
-
-		/*
-			set up the various timers
-		*/
-		// reset the clock
-		Clock::Initialise();
-		// get the current time (small optimisation)
-		Time_Type currentTime = Clock::GetTime();
-		// reset the time we last checked the state of the playing buffers
-		lastCheckBuffers = currentTime;
-		// determine the delay to check the state of the openal buffers
-		lastCheckDelay = Clock::Milliseconds(c_bufferLength / noBuffers);
-
 		unsigned int in_xram_ok = 0;
 
 		// allocate some buffers
@@ -368,7 +351,7 @@ namespace WinampOpenALOut
 			}
 		}
 
-#ifdef _DEBUG
+#ifdef _DEBUGGING
 		if ( xram_enabled == true )
 		{
 			sprintf_s(
@@ -429,6 +412,15 @@ namespace WinampOpenALOut
 		}
 		
 		alSourcei(uiSource, AL_LOOPING, AL_FALSE);
+
+		ALint iState = AL_SOURCE_STATE;
+		alGetError();
+		alGetSourcei(uiSource, AL_SOURCE_STATE, &iState);
+		
+		if(alGetError() != AL_NO_ERROR)
+		{
+			this->onError();
+		}
 		
 		/* Effects */
 		if ( effects != NULL )
@@ -465,6 +457,7 @@ namespace WinampOpenALOut
 		}
 
 		// stop the source
+		alGetError();
 		alSourceStop(uiSource);
 
 		played = 0;
@@ -481,6 +474,13 @@ namespace WinampOpenALOut
 			}
 		}
 
+		// wait for all the buffers to be used up
+		while(buffers_free != noBuffers)
+		{
+			CheckProcessedBuffers();
+			Sleep(10);
+		}
+
 		// remove all buffers
 		alSourcei(uiSource, AL_BUFFER, 0);
 
@@ -489,18 +489,27 @@ namespace WinampOpenALOut
 		// delete all the buffers
 		for(unsigned int i=0;i<noBuffers;i++)
 		{
+			alDeleteBuffers( 1, &uiBuffers[i].buffer_id );
+			uiBuffers[i].buffer_id = 0;
+		}
+
+		// make sure all memory from the buffers is freed up,
+		// if CheckProcessed is working correct this shouldn't run
+		for(unsigned int i=0;i<noBuffers;i++)
+		{
 			if ( uiBuffers[i].data != NULL )
 			{
 				delete uiBuffers[i].data;
 				uiBuffers[i].data = NULL;
 			}
-			alDeleteBuffers( noBuffers, &uiBuffers[i].buffer_id );
 		}
 
 		// just incase the thread has exitted, assume playing has stopped
 		isPlaying = false;
 
 		noBuffers = NO_BUFFERS;
+		buffer_free = 0;
+		buffers_free = 0;
 		sampleRate = NO_SAMPLE_RATE;
 		bitsPerSample = NO_BITS_PER_SAMPLE;
 		numberOfChannels = NO_NUMBER_OF_CHANNELS;
@@ -530,7 +539,7 @@ namespace WinampOpenALOut
 		// if the buffer is valid (non-NULL)
 		if (buf) {
 
-#ifdef _DEBUG
+#ifdef _DEBUGGING
 			char dbg[DEBUG_BUFFER_SIZE] = {'\0'};
 
 			sprintf_s(
@@ -561,7 +570,7 @@ namespace WinampOpenALOut
 					break;
 				}
 			}
-#ifdef _DEBUG
+#ifdef _DEBUGGING
 			sprintf_s(
 				dbg,
 				DEBUG_BUFFER_SIZE,
@@ -579,7 +588,7 @@ namespace WinampOpenALOut
 			buffer_free -= len;
 			uiBuffers[selectedBuffer].size = len;
 
-#ifdef _DEBUG
+#ifdef _DEBUGGING
 			sprintf_s(
 				dbg,
 				DEBUG_BUFFER_SIZE,
@@ -635,16 +644,18 @@ namespace WinampOpenALOut
 		if more data can be written to the plugin
 	*/
 	int Output_Renderer::CanWrite() {
+		
 		SYNC_START;
-		int r;
+		
+		int r = EMPTY_THE_BUFFER;
+		
 		if(streamOpen) {
 
 			this->CheckProcessedBuffers();
 
 			r = ((buffers_free > 0) ? buffer_free : 0);
-		}else{
-			r = EMPTY_THE_BUFFER;
 		}
+
 		SYNC_END;
 		
 		return r;
@@ -657,12 +668,12 @@ namespace WinampOpenALOut
 		return 0 if empty
 		return <0> if data present
 	*/
-	int Output_Renderer::IsPlaying() {
+	bool Output_Renderer::IsPlaying() {
 		SYNC_START;
 
 		this->CheckProcessedBuffers();
 
-		int r = isPlaying && streamOpen ? IS_PLAYING : IS_NOT_PLAYING;
+		bool r = isPlaying && streamOpen ? true : false;
 		SYNC_END;
 		return r;
 	}
@@ -727,15 +738,7 @@ namespace WinampOpenALOut
 
 	void Output_Renderer::SetXRAMEnabled( bool enabled )
 	{
-		/* Windows Vista or higher doesnt support XRAM yet - it seems */
-		if ( WINVER > 0x0600 )
-		{
-			xram_enabled = false;
-		}
-		else
-		{
-			xram_enabled = enabled;
-		}
+		xram_enabled = enabled;
 	}
 
 	void Output_Renderer::SetMatrix ( speaker_T speaker )

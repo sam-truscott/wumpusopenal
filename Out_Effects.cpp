@@ -81,8 +81,10 @@ namespace WinampOpenALOut {
 		}
 	}
 
-	void Output_Effects::setup(void)
+	bool Output_Effects::setup(void)
 	{
+		bool			retval = false;
+
 		if ( this->is_on == true )
 		{
 			if ( this->is_loaded == true )
@@ -104,11 +106,27 @@ namespace WinampOpenALOut {
 						{
 							alAuxiliaryEffectSloti(uiEffectSlot, AL_EFFECTSLOT_EFFECT, uiEffect);
 							this->is_loaded = true;
+
+							retval = true;
+						}
+						else
+						{
+							this->on_close();
 						}
 					}
+					else
+					{
+						this->on_close();
+					}
+				}
+				else
+				{
+					this->on_close();
 				}
 			}
 		}
+
+		return retval;
 	}
 
 	void Output_Effects::add_source(ALuint the_source)
@@ -160,8 +178,10 @@ namespace WinampOpenALOut {
 		return is_on;
 	}
 
-	void Output_Effects::set_enabled(bool enable)
+	bool Output_Effects::set_enabled(bool enable)
 	{
+		bool retval = false;
+
 		if ( enable == false &&
 			is_loaded == true )
 		{
@@ -174,26 +194,45 @@ namespace WinampOpenALOut {
 
 			this->on_close();
 			is_on = enable;
-			this->setup();
-	
-			for(unsigned char c = 0 ; c < old_channels ; c++ )
+
+			// failed to setup effects
+			if ( this->setup() == false )
 			{
-				this->add_source(uiSource[c]);
+				is_on = false;
+			}
+			else
+			{
+				for(unsigned char c = 0 ; c < old_channels ; c++ )
+				{
+					this->add_source(uiSource[c]);
+				}
+
+				retval = true;
 			}
 		}
+		else
+		{
+			retval = true;
+		}
+
+		return retval;
 	}
 
 	ALboolean Output_Effects::CreateAuxEffectSlot(ALuint *puiAuxEffectSlot)
 	{
 		ALboolean bReturn = AL_FALSE;
+		ALenum err = AL_NO_ERROR;
 
 		// Clear AL Error state
 		alGetError();
 
 		// Generate an Auxiliary Effect Slot
 		alGenAuxiliaryEffectSlots(1, puiAuxEffectSlot);
-		if (alGetError() == AL_NO_ERROR)
+		err = alGetError();
+		if (err == AL_NO_ERROR)
+		{
 			bReturn = AL_TRUE;
+		}
 
 		return bReturn;
 	}

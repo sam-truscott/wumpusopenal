@@ -69,8 +69,8 @@ namespace WinampOpenALOut {
 		split_out = false;
 	}
 
-	Output_Wumpus::~Output_Wumpus() {
-
+	Output_Wumpus::~Output_Wumpus()
+	{
 		//ensure everything in memory is deleted
 	}
 
@@ -212,7 +212,7 @@ namespace WinampOpenALOut {
 	void Output_Wumpus::log_debug_msg(char* msg, char* file, int line)
 	{
 		/* basic logging to file - only if we're in debug mode */
-#ifdef _DEBUG
+#ifdef _DEBUGGING
 		FILE *debug_file = NULL;
 		fopen_s(&debug_file, "out_openal.log", "a+");
 		fprintf_s(debug_file,"%s, %d - %s\n", file, line, msg);
@@ -260,8 +260,6 @@ namespace WinampOpenALOut {
 			&speaker_matrix,
 			0,
 			sizeof(speaker_matrix_T));
-
-		Clock::Initialise();
 
 		/*
 			set up the variables to a default state
@@ -336,7 +334,7 @@ namespace WinampOpenALOut {
 			MessageBoxA(NULL, "Could not initialise OpenAL", "Error", MB_OK);
 		}
 
-#ifdef _DEBUG
+#ifdef _DEBUGGING
 		char dbg[DEBUG_BUFFER_SIZE] = {'\0'};
 		sprintf_s(
 			dbg,
@@ -351,7 +349,7 @@ namespace WinampOpenALOut {
 		this->stereoExpand = ConfigFile::ReadBoolean(CONF_STEREO_EXPAND);
 		this->xram_enabled = ConfigFile::ReadBoolean(CONF_XRAM_ENABLED);
 
-#ifdef _DEBUG
+#ifdef _DEBUGGING
 		sprintf_s(
 			dbg,
 			DEBUG_BUFFER_SIZE,
@@ -377,32 +375,28 @@ namespace WinampOpenALOut {
 			alGetEnumValue("AL_STORAGE_ACCESSIBLE"));
 		this->log_debug_msg(dbg, __FILE__, __LINE__);
 #endif
-		if ( WINVER <= 0x0600 )
+
+		if ( Framework::getInstance()->ALFWIsXRAMSupported() == AL_TRUE )
 		{
-			if ( Framework::getInstance()->ALFWIsXRAMSupported() == AL_TRUE )
-			{
-#ifdef _DEBUG
-				sprintf_s(
-					dbg,
-					DEBUG_BUFFER_SIZE,
-					"-> Detect XRAM, Size {%d}MB, Free {%d}MB",
-					alGetInteger(eXRAMSize) / (1024 * 1024),
-					alGetInteger(eXRAMFree) / (1024 * 1024) );
-				this->log_debug_msg(dbg, __FILE__, __LINE__);
+#ifdef _DEBUGGING
+			sprintf_s(
+				dbg,
+				DEBUG_BUFFER_SIZE,
+				"-> Detect XRAM, Size {%d}MB, Free {%d}MB",
+				alGetInteger(eXRAMSize) / (1024 * 1024),
+				alGetInteger(eXRAMFree) / (1024 * 1024) );
+			this->log_debug_msg(dbg, __FILE__, __LINE__);
 #endif
-				this->xram_detected = true;
-			}
-		}
-		else
-		{
-			this->xram_detected = false;
-			SetXRAMEnabled(false);
+			this->xram_detected = true;
 		}
 
 		char setting[11];
 		strcpy_s(setting,11,"matrix_x_y\0");
 		for (char i=0 ; i < MAX_RENDERERS ; i++ )
 		{
+
+			this->renderers[i] = NULL;
+
 			setting[9] = i + '0';
 			bool valid = false;
 			float temp;
@@ -439,11 +433,18 @@ namespace WinampOpenALOut {
 	void Output_Wumpus::SetMatrix( speaker_matrix_T m )
 	{
 		speaker_matrix = m;
-		for( char i=0 ; i < no_renderers ; i++ )
+
+		// if it's a mono source or single stereo
+		// then leave it in the middle otherwise it'll be
+		// wherever the user configured the left speaker to be
+		if ( no_renderers > 1 )
 		{
-			if ( renderers[i] != NULL )
+			for( char i=0 ; i < no_renderers ; i++ )
 			{
-				renderers[i]->SetMatrix( m.speakers[i] );
+				if ( renderers[i] != NULL )
+				{
+					renderers[i]->SetMatrix( m.speakers[i] );
+				}
 			}
 		}
 
@@ -507,7 +508,7 @@ namespace WinampOpenALOut {
 			SYNC_END;
 			return -1;
 		}
-#ifdef _DEBUG
+#ifdef _DEBUGGING
 		char dbg[DEBUG_BUFFER_SIZE] = {'\0'};
 		sprintf_s(
 			dbg,
@@ -589,26 +590,14 @@ namespace WinampOpenALOut {
 			no_renderers++;
 		}
 
-#ifdef _DEBUG
+#ifdef _DEBUGGING
 		sprintf_s(
 			dbg,
 			DEBUG_BUFFER_SIZE,
-			"-> Using {%d} buffers", 
-			noBuffers);
+			"-> Using {%d} renderers", 
+			no_renderers);
 		this->log_debug_msg(dbg, __FILE__, __LINE__);
 #endif
-
-		/*
-			set up the various timers
-		*/
-		// reset the clock
-		Clock::Initialise();
-		// get the current time (small optimisation)
-		Time_Type currentTime = Clock::GetTime();
-		// reset the time we last checked the state of the playing buffers
-		lastCheckBuffers = currentTime;
-
-		unsigned int in_xram_ok = 0;
 
 		// allocate some buffers
 		alGetError();
@@ -624,6 +613,9 @@ namespace WinampOpenALOut {
 		preBuffer = true;
 
 		preBufferNumber = NO_BUFFERS_PROCESSED;
+
+		// reload the speaker positions
+		SetMatrix(speaker_matrix);
 
 		SYNC_END;
 
@@ -683,7 +675,7 @@ namespace WinampOpenALOut {
 		// if the buffer is valid (non-NULL)
 		if (buf) {
 
-#ifdef _DEBUG
+#ifdef _DEBUGGING
 			char dbg[DEBUG_BUFFER_SIZE] = {'\0'};
 
 			sprintf_s(
@@ -695,15 +687,14 @@ namespace WinampOpenALOut {
 
 			if ( len + temp_size < MINIMUM_BUFFER_SIZE ) 
 			{
-				fmemcpy(
-					temp,
-					temp_size,
+				memcpy_s(
+					temp + temp_size, 
+					TEMP_BUFFER_SIZE,
 					buf,
-					0,
 					len);
 
 				temp_size = temp_size + len;
-#ifdef _DEBUG
+#ifdef _DEBUGGING
 				sprintf_s(
 					dbg,
 					DEBUG_BUFFER_SIZE,
@@ -718,16 +709,20 @@ namespace WinampOpenALOut {
 
 			if ( temp_size > 0 )
 			{
-				to_write = new char[len+temp_size];
+				const unsigned int to_write_size = len + temp_size;
+				to_write = new char[to_write_size];
+
+#ifdef _DEBUGGING
+				memset(to_write, 0xAA, to_write_size);
+#endif
 
 				/* copy the first buffer in */
-				fmemcpy(
+				memcpy_s(
 					to_write,
-					0,
+					to_write_size,
 					temp,
-					0,
 					temp_size);
-#ifdef _DEBUG
+#ifdef _DEBUGGING
 				sprintf_s(
 					dbg,
 					DEBUG_BUFFER_SIZE,
@@ -735,28 +730,30 @@ namespace WinampOpenALOut {
 				log_debug_msg(dbg, __FILE__, __LINE__);
 #endif
 				/* copy what we can of the second */
-				fmemcpy(
-					to_write,
-					temp_size,
+				void * add_write = to_write + temp_size;
+				const size_t add_write_size = to_write_size - temp_size; 
+				memcpy_s(
+					add_write,
+					add_write_size,
 					buf,
-					0,
 					len);
 
 				buf = to_write;
 				len += temp_size;
 				temp_size = 0; 
+				memset(temp, 0, TEMP_BUFFER_SIZE);
 			}
-			
+
 			// ############## MONO EXPANSION
 
-			if(monoExpand) {
+			if(monoExpand && originalNumberOfChannels == 1) {
 				// we're writing out four as much data so
 				// increase this value by three more times
 				const unsigned int new_len = (len*4);
 
 				// expand buffer here
 				char* newBuffer = new char[new_len];
-#ifdef _DEBUG
+#ifdef _DEBUGGING
 				memset(newBuffer, 0, new_len);
 #endif
 
@@ -803,53 +800,48 @@ namespace WinampOpenALOut {
 
 			// ############## STEREO EXPANSION
 
-			if(stereoExpand) {
+			if(stereoExpand && originalNumberOfChannels == 2) {
 
 				// we're writing out twice as much data so
 				// increase this value again
-				const unsigned int new_len = len * 2;
+				const unsigned int old_length = len;
+				const unsigned int new_len = old_length * 2;
 
 				// expand buffer here
 				char* newBuffer = new char[new_len];
-#ifdef _DEBUG
+#ifdef _DEBUGGING
 				memset(newBuffer, 0, new_len);
 #endif
-
-				int nPos = 0;
 				const unsigned char sampleSize = 
 					((bitsPerSample == 8) ? TWO_BYTE_SAMPLE : FOUR_BYTE_SAMPLE);
 				
 				/* expand the samples out */
-				for(int pos=0; pos < len;)
+				int nPos = 0;
+				for(unsigned int pos=0; pos < old_length; )
 				{
 					if ( sampleSize == TWO_BYTE_SAMPLE )
 					{
-						const short* src = (short*)(buf + pos);
-						short* dst_a = (short*)(newBuffer + nPos);
-						short* dst_b = (short*)(newBuffer + nPos + TWO_BYTE_SAMPLE);
-
-						(*dst_a) = (*src);
-						(*dst_b) = (*src);
+						memcpy_s(newBuffer + nPos, new_len, buf + pos, TWO_BYTE_SAMPLE);
+						memcpy_s(newBuffer + nPos + TWO_BYTE_SAMPLE, new_len, buf + pos, TWO_BYTE_SAMPLE);
 					}
 					else
 					{
-						const unsigned int* src = 
-							(const unsigned int*)(buf + pos);
-						unsigned int* dst_a = 
-							(unsigned int*)(newBuffer + nPos);
-						unsigned int* dst_b = 
-							(unsigned int*)(newBuffer + nPos + FOUR_BYTE_SAMPLE);
+						void* dst1 = newBuffer + nPos;
+						void* dst2 = newBuffer + nPos + FOUR_BYTE_SAMPLE;
+						const char* src = buf + pos;
 
-						(*dst_a) = (*src);
-						(*dst_b) = (*src);
+						const size_t red_len = new_len - nPos;
+
+						memcpy_s(dst1, red_len,src, FOUR_BYTE_SAMPLE);
+						memcpy_s(dst2, red_len,src, FOUR_BYTE_SAMPLE);	
 					}
 
 					nPos += (sampleSize * 2);
 					pos += sampleSize;
 				}
 
-				len = new_len;
 				delete buf;
+				len = new_len;
 				buf = newBuffer;
 			}
 
@@ -948,17 +940,23 @@ namespace WinampOpenALOut {
 	*/
 	int Output_Wumpus::CanWrite() {
 		SYNC_START;
+
 		int r = EMPTY_THE_BUFFER;
 		if(streamOpen)
 		{
-
 			this->CheckProcessedBuffers();
 
 			if ( no_renderers > 0 )
 			{
-				r = renderers[0]->CanWrite() ? renderers[0]->GetBufferFree() : EMPTY_THE_BUFFER;
+				r = renderers[0]->CanWrite();
 			}
 		}
+
+		if ( r >= temp_size)
+		{
+			r -= temp_size;
+		}
+
 		SYNC_END;
 		
 		return r;
@@ -1002,9 +1000,12 @@ namespace WinampOpenALOut {
 		// we may start to play data before it's ready
 		// and cause and under-run
 		
-		for ( char i=0 ; i < no_renderers ; i++ )
+		if ( !this->preBuffer )
 		{
-			renderers[i]->Pause(pause);
+			for ( char i=0 ; i < no_renderers ; i++ )
+			{
+				renderers[i]->Pause(pause);
+			}
 		}
 
 		SYNC_END;
@@ -1068,7 +1069,8 @@ namespace WinampOpenALOut {
 		this procedure is invoked by winamp to flush the buffers
 		and start playing from time (t)ms.
 	*/
-	void Output_Wumpus::Flush(int newTimeMs) {
+	void Output_Wumpus::Flush(int newTimeMs)
+	{
 		SYNC_START;
 
 		for ( char i=0 ; i < no_renderers ; i++ )
@@ -1078,7 +1080,7 @@ namespace WinampOpenALOut {
 
 		// calculate the number of bytes that will have been
 		// this will relocate to the current device at a set time
-		this->Relocate(Framework::getInstance()->GetCurrentDevice(), newTimeMs,split_out);
+		this->Relocate(Framework::getInstance()->GetCurrentDevice(), newTimeMs, split_out);
 
 		CheckPlayState();
 
@@ -1128,6 +1130,17 @@ namespace WinampOpenALOut {
 		{
 			currentWrittenTime = total_written;
 			currentWrittenTime = get_current_written_time(currentWrittenTime, sampleRate) / bytesPerSampleChannel;
+
+			if ( stereoExpand && numberOfChannels == 4)
+			{
+				currentWrittenTime /= 2;
+			}
+
+			if ( monoExpand && numberOfChannels == 4)
+			{
+				currentWrittenTime /= 4;
+			}
+
 		}else{
 			currentWrittenTime = ZERO_TIME;
 		}
@@ -1150,20 +1163,13 @@ namespace WinampOpenALOut {
 
 		if(streamOpen)
 		{
-			// only check the state of the openal buffers
-			// every so often, no need to keep checking them
-			// if we know they're x'ms long
-			Time_Type currentTime = Clock::GetTime();
-
 			CheckProcessedBuffers();
-			lastCheckBuffers = currentTime;
 
 			total_played = 0;
 			for( char i=0; i < no_renderers ; i++ )
 			{
 				total_played += (renderers[i]->GetPlayedTime() + renderers[i]->GetPosition());
 			}
-			
 
 			// this works it out how many bytes it is
 			currentOutputTime = total_played;
@@ -1171,6 +1177,16 @@ namespace WinampOpenALOut {
 			currentOutputTime =
 				get_current_output_time(currentOutputTime, sampleRate)
 				/ bytesPerSampleChannel;
+
+			if ( stereoExpand && numberOfChannels == 4)
+			{
+				currentOutputTime /= 2;
+			}
+
+			if ( monoExpand && numberOfChannels == 4)
+			{
+				currentOutputTime /= 4;
+			}
 
 		}else{
 			currentOutputTime = ZERO_TIME;
@@ -1202,12 +1218,6 @@ namespace WinampOpenALOut {
 
 	void Output_Wumpus::SetXRAMEnabled( bool enabled )
 	{
-		/* Windows Vista or higher doesnt support XRAM yet - it seems */
-		if ( WINVER > 0x0600 )
-		{
-			enabled = false;
-		}
-
 		xram_enabled = enabled;
 		ConfigFile::WriteBoolean(CONF_XRAM_ENABLED,xram_enabled);
 		SwitchOutputDevice(Framework::getInstance()->GetCurrentDevice(),split_out);
