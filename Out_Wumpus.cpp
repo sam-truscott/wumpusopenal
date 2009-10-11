@@ -448,7 +448,7 @@ namespace WinampOpenALOut {
 			}
 		}
 
-		char setting[11];
+		char setting[11] = {'\0'};
 		strcpy_s(setting,11,"matrix_x_y\0");
 		for (char i=0 ; i < MAX_RENDERERS ; i++ )
 		{

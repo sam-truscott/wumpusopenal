@@ -37,6 +37,7 @@ Change Log
 	======
 	* Fixed - Doesn't re-play the end of the track when skipped
 	* Fixed - Sync issues with FLAC files
+	* Fixed - Mono source won't be affected by Matrix values (left/right etc)
 
 	v0.9.7.1
 	======

@@ -297,6 +297,10 @@ namespace WinampOpenALOut
 		{
 			noBuffers = MINIMUM_BUFFERS;
 		}
+		if(noBuffers > MAX_NO_BUFFERS)
+		{
+			noBuffers = MAX_NO_BUFFERS;
+		}
 
 		this->buffer_free = noBuffers * MAXIMUM_BUFFER_SIZE;
 		this->buffers_free = noBuffers;

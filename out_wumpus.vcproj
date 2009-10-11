@@ -86,7 +86,7 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="&quot;$(OPENAL_SDK_DIR)\libs\Win32\OpenAL32.lib&quot; &quot;$(OPENAL_SDK_DIR)\libs\Win32\EFX-Util_MTDLL\EFX-Util.lib&quot;"
 				OutputFile="$(PROGRAMFILES)\Winamp\Plugins\out_openal.dll"
-				Version="0.9.7"
+				Version="0.9.8"
 				LinkIncremental="1"
 				IgnoreDefaultLibraryNames=""
 				ModuleDefinitionFile="Exports.def"
@@ -164,10 +164,10 @@
 				AdditionalIncludeDirectories="&quot;$(OPENAL_SDK_DIR)\include&quot;"
 				PreprocessorDefinitions="WIN32;W_DEBUG;_WINDOWS;_USRDLL;OUT_MINISDK_EXPORTS;_CRT_SECURE_NO_DEPRECATEf;CONSOLE;NASM_HACK"
 				RuntimeLibrary="3"
-				PrecompiledHeaderFile=".\Debugging/out_minisdk.pch"
-				AssemblerListingLocation=".\Debugging/"
-				ObjectFile=".\Debugging/"
-				ProgramDataBaseFileName=".\Debugging/"
+				PrecompiledHeaderFile=".\Debug/out_minisdk.pch"
+				AssemblerListingLocation=".\Debug/"
+				ObjectFile=".\Debug/"
+				ProgramDataBaseFileName=".\Debug/"
 				BrowseInformation="1"
 				WarningLevel="4"
 				Detect64BitPortabilityProblems="true"
@@ -188,15 +188,14 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="&quot;$(OPENAL_SDK_DIR)\libs\Win32\OpenAL32.lib&quot; &quot;$(OPENAL_SDK_DIR)\libs\Win32\EFX-Util_MTDLL\EFX-Util.lib&quot;"
 				OutputFile="$(PROGRAMFILES)\Winamp\Plugins\out_openal.dll"
-				Version="0.9.3"
 				IgnoreDefaultLibraryNames=""
 				ModuleDefinitionFile="Exports.def"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile=".\Debugging/out_minisdk.pdb"
+				ProgramDatabaseFile=".\Debug/out_minisdk.pdb"
 				SubSystem="1"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
-				ImportLibrary=".\Debugging/out_minisdk.lib"
+				ImportLibrary=".\Debug/out_minisdk.lib"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -211,7 +210,7 @@
 			<Tool
 				Name="VCBscMakeTool"
 				SuppressStartupBanner="true"
-				OutputFile=".\Debugging/out_minisdk.bsc"
+				OutputFile=".\Debug/out_minisdk.bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"
@@ -412,7 +411,15 @@
 			Filter="ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"
 			>
 			<File
+				RelativePath=".\Info.rc"
+				>
+			</File>
+			<File
 				RelativePath=".\Readme.txt"
+				>
+			</File>
+			<File
+				RelativePath=".\resource.h"
 				>
 			</File>
 		</Filter>
