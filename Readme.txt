@@ -36,6 +36,7 @@ Change Log
 	v0.9.8
 	======
 	* Fixed - Doesn't re-play the end of the track when skipped
+	* Fixed - Sync issues with FLAC files
 
 	v0.9.7.1
 	======
