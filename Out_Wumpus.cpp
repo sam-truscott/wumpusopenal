@@ -212,7 +212,7 @@ namespace WinampOpenALOut {
 	void Output_Wumpus::log_debug_msg(char* msg, char* file, int line)
 	{
 		/* basic logging to file - only if we're in debug mode */
-#ifdef _DEBUGGING
+#ifdef _DEBUG
 		FILE *debug_file = NULL;
 		fopen_s(&debug_file, "out_openal.log", "a+");
 		fprintf_s(debug_file,"%s, %d - %s\n", file, line, msg);
@@ -1131,12 +1131,12 @@ namespace WinampOpenALOut {
 			currentWrittenTime = total_written;
 			currentWrittenTime = get_current_written_time(currentWrittenTime, sampleRate) / bytesPerSampleChannel;
 
-			if ( stereoExpand && numberOfChannels == 4)
+			if ( stereoExpand && originalNumberOfChannels == 2)
 			{
 				currentWrittenTime /= 2;
 			}
 
-			if ( monoExpand && numberOfChannels == 4)
+			if ( monoExpand && originalNumberOfChannels == 1)
 			{
 				currentWrittenTime /= 4;
 			}
@@ -1168,7 +1168,7 @@ namespace WinampOpenALOut {
 			total_played = 0;
 			for( char i=0; i < no_renderers ; i++ )
 			{
-				total_played += (renderers[i]->GetPlayedTime() + renderers[i]->GetPosition());
+				total_played += renderers[i]->GetPlayedTime();
 			}
 
 			// this works it out how many bytes it is
@@ -1178,12 +1178,12 @@ namespace WinampOpenALOut {
 				get_current_output_time(currentOutputTime, sampleRate)
 				/ bytesPerSampleChannel;
 
-			if ( stereoExpand && numberOfChannels == 4)
+			if ( stereoExpand && originalNumberOfChannels == 2)
 			{
 				currentOutputTime /= 2;
 			}
 
-			if ( monoExpand && numberOfChannels == 4)
+			if ( monoExpand && originalNumberOfChannels == 1)
 			{
 				currentOutputTime /= 4;
 			}

@@ -47,19 +47,14 @@ namespace WinampOpenALOut
 		
 		inline unsigned long long GetPlayedTime()
 		{
-			return played;
+			ALint deltaBytes = 0;
+			alGetSourcei(uiSource, AL_BYTE_OFFSET, &deltaBytes);
+			return played + deltaBytes;
 		}
 
 		inline void SetPlayedTime(unsigned long long t)
 		{
 			played = t;
-		}
-
-		inline ALint GetPosition()
-		{
-			ALint deltaBytes = 0;
-			alGetSourcei(uiSource, AL_BYTE_OFFSET, &deltaBytes);
-			return deltaBytes;
 		}
 
 		void SetMatrix ( speaker_T speaker );

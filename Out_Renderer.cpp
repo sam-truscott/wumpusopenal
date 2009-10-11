@@ -44,7 +44,7 @@ namespace WinampOpenALOut
 		ulFormat = 0;
 		bufferSize = 0;
 
-		memset(uiBuffers, 0, sizeof(buffer_type) & MAX_NO_BUFFERS);
+		memset(uiBuffers, 0, sizeof(buffer_type) * MAX_NO_BUFFERS);
 
 		SYNC_END;
 	}
@@ -212,7 +212,7 @@ namespace WinampOpenALOut
 	void Output_Renderer::log_debug_msg(char* msg, char* file, int line)
 	{
 		/* basic logging to file - only if we're in debug mode */
-#ifdef _DEBUGGING
+#ifdef _DEBUG
 		FILE *debug_file = NULL;
 		fopen_s(&debug_file, "out_openal.log", "a+");
 		fprintf_s(debug_file,"%s, %d - %s\n", file, line, msg);
@@ -280,7 +280,6 @@ namespace WinampOpenALOut
 
 		// reset the play position back to zero
 		lastPause = 0;
-
 		played = 0;
 
 		// determine the size of the buffer
@@ -300,7 +299,7 @@ namespace WinampOpenALOut
 		}
 
 		this->buffer_free = noBuffers * MAXIMUM_BUFFER_SIZE;
-		buffers_free = noBuffers;
+		this->buffers_free = noBuffers;
 
 #ifdef _DEBUGGING
 		sprintf_s(
@@ -319,14 +318,16 @@ namespace WinampOpenALOut
 		{
 			uiBuffers[i].size = 0;
 			uiBuffers[i].available = false;
+			if ( uiBuffers[i].data != NULL)
+			{
+				delete uiBuffers[i].data;
+			}
 			uiBuffers[i].data = NULL;
 		}
 
 		for(unsigned int i=0;i<noBuffers;i++)
 		{
-			uiBuffers[i].size = 0;
 			uiBuffers[i].available = true;
-			uiBuffers[i].data = NULL;
 			alGenBuffers( 1, &uiBuffers[i].buffer_id );
 
 			/* if xram is enabled write the buffer to XRAM */
@@ -411,11 +412,8 @@ namespace WinampOpenALOut
 			this->onError();
 		}
 		
-		alSourcei(uiSource, AL_LOOPING, AL_FALSE);
-
-		ALint iState = AL_SOURCE_STATE;
 		alGetError();
-		alGetSourcei(uiSource, AL_SOURCE_STATE, &iState);
+		alSourcei(uiSource, AL_LOOPING, AL_FALSE);
 		
 		if(alGetError() != AL_NO_ERROR)
 		{
