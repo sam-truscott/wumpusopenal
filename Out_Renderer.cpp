@@ -320,13 +320,18 @@ namespace WinampOpenALOut
 		alGetError();
 		for(unsigned int i=0;i<MAX_NO_BUFFERS;i++)
 		{
+			if ( uiBuffers[i].buffer_id != 0)
+			{
+				uiBuffers[i].buffer_id = 0;
+			}
+			uiBuffers[i].buffer_id = 0;
 			uiBuffers[i].size = 0;
 			uiBuffers[i].available = false;
-			if ( uiBuffers[i].data != NULL)
+			if ( uiBuffers[i].data )
 			{
 				delete uiBuffers[i].data;
+				uiBuffers[i].data = NULL;
 			}
-			uiBuffers[i].data = NULL;
 		}
 
 		for(unsigned int i=0;i<noBuffers;i++)
@@ -451,7 +456,6 @@ namespace WinampOpenALOut
 	void Output_Renderer::Close() 
 	{
 		SYNC_START;
-		streamOpen = false;
 
 		if ( effects != NULL )
 		{
@@ -476,12 +480,19 @@ namespace WinampOpenALOut
 			}
 		}
 
+		int c = 0;
 		// wait for all the buffers to be used up
 		while(buffers_free != noBuffers)
 		{
 			CheckProcessedBuffers();
 			Sleep(10);
+			if ( ++c > CLOSE_TIMEOUT_COUNT )
+			{
+				break;
+			}
 		}
+
+		streamOpen = false;
 
 		// remove all buffers
 		alSourcei(uiSource, AL_BUFFER, 0);

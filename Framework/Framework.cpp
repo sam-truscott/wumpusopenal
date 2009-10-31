@@ -127,32 +127,7 @@ ALboolean Framework::ALFWInitOpenAL(int myDevice, ALint attrs[])
 
 	return bReturn;
 }
-/*
-ALboolean Framework::ALFWSwitchDevice(int device) {
-	
-	ALboolean bReturn = AL_FALSE;
-	ALCcontext *pContext = (ALCcontext*)ptrContext;
-	ALCdevice *pDevice = (ALCdevice*)ptrDevice;
 
-	alcMakeContextCurrent(NULL);
-	alcDestroyContext(pContext);
-	alcCloseDevice(pDevice);
-
-	pDevice = alcOpenDevice(pDeviceList->GetDeviceName(device));
-	if (pDevice) {
-		pContext = alcCreateContext(pDevice, NULL);
-		if (pContext) {
-			alcMakeContextCurrent(pContext);
-			bReturn = AL_TRUE;
-		} else {
-			alcCloseDevice(pDevice);
-		}
-	}
-
-	return bReturn;
-
-}
-*/
 ALboolean Framework::ALFWShutdownOpenAL()
 {
 	ALCcontext *pContext;
@@ -165,8 +140,11 @@ ALboolean Framework::ALFWShutdownOpenAL()
 	alcDestroyContext(pContext);
 	alcCloseDevice(pDevice);
 
-	delete pDeviceList;
-	pDeviceList = NULL;
+	if ( pDeviceList )
+	{
+		delete pDeviceList;
+		pDeviceList = NULL;
+	}
 
 	return AL_TRUE;
 }

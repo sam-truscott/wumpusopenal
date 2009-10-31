@@ -116,13 +116,21 @@ namespace WinampOpenALOut {
 
 	void Output_Wumpus::SwitchOutputDevice(int device)
 	{
+		SYNC_START;
+
 		SwitchOutputDevice(device, split_out);
+
+		SYNC_END;
 	}
 
 	void Output_Wumpus::SwitchOutputDevice(int device, bool isSplit)
 	{
+		SYNC_START;
+
 		/* stop the source so we dont hear anthing else */
 		this->Relocate(device, GetOutputTime(),isSplit);
+
+		SYNC_END;
 	}
 
 	void Output_Wumpus::Relocate(int device, int currentPosition, bool isSplit) {
@@ -192,9 +200,11 @@ namespace WinampOpenALOut {
 
 		for ( char i=0 ; i < no_renderers ; i++ )
 		{
-			this->renderers[i]->CheckPlayState();
-
-			this->isPlaying |= this->renderers[i]->IsPlaying();
+			if ( this->renderers[i] )
+			{
+				this->renderers[i]->CheckPlayState();
+				this->isPlaying |= this->renderers[i]->IsPlaying();
+			}
 		}
 	}
 
@@ -538,7 +548,7 @@ namespace WinampOpenALOut {
 
 		for ( char i=0 ; i < MAX_RENDERERS ; i++ )
 		{
-			if ( renderers[i] != NULL )
+			if ( renderers[i] )
 			{
 				renderers[i]->Close();
 				delete renderers[i];
@@ -634,7 +644,7 @@ namespace WinampOpenALOut {
 
 		for ( char i=0 ; i < MAX_RENDERERS ; i++ )
 		{
-			if ( renderers[i] != NULL )
+			if ( renderers[i] )
 			{
 				renderers[i]->Close();
 				delete renderers[i];
@@ -946,7 +956,7 @@ namespace WinampOpenALOut {
 		{
 			this->CheckProcessedBuffers();
 
-			if ( no_renderers > 0 )
+			if ( no_renderers > 0 && renderers[0] )
 			{
 				r = renderers[0]->CanWrite();
 			}
@@ -1004,7 +1014,10 @@ namespace WinampOpenALOut {
 		{
 			for ( char i=0 ; i < no_renderers ; i++ )
 			{
-				renderers[i]->Pause(pause);
+				if ( renderers[i] )
+				{
+					renderers[i]->Pause(pause);
+				}
 			}
 		}
 
@@ -1045,7 +1058,10 @@ namespace WinampOpenALOut {
 			
 			for ( char i=0 ; i < no_renderers ; i++ )
 			{
-				renderers[i]->SetVolumeInternal(volume);
+				if ( renderers[i] )
+				{
+					renderers[i]->SetVolumeInternal(volume);
+				}
 			}
 
 			ConfigFile::WriteInteger(CONF_VOLUME, (int)(volume * VOLUME_DIVISOR) );
@@ -1075,7 +1091,10 @@ namespace WinampOpenALOut {
 
 		for ( char i=0 ; i < no_renderers ; i++ )
 		{
-			renderers[i]->Flush();
+			if ( renderers[i] )
+			{
+				renderers[i]->Flush();
+			}
 		}
 
 		// calculate the number of bytes that will have been
@@ -1101,7 +1120,10 @@ namespace WinampOpenALOut {
 
 		for ( char i = 0 ; i < no_renderers ; i++ )
 		{
-			renderers[i]->SetPlayedTime(calcTime / no_renderers);
+			if ( renderers[i] )
+			{
+				renderers[i]->SetPlayedTime(calcTime / no_renderers);
+			}
 		}
 
 		// reset played pointers
@@ -1168,7 +1190,10 @@ namespace WinampOpenALOut {
 			total_played = 0;
 			for( char i=0; i < no_renderers ; i++ )
 			{
-				total_played += renderers[i]->GetPlayedTime();
+				if ( renderers[i] )
+				{
+					total_played += renderers[i]->GetPlayedTime();
+				}
 			}
 
 			// this works it out how many bytes it is
