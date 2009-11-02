@@ -12,8 +12,7 @@ using namespace std;
 
 typedef struct
 {
-	//string			strDeviceName;
-	char strDeviceName[MAX_DEVICE_NAME_LEN];
+	string			strDeviceName;
 } ALDEVICEINFO, *LPALDEVICEINFO;
 
 class ALDeviceList

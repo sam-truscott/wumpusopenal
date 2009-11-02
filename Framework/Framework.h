@@ -27,7 +27,7 @@ class Framework {
 		ALboolean ALFWShutdownOpenAL();
 
 		static Framework* getInstance() {
-			if(!framework) {
+			if( !framework ) {
 				framework = new Framework();
 			}
 			return framework;
@@ -36,7 +36,7 @@ class Framework {
 		static void deleteInstance() {
 			if(framework) {
 				delete framework;
-				framework = 0;
+				framework = NULL;
 			}
 		}
 

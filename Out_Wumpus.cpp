@@ -3,6 +3,7 @@
 #include "Out_Effects.h"
 #include "ConfigStatusForm.h"
 #include "Out_Renderer.h"
+#include "Winamp.h"
 
 #define DEBUG_BUFFER_SIZE 255
 
@@ -291,6 +292,8 @@ namespace WinampOpenALOut {
 
 		// load the config up
 		ConfigFile::Initialise(window);
+
+		Winamp::Initialise(window);
 
 		c_bufferLength = ConfigFile::ReadInteger(CONF_BUFFER_LENGTH);
 		if(c_bufferLength == ERROR_BUFFER || 
@@ -665,6 +668,7 @@ namespace WinampOpenALOut {
 		total_written = ZERO_TIME;
 		lastOutputTime = ZERO_TIME;
 		lastWrittenTime = ZERO_TIME;
+		
 		temp_size = 0;
 		memset(temp, 0, sizeof(temp));
 
@@ -1097,11 +1101,15 @@ namespace WinampOpenALOut {
 			}
 		}
 
-		// calculate the number of bytes that will have been
-		// this will relocate to the current device at a set time
-		this->Relocate(Framework::getInstance()->GetCurrentDevice(), newTimeMs, split_out);
+		//if ( streamOpen && newTimeMs < Winamp::GetTrackLength() )
+		//{
 
-		CheckPlayState();
+			// calculate the number of bytes that will have been
+			// this will relocate to the current device at a set time
+			this->Relocate(Framework::getInstance()->GetCurrentDevice(), newTimeMs, split_out);
+
+			CheckPlayState();
+		//}
 
 		SYNC_END;
 	}

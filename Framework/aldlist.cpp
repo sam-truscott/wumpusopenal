@@ -87,8 +87,7 @@ ALDeviceList::ALDeviceList()
 					}
 					if ((bNewName) && (actualDeviceName != NULL) && (strlen(actualDeviceName) > 0))
 					{
-						memset(&ALDeviceInfo, 0, sizeof(ALDEVICEINFO));
-						strcpy_s(ALDeviceInfo.strDeviceName, MAX_DEVICE_NAME_LEN, actualDeviceName);
+						ALDeviceInfo.strDeviceName = actualDeviceName;
 						vDeviceInfo.push_back(ALDeviceInfo);
 					}
 					ALFunction.alcMakeContextCurrent(NULL);
@@ -107,6 +106,12 @@ ALDeviceList::ALDeviceList()
  */
 ALDeviceList::~ALDeviceList()
 {
+	vector <ALDEVICEINFO>::iterator it;
+	for ( it = vDeviceInfo.begin( ) ; it != vDeviceInfo.end( ) ; it++ )
+	{
+		ALDEVICEINFO cli = *it;
+		cli.strDeviceName.empty();
+	}
 	vDeviceInfo.empty();
 
 	UnloadOAL10Library();
@@ -126,7 +131,7 @@ int ALDeviceList::GetNumDevices()
 char * ALDeviceList::GetDeviceName(int index)
 {
 	if (index < GetNumDevices())
-		return vDeviceInfo[index].strDeviceName;
+		return (char*)vDeviceInfo[index].strDeviceName.c_str();
 	else
 		return NULL;
 }

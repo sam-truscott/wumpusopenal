@@ -457,14 +457,15 @@ namespace WinampOpenALOut
 	{
 		SYNC_START;
 
+		streamOpen = false;
+
+		// stop the source
+		alSourceStop(uiSource);
+
 		if ( effects != NULL )
 		{
 			effects->on_close();
 		}
-
-		// stop the source
-		alGetError();
-		alSourceStop(uiSource);
 
 		played = 0;
 
@@ -474,7 +475,7 @@ namespace WinampOpenALOut
 		alGetSourcei(uiSource, AL_SOURCE_STATE, &iState);
 		while(iState != AL_STOPPED && iState != AL_INITIAL)
 		{
-			Sleep(10);
+			Sleep(1);
 			if(timeout++ > CLOSE_TIMEOUT_COUNT) {
 				break;
 			}
@@ -485,14 +486,12 @@ namespace WinampOpenALOut
 		while(buffers_free != noBuffers)
 		{
 			CheckProcessedBuffers();
-			Sleep(10);
+			Sleep(1);
 			if ( ++c > CLOSE_TIMEOUT_COUNT )
 			{
 				break;
 			}
 		}
-
-		streamOpen = false;
 
 		// remove all buffers
 		alSourcei(uiSource, AL_BUFFER, 0);

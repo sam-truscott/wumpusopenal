@@ -29,7 +29,7 @@
 #include "Framework.h"
 #include "aldlist.h"
 
-Framework* Framework::framework = 0;
+Framework* Framework::framework = NULL;
 
 // Imported EFX functions
 
@@ -83,13 +83,20 @@ ALenum eXRAMAuto = 0;
 ALenum eXRAMHardware = 0;
 ALenum eXRAMAccessible = 0;
 
-Framework::Framework() {
+Framework::Framework()
+{
 	pDeviceList = NULL;
+	ptrContext = NULL;
+	ptrDevice = NULL;
 }
 
-Framework::~Framework() {
-	delete pDeviceList;
-	pDeviceList = NULL;
+Framework::~Framework()
+{
+	if ( pDeviceList )
+	{
+		delete pDeviceList;
+		pDeviceList = NULL;
+	}
 }
 
 ALboolean Framework::ALFWInitOpenAL(int myDevice, ALint attrs[])
@@ -100,7 +107,7 @@ ALboolean Framework::ALFWInitOpenAL(int myDevice, ALint attrs[])
 	ALboolean bReturn = AL_FALSE;
 	currentDevice = -1;
 
-	if(!pDeviceList) {
+	if( !pDeviceList ) {
 		pDeviceList = new ALDeviceList();
 	}
 
@@ -130,8 +137,8 @@ ALboolean Framework::ALFWInitOpenAL(int myDevice, ALint attrs[])
 
 ALboolean Framework::ALFWShutdownOpenAL()
 {
-	ALCcontext *pContext;
-	ALCdevice *pDevice;
+	ALCcontext *pContext = NULL;
+	ALCdevice *pDevice = NULL;
 
 	pContext = alcGetCurrentContext();
 	pDevice = alcGetContextsDevice(pContext);
@@ -139,6 +146,9 @@ ALboolean Framework::ALFWShutdownOpenAL()
 	alcMakeContextCurrent(NULL);
 	alcDestroyContext(pContext);
 	alcCloseDevice(pDevice);
+
+	pContext = NULL;
+	pDevice = NULL;
 
 	if ( pDeviceList )
 	{

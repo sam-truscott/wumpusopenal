@@ -57,7 +57,7 @@
 				OmitFramePointers="true"
 				EnableFiberSafeOptimizations="true"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories="&quot;$(OPENAL_SDK_DIR)\include&quot;"
+				AdditionalIncludeDirectories="&quot;$(OPENAL_SDK_DIR)\include&quot;;&quot;$(WA_SDK_DIR)&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;OUT_MINISDK_EXPORTS;CONSOLE"
 				StringPooling="true"
 				MinimalRebuild="false"
@@ -161,7 +161,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				FavorSizeOrSpeed="0"
-				AdditionalIncludeDirectories="&quot;$(OPENAL_SDK_DIR)\include&quot;"
+				AdditionalIncludeDirectories="&quot;$(OPENAL_SDK_DIR)\include&quot;;&quot;$(WA_SDK_DIR)&quot;"
 				PreprocessorDefinitions="WIN32;W_DEBUG;_WINDOWS;_USRDLL;OUT_MINISDK_EXPORTS;_CRT_SECURE_NO_DEPRECATEf;CONSOLE;NASM_HACK"
 				RuntimeLibrary="3"
 				PrecompiledHeaderFile=".\Debug/out_minisdk.pch"
@@ -336,6 +336,10 @@
 					/>
 				</FileConfiguration>
 			</File>
+			<File
+				RelativePath=".\Winamp.cpp"
+				>
+			</File>
 			<Filter
 				Name="Framework"
 				>
@@ -387,6 +391,10 @@
 			</File>
 			<File
 				RelativePath=".\Version.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Winamp.h"
 				>
 			</File>
 			<Filter
