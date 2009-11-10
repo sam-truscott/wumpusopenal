@@ -541,6 +541,7 @@ namespace WinampOpenALOut {
 		// reset the play position back to zero
 		total_written = ZERO_TIME;
 		total_played = ZERO_TIME;
+		track_length = ZERO_TIME;
 		lastPause = 0;
 
 		temp_size = 0;
@@ -653,6 +654,11 @@ namespace WinampOpenALOut {
 				delete renderers[i];
 				renderers[i] = NULL;
 			}
+		}
+
+		if ( this->effects )
+		{
+			effects->on_close();
 		}
 
 		// just incase the thread has exitted, assume playing has stopped
@@ -934,6 +940,10 @@ namespace WinampOpenALOut {
 
 			if(preBuffer)
 			{
+				if ( track_length == 0 )
+				{
+					track_length = Winamp::GetTrackLength();
+				}
 				if(++preBufferNumber == PREBUFFER_LIMIT)
 				{
 					preBuffer = false;
@@ -1101,15 +1111,18 @@ namespace WinampOpenALOut {
 			}
 		}
 
-		//if ( streamOpen && newTimeMs < Winamp::GetTrackLength() )
-		//{
+		if ( streamOpen && newTimeMs < track_length )
+		{
 
 			// calculate the number of bytes that will have been
 			// this will relocate to the current device at a set time
 			this->Relocate(Framework::getInstance()->GetCurrentDevice(), newTimeMs, split_out);
 
 			CheckPlayState();
-		//}
+		}else{
+			// TODO ?
+			int i = 0;
+		}
 
 		SYNC_END;
 	}
@@ -1154,7 +1167,7 @@ namespace WinampOpenALOut {
 	*/
 	int Output_Wumpus::GetWrittenTime()
 	{
-		SYNC_START;
+		//SYNC_START;
 		
 		if(streamOpen)
 		{
@@ -1175,7 +1188,7 @@ namespace WinampOpenALOut {
 			currentWrittenTime = ZERO_TIME;
 		}
 		
-		SYNC_END;
+		//SYNC_END;
 		
 		// make sure we only use the first 32bits of the 64bit value
 		lastWrittenTime = (int)(currentWrittenTime & THIRTY_TWO_BIT_BIT_MASK);
@@ -1189,7 +1202,7 @@ namespace WinampOpenALOut {
 	*/
 	int Output_Wumpus::GetOutputTime()
 	{
-		SYNC_START;
+		//SYNC_START;
 
 		if(streamOpen)
 		{
@@ -1225,7 +1238,7 @@ namespace WinampOpenALOut {
 			currentOutputTime = ZERO_TIME;
 		}
 
-		SYNC_END;
+		//SYNC_END;
 
 		lastOutputTime = (int)(currentOutputTime & THIRTY_TWO_BIT_BIT_MASK);
 		return lastOutputTime;

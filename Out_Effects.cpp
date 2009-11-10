@@ -137,14 +137,14 @@ namespace WinampOpenALOut {
 
 	void Output_Effects::on_close(void)
 	{
+		for( unsigned char c = 0; c < channels ; c++ )
+		{
+			alSource3i(uiSource[c], AL_AUXILIARY_SEND_FILTER, AL_EFFECTSLOT_NULL, 0, AL_FILTER_NULL);
+		}
+		channels = 0;
+
 		if ( this->is_loaded == true )
 		{
-			for( unsigned char c = 0; c < channels ; c++ )
-			{
-				alSource3i(uiSource[c], AL_AUXILIARY_SEND_FILTER, AL_EFFECTSLOT_NULL, 0, AL_FILTER_NULL);
-			}
-
-			channels = 0;
 			alAuxiliaryEffectSloti(uiEffectSlot, AL_EFFECTSLOT_EFFECT, AL_EFFECT_NULL);
 			alDeleteEffects(1, &uiEffect);
 			alDeleteAuxiliaryEffectSlots(1, &uiEffectSlot);
