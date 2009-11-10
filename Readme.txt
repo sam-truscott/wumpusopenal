@@ -1,7 +1,7 @@
 Wumpus Out OpenAL is copyright (c) 2009 by Sam Truscott.
 =======================================================
 
-Wumpus Out OpenAL v0.9.8
+Wumpus Out OpenAL v0.9.9
 ========================
 
 	Requirements
@@ -33,6 +33,12 @@ Wumpus Out OpenAL v0.9.8
 Change Log
 ==========
 
+	v0.9.9
+	======
+	* Fixed - Memory leak when closing regarding Effects
+	* Fixed - Skipping past the end of the file
+	* Fixed - Skipping and sync issues
+	
 	v0.9.8
 	======
 	* Fixed - Doesn't re-play the end of the track when skipped
