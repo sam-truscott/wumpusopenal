@@ -541,7 +541,6 @@ namespace WinampOpenALOut {
 		// reset the play position back to zero
 		total_written = ZERO_TIME;
 		total_played = ZERO_TIME;
-		track_length = ZERO_TIME;
 		lastPause = 0;
 
 		temp_size = 0;
@@ -940,10 +939,6 @@ namespace WinampOpenALOut {
 
 			if(preBuffer)
 			{
-				if ( track_length == 0 )
-				{
-					track_length = Winamp::GetTrackLength();
-				}
 				if(++preBufferNumber == PREBUFFER_LIMIT)
 				{
 					preBuffer = false;
@@ -1120,17 +1115,25 @@ namespace WinampOpenALOut {
 		log_debug_msg(dbg, __FILE__, __LINE__);
 #endif
 
-		if ( streamOpen && (newTimeMs < Winamp::GetTrackLength()) )
+		bool closing = false;
+		if ( streamOpen && (newTimeMs < (Winamp::GetTrackLength()-c_bufferLength)) )
 		{
-
 			// calculate the number of bytes that will have been
 			// this will relocate to the current device at a set time
 			this->Relocate(Framework::getInstance()->GetCurrentDevice(), newTimeMs, split_out);
 
 			CheckPlayState();
+		}else{
+			this->Close();
+			closing = true;
 		}
 
 		SYNC_END;
+
+		if ( closing )
+		{
+			Winamp::Next();
+		}
 	}
 
 	int Output_Wumpus::SetBufferTime(int tMs) {
@@ -1144,6 +1147,20 @@ namespace WinampOpenALOut {
 			((((sampleRate / ONE_SECOND_IN_MS) *
 			(bitsPerSample >> SHIFT_BITS_TO_BYTES)) *
 			numberOfChannels) * tMs);
+
+#ifdef _DEBUGGING
+		char dbg[DEBUG_BUFFER_SIZE] = {'\0'};
+		sprintf_s(
+			dbg,
+			DEBUG_BUFFER_SIZE,
+			"Calc to %dms, calc'd to be %d bytes", tMs, calcTime);
+		log_debug_msg(dbg, __FILE__, __LINE__);
+		sprintf_s(
+			dbg,
+			DEBUG_BUFFER_SIZE,
+			"Using sample rate %d, bps %d channels %d", sampleRate, bitsPerSample, numberOfChannels);
+		log_debug_msg(dbg, __FILE__, __LINE__);
+#endif
 
 		for ( char i = 0 ; i < no_renderers ; i++ )
 		{

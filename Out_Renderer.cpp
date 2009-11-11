@@ -69,7 +69,7 @@ namespace WinampOpenALOut
 		ALuint			uiNextBuffer;
 		ALenum			err;
 
-		unsigned int selectedBuffer;
+		unsigned int selectedBuffer = 0u;
 
 		iBuffersProcessed = NO_BUFFERS_PROCESSED;
 

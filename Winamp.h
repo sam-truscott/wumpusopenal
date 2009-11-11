@@ -9,6 +9,8 @@ class Winamp
 public:
 	static void Initialise(HWND hMainWindow);
 	static int GetTrackLength(void);
+	static void Stop(void);
+	static void Next(void);
 private:
 	static HWND theMainWindow;
 };

@@ -10,10 +10,6 @@ void Winamp::Initialise(HWND hMainWindow)
 
 int Winamp::GetTrackLength()
 {
-	//basicFileInfoStruct info;
-	//memset(&info, 0, sizeof(info));
-	//SendMessage(theMainWindow, WM_WA_IPC, (WPARAM)&info, IPC_GET_BASIC_FILE_INFO );
-
 	LRESULT len = SendMessage(
 		theMainWindow,
 		WM_WA_IPC,
@@ -21,4 +17,14 @@ int Winamp::GetTrackLength()
 		IPC_GETOUTPUTTIME );
 
 	return (int)len;
+}
+
+void Winamp::Next()
+{
+	PostMessage(theMainWindow, WM_COMMAND,40048,0);
+}
+
+void Winamp::Stop()
+{
+	PostMessage(theMainWindow, WM_COMMAND,40047,0);
 }

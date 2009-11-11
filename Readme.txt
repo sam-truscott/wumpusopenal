@@ -37,7 +37,7 @@ Change Log
 	======
 	* Fixed - Memory leak when closing regarding Effects
 	* Fixed - Skipping past the end of the file
-	* Fixed - Skipping and sync issues
+	* Fixed - Skipping and sync issues, skipping over-run
 	
 	v0.9.8
 	======

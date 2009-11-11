@@ -127,8 +127,6 @@ namespace WinampOpenALOut
 		__int64		currentOutputTime;
 		// integer to store the where we've buffered to
 		__int64		currentWrittenTime;
-		// integer for the total track length in ms
-		int			track_length;
 
 		int			lastOutputTime;
 		int			lastWrittenTime;
