@@ -1111,7 +1111,16 @@ namespace WinampOpenALOut {
 			}
 		}
 
-		if ( streamOpen && newTimeMs < track_length )
+#ifdef _DEBUGGING
+		char dbg[DEBUG_BUFFER_SIZE] = {'\0'};
+		sprintf_s(
+			dbg,
+			DEBUG_BUFFER_SIZE,
+			"Jump to %d, max length is %d\n", newTimeMs, Winamp::GetTrackLength());
+		log_debug_msg(dbg, __FILE__, __LINE__);
+#endif
+
+		if ( streamOpen && (newTimeMs < Winamp::GetTrackLength()) )
 		{
 
 			// calculate the number of bytes that will have been
@@ -1119,9 +1128,6 @@ namespace WinampOpenALOut {
 			this->Relocate(Framework::getInstance()->GetCurrentDevice(), newTimeMs, split_out);
 
 			CheckPlayState();
-		}else{
-			// TODO ?
-			int i = 0;
 		}
 
 		SYNC_END;
@@ -1206,7 +1212,9 @@ namespace WinampOpenALOut {
 
 		if(streamOpen)
 		{
-			CheckProcessedBuffers();
+			//SYNC_START;
+			//CheckProcessedBuffers();
+			//SYNC_END;
 
 			total_played = 0;
 			for( char i=0; i < no_renderers ; i++ )

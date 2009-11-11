@@ -14,11 +14,11 @@ int Winamp::GetTrackLength()
 	//memset(&info, 0, sizeof(info));
 	//SendMessage(theMainWindow, WM_WA_IPC, (WPARAM)&info, IPC_GET_BASIC_FILE_INFO );
 
-	int len = SendMessage(
+	LRESULT len = SendMessage(
 		theMainWindow,
 		WM_WA_IPC,
 		2,
 		IPC_GETOUTPUTTIME );
 
-	return len;
+	return (int)len;
 }
