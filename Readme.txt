@@ -1,8 +1,8 @@
 Wumpus Out OpenAL is copyright (c) 2009 by Sam Truscott.
 =======================================================
 
-Wumpus Out OpenAL v0.9.9
-========================
+Wumpus Out OpenAL v0.9.9.1
+==========================
 
 	Requirements
 	============
@@ -32,6 +32,10 @@ Wumpus Out OpenAL v0.9.9
 
 Change Log
 ==========
+
+	v0.9.9.1
+	========
+	* Fixed - Issue with synchronisation and the output time for track position
 
 	v0.9.9
 	======

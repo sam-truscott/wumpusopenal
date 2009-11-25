@@ -228,7 +228,12 @@ namespace WinampOpenALOut
 
 		the open al buffers are created and an open al source
 	*/
-	int Output_Renderer::Open(int samplerate, int numchannels, int bitspersamp, int bufferlenms, int prebufferms) {
+	int Output_Renderer::Open(
+		int samplerate, 
+		int numchannels, 
+		int bitspersamp, 
+		int bufferlenms, 
+		int prebufferms) {
 		
 		SYNC_START;
 

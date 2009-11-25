@@ -23,4 +23,7 @@ Global
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		AMDCaProjectFile = C:\Development\winampopenalout\trunk\CodeAnalyst\out_wumpus.caw
+	EndGlobalSection
 EndGlobal

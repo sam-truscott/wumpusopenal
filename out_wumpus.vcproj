@@ -77,7 +77,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG"
-				Culture="1033"
+				Culture="2057"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -86,7 +86,6 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="&quot;$(OPENAL_SDK_DIR)\libs\Win32\OpenAL32.lib&quot; &quot;$(OPENAL_SDK_DIR)\libs\Win32\EFX-Util_MTDLL\EFX-Util.lib&quot;"
 				OutputFile="$(PROGRAMFILES)\Winamp\Plugins\out_openal.dll"
-				Version="0.9.8"
 				LinkIncremental="1"
 				IgnoreDefaultLibraryNames=""
 				ModuleDefinitionFile="Exports.def"
@@ -94,6 +93,7 @@
 				LargeAddressAware="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
+				OptimizeForWindows98="1"
 				LinkTimeCodeGeneration="1"
 				ImportLibrary=".\Release/out_openal.lib"
 			/>

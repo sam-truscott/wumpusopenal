@@ -963,8 +963,6 @@ namespace WinampOpenALOut {
 		int r = EMPTY_THE_BUFFER;
 		if(streamOpen)
 		{
-			this->CheckProcessedBuffers();
-
 			if ( no_renderers > 0 && renderers[0] )
 			{
 				r = renderers[0]->CanWrite();
@@ -1233,14 +1231,16 @@ namespace WinampOpenALOut {
 			//CheckProcessedBuffers();
 			//SYNC_END;
 
-			total_played = 0;
+			__int64 new_total_played = 0;
 			for( char i=0; i < no_renderers ; i++ )
 			{
 				if ( renderers[i] )
 				{
-					total_played += renderers[i]->GetPlayedTime();
+					new_total_played += renderers[i]->GetPlayedTime();
 				}
 			}
+
+			total_played = new_total_played;
 
 			// this works it out how many bytes it is
 			currentOutputTime = total_played;
