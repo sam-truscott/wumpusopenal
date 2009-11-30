@@ -467,11 +467,6 @@ namespace WinampOpenALOut
 		// stop the source
 		alSourceStop(uiSource);
 
-		if ( effects != NULL )
-		{
-			effects->on_close();
-		}
-
 		played = 0;
 
 		ALint iState;
@@ -497,7 +492,6 @@ namespace WinampOpenALOut
 				break;
 			}
 		}
-
 		// remove all buffers
 		alSourcei(uiSource, AL_BUFFER, 0);
 
@@ -530,6 +524,7 @@ namespace WinampOpenALOut
 		sampleRate = NO_SAMPLE_RATE;
 		bitsPerSample = NO_BITS_PER_SAMPLE;
 		numberOfChannels = NO_NUMBER_OF_CHANNELS;
+
 		SYNC_END;
 
 	}

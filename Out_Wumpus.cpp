@@ -62,7 +62,7 @@ namespace WinampOpenALOut {
 		memset(
 			temp,
 			0,
-			MAXIMUM_BUFFER_SIZE);
+			sizeof(temp));
 
 		c_bufferLength = 0;
 		monoExpand = false;
@@ -412,28 +412,28 @@ namespace WinampOpenALOut {
 
 			setting[9] = i + '0';
 			bool valid = false;
-			float temp;
+			float tempf;
 			setting[7] = 'x';
-			temp = ConfigFile::ReadFloat(setting, &valid);
+			tempf = ConfigFile::ReadFloat(setting, &valid);
 			if ( valid )
 			{
-				speaker_matrix.speakers[i].x = temp;
+				speaker_matrix.speakers[i].x = tempf;
 			} else {
 				speaker_matrix.speakers[i].x = DEFAULT_MATRIX[i][0];
 			}
 			setting[7] = 'y';
-			temp = ConfigFile::ReadFloat(setting, &valid);
+			tempf = ConfigFile::ReadFloat(setting, &valid);
 			if ( valid )
 			{
-				speaker_matrix.speakers[i].y = temp;
+				speaker_matrix.speakers[i].y = tempf;
 			} else {
 				speaker_matrix.speakers[i].y = DEFAULT_MATRIX[i][1];
 			}
 			setting[7] = 'z';
-			temp = ConfigFile::ReadFloat(setting, &valid);
+			tempf = ConfigFile::ReadFloat(setting, &valid);
 			if ( valid )
 			{
-				speaker_matrix.speakers[i].z = temp;
+				speaker_matrix.speakers[i].z = tempf;
 			} else {
 				speaker_matrix.speakers[i].z = DEFAULT_MATRIX[i][2];
 			}
@@ -661,7 +661,7 @@ namespace WinampOpenALOut {
 		}
 
 		// just incase the thread has exitted, assume playing has stopped
-		isPlaying = false;
+		isPlaying = IS_NOT_PLAYING;
 
 		noBuffers = NO_BUFFERS;
 		sampleRate = NO_SAMPLE_RATE;
@@ -708,7 +708,7 @@ namespace WinampOpenALOut {
 			{
 				memcpy_s(
 					temp + temp_size, 
-					TEMP_BUFFER_SIZE,
+					sizeof(temp),
 					buf,
 					len);
 
@@ -732,7 +732,7 @@ namespace WinampOpenALOut {
 				to_write = new char[to_write_size];
 
 #ifdef _DEBUGGING
-				memset(to_write, 0xAA, to_write_size);
+				memset(to_write, 0x00, to_write_size);
 #endif
 
 				/* copy the first buffer in */
@@ -967,11 +967,11 @@ namespace WinampOpenALOut {
 			{
 				r = renderers[0]->CanWrite();
 			}
-		}
 
-		if ( r >= temp_size)
-		{
-			r -= temp_size;
+			if ( r >= temp_size)
+			{
+				r -= temp_size;
+			}
 		}
 
 		SYNC_END;
@@ -989,11 +989,14 @@ namespace WinampOpenALOut {
 	int Output_Wumpus::IsPlaying() {
 		SYNC_START;
 
-		this->CheckProcessedBuffers();
-
-		if(!preBuffer)
+		if ( streamOpen )
 		{
-			this->CheckPlayState();
+			this->CheckProcessedBuffers();
+
+			if(!preBuffer)
+			{
+				this->CheckPlayState();
+			}
 		}
 
 		int r = isPlaying && streamOpen ? IS_PLAYING : IS_NOT_PLAYING;
