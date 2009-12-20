@@ -764,7 +764,7 @@ namespace WinampOpenALOut {
 			}
 
 			// ############## MONO EXPANSION
-
+#pragma region MONO_EXPAND 
 			if(monoExpand && originalNumberOfChannels == 1) {
 				// we're writing out four as much data so
 				// increase this value by three more times
@@ -814,11 +814,11 @@ namespace WinampOpenALOut {
 				buf = newBuffer;
 				len = new_len;
 			}
-
+#pragma endregion MONO_EXPAND
 			// ############## END MONO EXPANSION
 
 			// ############## STEREO EXPANSION
-
+#pragma region STEREO_EXPAND
 			if(stereoExpand && originalNumberOfChannels == 2) {
 
 				// we're writing out twice as much data so
@@ -863,26 +863,30 @@ namespace WinampOpenALOut {
 				len = new_len;
 				buf = newBuffer;
 			}
+#pragma endregion STEREO_EXPAND
 
 			total_written += len;
 
+#pragma region SPLIT_OUTPUT
 			if ( split_out == true )
 			{
+				// create a table of pointers to each channels buffer
 				char* buffers[MAX_RENDERERS];
 				memset(buffers,0, sizeof(char*) * MAX_RENDERERS);
+				const unsigned int csize = len / no_renderers;
 
-				for ( char i=0; i < no_renderers ; i++ )
+				for ( char rend=0 ; rend < no_renderers ; rend++ )
 				{
-					const unsigned int csize = len / no_renderers;
-					buffers[i] = new char[csize];
-					memset(buffers[i],0,csize);
+					// alloc a buffer to create it
+					buffers[rend] = new char[csize];
+					memset(buffers[rend],0,csize);
 				
 					if ( bitsPerSample == EIGHT_BIT_PER_SAMPLE )
 					{
 						/* create buffers for src/dst*/
-						char *dst = (char*)buffers[i], *src = (char*)buf;
+						char *dst = (char*)buffers[rend], *src = (char*)buf;
 						/* offset the channel number */
-						src+=i;
+						src+=rend;
 
 						/* work out top range */
 						const char* to = dst + (csize);
@@ -898,12 +902,12 @@ namespace WinampOpenALOut {
 					else
 					{
 						/* create buffers for src/dst*/
-						short *dst = (short*)buffers[i], *src = (short*)buf;
+						short *dst = (short*)buffers[rend], *src = (short*)buf;
 						/* offset the channel number */
-						src+=i;
+						src+=(rend * 2);	// * (times) by 2 coz its 16-bit
 
 						/* work out top range */
-						const short* to = dst + (csize / 2);
+						const short* to = dst + (csize / 2); // 2 coz 2 bytes per sample (16bit)
 
 						/* copy over */
 						while(dst < to)
@@ -913,12 +917,16 @@ namespace WinampOpenALOut {
 							src += no_renderers;
 						}
 					}
+				}
 
+				for ( char i=0; i < no_renderers ; i++ )
+				{
 					renderers[i]->Write(buffers[i],csize);
 				}
-				
+
 				delete buf;
 			}
+#pragma endregion SPLIT_OUTPUT
 			else
 			{
 				for ( char i=0; i < no_renderers ; i++ )

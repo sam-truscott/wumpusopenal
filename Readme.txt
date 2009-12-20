@@ -1,7 +1,7 @@
 Wumpus Out OpenAL is copyright (c) 2009 by Sam Truscott.
 =======================================================
 
-Wumpus Out OpenAL v0.9.9.1
+Wumpus Out OpenAL v0.9.10
 ==========================
 
 	Requirements
@@ -29,9 +29,23 @@ Wumpus Out OpenAL v0.9.9.1
 	Known Issues
 	============
 	* No 24bit audio support, OpenAL doesn't support it
+	
+Development
+===========
+out_wumpus.sln		The Project to load
+OPENAL_SDK_DIR		Environment variable pointing to the OpenAL SDK installation
+						directory. On my system it's:
+						C:\Development\OpenAL 1.1 SDK
+WA_SDK_DIR			The 'Winamp' folder of the Winamp SDK. This contains some of the stuff
+						we need to talk to Winamp. On my system it's:
+						C:\Program Files\Winamp SDK\Winamp
 
 Change Log
 ==========
+
+	v0.9.10
+	=======
+	* [Probably] Fixed - 3D issue where it went out of phase.
 
 	v0.9.9.1
 	========

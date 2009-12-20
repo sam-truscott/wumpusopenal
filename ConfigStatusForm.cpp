@@ -60,6 +60,7 @@ namespace WinampOpenALOut {
 
 		int efx_env = ConfigFile::ReadInteger(CONF_EFX_ENV);
 
+		// overflow check
 		if ( efx_env < EFX_REVERB_PRESET_GENERIC ||
 			 efx_env > EFX_REVERB_PRESET_SMALLWATERROOM )
 		{
@@ -70,6 +71,15 @@ namespace WinampOpenALOut {
 		this->checkBoxEfxEnabled->Checked = ConfigFile::ReadBoolean(CONF_EFX_ENABLED);
 
 		this->checkBoxSplit->Checked = ptrOw->IsSplit();
+
+		if(this->checkBoxSplit->Checked)
+		{
+			this->checkBoxEfxEnabled->Enabled = true;
+		}
+		else
+		{
+			this->checkBoxEfxEnabled->Enabled = false;
+		}
 
 		speaker_matrix_T matrix = ptrOw->GetMatrix();
 		numFLx->Value = (System::Decimal)matrix.speakers[0].x;

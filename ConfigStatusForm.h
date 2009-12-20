@@ -1350,7 +1350,12 @@ private: System::Void numSz_ValueChanged(System::Object^  sender, System::EventA
 private: System::Void checkBoxSplit_CheckedChanged(System::Object^  sender, System::EventArgs^  e) {
 			 if ( checkBoxSplit->Checked == false )
 			 {
-				 checkBoxEfxEnabled->Checked = false;
+				 this->checkBoxEfxEnabled->Checked = false;
+				 checkBoxEfxEnabled->Enabled = false;
+			 }
+			 else
+			 {
+				 checkBoxEfxEnabled->Enabled = true;
 			 }
 		 }
 };
