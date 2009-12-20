@@ -7,11 +7,11 @@ namespace WinampOpenALOut {
 
 	delegate void UpdateData();
 
-	Config::Config(Output_Wumpus *output_plugin)
+	Config::Config(Output_Wumpus *an_output_plugin)
 		{
 		InitializeComponent();
 
-		output_plugin = output_plugin;
+		output_plugin = an_output_plugin;
 		ptrForm = this;
 
 		overRide = false;

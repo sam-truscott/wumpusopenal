@@ -29,7 +29,7 @@ namespace WinampOpenALOut {
 	public ref class Config : public System::Windows::Forms::Form
 	{
 	public:
-		Config(class Output_Wumpus *output_plugin);
+		Config(class Output_Wumpus *an_output_plugin);
 
 		static Config^ GetInstance(Output_Wumpus *output)
 		{
