@@ -67,4 +67,18 @@ typedef struct
 	speaker_T speakers[MAX_RENDERERS];
 } speaker_matrix_T;
 
+static const float DEFAULT_MATRIX[MAX_RENDERERS][3] = 
+{
+	{-12.50	,0.0,	-10.0},
+	{12.50	,0.0,	-10.0},
+	{-12.50	,0.0,	10.0},
+	{12.50	,0.0,	10.0},
+	{0.0	,0.0,	-10.0},
+	{0.0	,0.0,	0.0}
+};
+
+#define MATRIX_BUFFER_SIZE 11u
+#define MATRIX_AXIS_POSITION 7u
+#define MATRIX_RENDERER_POSITION 9u
+
 #endif

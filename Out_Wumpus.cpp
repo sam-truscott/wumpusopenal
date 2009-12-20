@@ -11,16 +11,6 @@
 	#include <crtdbg.h>
 #endif
 
-static const float DEFAULT_MATRIX[MAX_RENDERERS][3] = 
-{
-	{-12.50	,0.0,	-10.0},
-	{12.50	,0.0,	-10.0},
-	{-12.50	,0.0,	10.0},
-	{12.50	,0.0,	10.0},
-	{0.0	,0.0,	-10.0},
-	{0.0	,0.0,	0.0}
-};
-
 #define SYNC_START EnterCriticalSection(&criticalSection)
 #define SYNC_END LeaveCriticalSection(&criticalSection)
 
@@ -38,9 +28,9 @@ namespace WinampOpenALOut {
 		effects = NULL;
 
 		no_renderers = 0;
-		for ( char i=0 ; i < MAX_RENDERERS ; i++ )
+		for ( char rend=0 ; rend < MAX_RENDERERS ; rend++ )
 		{
-			renderers[i] = NULL;
+			renderers[rend] = NULL;
 		}
 
 		isPlaying = false;
@@ -103,11 +93,11 @@ namespace WinampOpenALOut {
 	void Output_Wumpus::fmemcpy(char* dest, int destPos, char* src, int srcPos, int size) {
 		
 		// get a pointer to the memory data with an offset
-		void* ptr = (void*)&dest[destPos];
+		void* ptrDst = (void*)&dest[destPos];
 		void* ptrSrc = (void*)&src[srcPos];
 
 		// now copy from this position onwards
-		memcpy_s(ptr, MAXIMUM_BUFFER_SIZE, ptrSrc, size);
+		memcpy_s(ptrDst, MAXIMUM_BUFFER_SIZE, ptrSrc, size);
 	}
 
 	void Output_Wumpus::onError()
@@ -140,14 +130,14 @@ namespace WinampOpenALOut {
 
 		// grab some temporary data for where we are now
 		// and the format of the data
-		unsigned int tempSampleRate = sampleRate;
-		unsigned int tempBitsPerSample = bitsPerSample;
-		unsigned int tempNumberOfChannels = originalNumberOfChannels;
+		const unsigned int tempSampleRate = sampleRate;
+		const unsigned int tempBitsPerSample = bitsPerSample;
+		const unsigned int tempNumberOfChannels = originalNumberOfChannels;
 
 		// shut down the thread and wait for it to shutdown
-		bool tempStreamOpen = streamOpen;
-		int tempPause = lastPause;
-		float tempVolume = volume;
+		const bool tempStreamOpen = streamOpen;
+		const int tempPause = lastPause;
+		const float tempVolume = volume;
 
 		/* stop playing */
 		this->Close();
@@ -170,7 +160,7 @@ namespace WinampOpenALOut {
 				tempSampleRate,
 				tempNumberOfChannels,
 				tempBitsPerSample,
-				0,0);
+				ZERO_TIME,ZERO_TIME);
 						
 			// reset back to the current position
 			this->SetBufferTime(currentPosition);
@@ -189,9 +179,12 @@ namespace WinampOpenALOut {
 
 	void Output_Wumpus::CheckProcessedBuffers() 
 	{
-		for ( char i=0 ; i < no_renderers ; i++ )
+		/*
+		 * ask each of the renderers to check where they are
+		 */
+		for ( char rend=0 ; rend < no_renderers ; rend++ )
 		{
-			this->renderers[i]->CheckProcessedBuffers();
+			this->renderers[rend]->CheckProcessedBuffers();
 		}
 	}
 
@@ -199,12 +192,15 @@ namespace WinampOpenALOut {
 	{
 		this->isPlaying = false;
 
-		for ( char i=0 ; i < no_renderers ; i++ )
+		/*
+		 * ask all of the renderers if they're playing
+		 */
+		for ( char rend=0 ; rend < no_renderers ; rend++ )
 		{
-			if ( this->renderers[i] )
+			if ( this->renderers[rend] )
 			{
-				this->renderers[i]->CheckPlayState();
-				this->isPlaying |= this->renderers[i]->IsPlaying();
+				this->renderers[rend]->CheckPlayState();
+				this->isPlaying |= this->renderers[rend]->IsPlaying();
 			}
 		}
 	}
@@ -267,14 +263,18 @@ namespace WinampOpenALOut {
 
 		effects = new Output_Effects();
 
+		/*
+		 * empty the speaker matrix (values of where the speakers are)
+		 * by zeroing them all
+		 */
 		memset(
 			&speaker_matrix,
 			0,
 			sizeof(speaker_matrix_T));
 
 		/*
-			set up the variables to a default state
-		*/
+		 *	set up the variables to a default state
+		 */
 		streamOpen = false;
 		isPlaying = false;
 		split_out = false;
@@ -293,8 +293,14 @@ namespace WinampOpenALOut {
 		// load the config up
 		ConfigFile::Initialise(window);
 
+		/*
+		 *	initialise the winamp interface to get info
+		 */
 		Winamp::Initialise(window);
 
+		/*
+		 *	get the buffer length from the config file
+		 */
 		c_bufferLength = ConfigFile::ReadInteger(CONF_BUFFER_LENGTH);
 		if(c_bufferLength == ERROR_BUFFER || 
 			c_bufferLength > CONF_BUFFER_LENGTH_MAX || 
@@ -312,6 +318,9 @@ namespace WinampOpenALOut {
 			ConfigFile::WriteInteger(CONF_DEVICE, currentDevice);
 		}
 
+		/*
+		 *	get the last used volume we used to with openal
+		 */
 		int last_volume = ConfigFile::ReadGlobalInteger(CONF_VOLUME);
 		if ( last_volume != -1)
 		{
@@ -322,6 +331,9 @@ namespace WinampOpenALOut {
 			volume = 1.0f;
 		}
 
+		/*
+		 *	get the 3D mode (split out) and effects settings
+		 */
 		split_out = ConfigFile::ReadBoolean(CONF_SPLIT);
 
 		bool efx_enabled = ConfigFile::ReadBoolean(CONF_EFX_ENABLED);
@@ -329,6 +341,9 @@ namespace WinampOpenALOut {
 			
 		efx_env = (effects_list)ConfigFile::ReadInteger(CONF_EFX_ENV);
 
+		/*
+		 *	range check the setting value
+		 */
 		if ( efx_env < EFX_REVERB_PRESET_GENERIC ||
 			 efx_env > EFX_REVERB_PRESET_SMALLWATERROOM )
 		{
@@ -403,39 +418,47 @@ namespace WinampOpenALOut {
 			this->xram_detected = true;
 		}
 
-		char setting[11];
-		strcpy_s(setting,11,"matrix_x_y\0");
-		for (char i=0 ; i < MAX_RENDERERS ; i++ )
+		/*
+		 *	fairly horrible bit of code to read in the speaker
+		 * matrix (all the real numbers for where the speakers are)
+		 */
+		char setting[MATRIX_BUFFER_SIZE];
+		memset(setting, '\0', MATRIX_BUFFER_SIZE);
+		//pump out the default format for the string
+		// the _x_ is the x/y/z axis position
+		// the _y is the renderer number
+		strcpy_s(setting,MATRIX_BUFFER_SIZE,"matrix_x_y\0");
+		for (char rend=0 ; rend < MAX_RENDERERS ; rend++ )
 		{
+			this->renderers[rend] = NULL;
 
-			this->renderers[i] = NULL;
-
-			setting[9] = i + '0';
+			// offset the ascii value
+			setting[MATRIX_RENDERER_POSITION] = rend + '0';
 			bool valid = false;
 			float tempf;
-			setting[7] = 'x';
+			setting[MATRIX_AXIS_POSITION] = 'x';
 			tempf = ConfigFile::ReadFloat(setting, &valid);
 			if ( valid )
 			{
-				speaker_matrix.speakers[i].x = tempf;
+				speaker_matrix.speakers[rend].x = tempf;
 			} else {
-				speaker_matrix.speakers[i].x = DEFAULT_MATRIX[i][0];
+				speaker_matrix.speakers[rend].x = DEFAULT_MATRIX[rend][0];
 			}
-			setting[7] = 'y';
+			setting[MATRIX_AXIS_POSITION] = 'y';
 			tempf = ConfigFile::ReadFloat(setting, &valid);
 			if ( valid )
 			{
-				speaker_matrix.speakers[i].y = tempf;
+				speaker_matrix.speakers[rend].y = tempf;
 			} else {
-				speaker_matrix.speakers[i].y = DEFAULT_MATRIX[i][1];
+				speaker_matrix.speakers[rend].y = DEFAULT_MATRIX[rend][1];
 			}
-			setting[7] = 'z';
+			setting[MATRIX_AXIS_POSITION] = 'z';
 			tempf = ConfigFile::ReadFloat(setting, &valid);
 			if ( valid )
 			{
-				speaker_matrix.speakers[i].z = tempf;
+				speaker_matrix.speakers[rend].z = tempf;
 			} else {
-				speaker_matrix.speakers[i].z = DEFAULT_MATRIX[i][2];
+				speaker_matrix.speakers[rend].z = DEFAULT_MATRIX[rend][2];
 			}
 		}
 
@@ -461,14 +484,19 @@ namespace WinampOpenALOut {
 			}
 		}
 
-		char setting[11] = {'\0'};
+		char setting[MATRIX_BUFFER_SIZE];
+		memset(setting, '\0', MATRIX_BUFFER_SIZE);
 		strcpy_s(setting,11,"matrix_x_y\0");
-		for (char i=0 ; i < MAX_RENDERERS ; i++ )
+		for (char rend=0 ; rend < MAX_RENDERERS ; rend++ )
 		{
-			setting[9] = i + '0';
-			setting[7] = 'x';	ConfigFile::WriteFloat( setting, speaker_matrix.speakers[i].x );
-			setting[7] = 'y';	ConfigFile::WriteFloat( setting, speaker_matrix.speakers[i].y );
-			setting[7] = 'z';	ConfigFile::WriteFloat( setting, speaker_matrix.speakers[i].z );
+			setting[MATRIX_RENDERER_POSITION] = rend + '0';
+
+			setting[MATRIX_AXIS_POSITION] = 'x';
+				ConfigFile::WriteFloat( setting, speaker_matrix.speakers[rend].x );
+			setting[MATRIX_AXIS_POSITION] = 'y';	
+				ConfigFile::WriteFloat( setting, speaker_matrix.speakers[rend].y );
+			setting[MATRIX_AXIS_POSITION] = 'z';	
+				ConfigFile::WriteFloat( setting, speaker_matrix.speakers[rend].z );
 		}
 	}
 
@@ -511,10 +539,18 @@ namespace WinampOpenALOut {
 
 		the open al buffers are created and an open al source
 	*/
-	int Output_Wumpus::Open(int samplerate, int numchannels, int bitspersamp, int bufferlenms, int prebufferms) {
+	int Output_Wumpus::Open(
+		int samplerate,
+		int numchannels,
+		int bitspersamp, 
+		int bufferlenms,
+		int prebufferms) {
 		
 		SYNC_START;
 
+		/*
+		 * catch the case where someone tried 24-bit or higher
+		 */
 		if(bitspersamp > SIXTEEN_BIT_PER_SAMPLE)
 		{
 			MessageBoxA(NULL, "This Plug-In only supports 8 and 16bit audio, please disable 24bit audio in Winamp", "Whoops", MB_OK);
@@ -549,13 +585,17 @@ namespace WinampOpenALOut {
 		// determine the size of the buffer
 		bytesPerSampleChannel = ((bitsPerSample >> SHIFT_BITS_TO_BYTES)*numberOfChannels);
 
-		for ( char i=0 ; i < MAX_RENDERERS ; i++ )
+		/*
+		 * just incase we haven't closed properly from last time,
+		 * make sure by closing down the renderers
+		 */
+		for ( char rend=0 ; rend < MAX_RENDERERS ; rend++ )
 		{
-			if ( renderers[i] )
+			if ( renderers[rend] )
 			{
-				renderers[i]->Close();
-				delete renderers[i];
-				renderers[i] = NULL;
+				renderers[rend]->Close();
+				delete renderers[rend];
+				renderers[rend] = NULL;
 			}
 		}
 
@@ -573,7 +613,11 @@ namespace WinampOpenALOut {
 			effects->setup();
 		}
 
-		/* stereo and mono expansion */
+		/* stereo and mono expansion 
+		 *	we need to store the original number of channels
+		 *	incase we need to expand them out and need to work
+		 *	out how much "real" data is in the stream
+		 */
 		originalNumberOfChannels = this->numberOfChannels;
 		if ( this->stereoExpand && this->numberOfChannels == 2)
 		{
@@ -587,16 +631,22 @@ namespace WinampOpenALOut {
 		no_renderers = 0;
 		if ( split_out == true )
 		{
-			for ( unsigned char i=0 ; i < numberOfChannels ; i++ )
+			for ( unsigned char rend=0 ; rend < numberOfChannels ; rend++ )
 			{
-				renderers[i] = new Output_Renderer(c_bufferLength, i, effects);
-				renderers[i]->SetXRAMEnabled(use_xram);
-				renderers[i]->Open(samplerate,1,bitspersamp,0,0);
+				renderers[rend] = new Output_Renderer(c_bufferLength, rend, effects);
+				renderers[rend]->SetXRAMEnabled(use_xram);
+				// if we're splitting out, there will always be '1' channel
+				// because we'll split multiple channels out to many single renderers
+				renderers[rend]->Open(samplerate,1,bitspersamp,0,0);
 				no_renderers++;
 			}
 		}
 		else
 		{
+			/*
+			 * otherwise, create one renderer and just use that to represent
+			 * the whole stream
+			 */
 			renderers[0] = new Output_Renderer(c_bufferLength, 0, effects);
 			renderers[0]->SetXRAMEnabled(use_xram);
 			renderers[0]->Open(samplerate,this->numberOfChannels,bitspersamp,0,0);
@@ -645,16 +695,24 @@ namespace WinampOpenALOut {
 		SYNC_START;
 		streamOpen = false;
 
-		for ( char i=0 ; i < MAX_RENDERERS ; i++ )
+		/*
+		 * loop through each renderer we're using and close each one down,
+		 * also, delete the renderer and reclaim any memory etc.
+		 */
+		for ( char rend=0 ; rend < MAX_RENDERERS ; rend++ )
 		{
-			if ( renderers[i] )
+			if ( renderers[rend] )
 			{
-				renderers[i]->Close();
-				delete renderers[i];
-				renderers[i] = NULL;
+				renderers[rend]->Close();
+				delete renderers[rend];
+				renderers[rend] = NULL;
 			}
 		}
 
+		/*
+		 * if we're using effects we can remove any sources
+		 * that are attached
+		 */
 		if ( this->effects )
 		{
 			effects->on_close();
@@ -704,6 +762,10 @@ namespace WinampOpenALOut {
 			log_debug_msg(dbg, __FILE__, __LINE__);
 #endif
 
+			/*
+			 * if our internal buffer isn't full, copy the new data
+			 * to the internal buffer and quit out
+			 */
 			if ( len + temp_size < MINIMUM_BUFFER_SIZE ) 
 			{
 				memcpy_s(
@@ -732,6 +794,7 @@ namespace WinampOpenALOut {
 				to_write = new char[to_write_size];
 
 #ifdef _DEBUGGING
+				/* this isnt required, all the data *should* be over-written */
 				memset(to_write, 0x00, to_write_size);
 #endif
 
@@ -884,7 +947,8 @@ namespace WinampOpenALOut {
 					if ( bitsPerSample == EIGHT_BIT_PER_SAMPLE )
 					{
 						/* create buffers for src/dst*/
-						char *dst = (char*)buffers[rend], *src = (char*)buf;
+						char *dst = (char*)buffers[rend];
+						const char *src = (char*)buf;
 						/* offset the channel number */
 						src+=rend;
 
@@ -902,7 +966,8 @@ namespace WinampOpenALOut {
 					else
 					{
 						/* create buffers for src/dst*/
-						short *dst = (short*)buffers[rend], *src = (short*)buf;
+						short *dst = (short*)buffers[rend];
+						const short *src = (short*)buf;
 						/* offset the channel number */
 						src+=(rend * 2);	// * (times) by 2 coz its 16-bit
 
@@ -919,9 +984,11 @@ namespace WinampOpenALOut {
 					}
 				}
 
-				for ( char i=0; i < no_renderers ; i++ )
+				/* we write in a sepeate loop to ensure that they're close
+				 * together, if they're in the loop above the audio may drift */
+				for ( char rend=0; rend < no_renderers ; rend++ )
 				{
-					renderers[i]->Write(buffers[i],csize);
+					renderers[rend]->Write(buffers[rend],csize);
 				}
 
 				delete buf;
@@ -929,9 +996,10 @@ namespace WinampOpenALOut {
 #pragma endregion SPLIT_OUTPUT
 			else
 			{
-				for ( char i=0; i < no_renderers ; i++ )
+				/* if we're not splitting out, throw it to the renderers */
+				for ( char rend=0; rend < no_renderers ; rend++ )
 				{				
-					renderers[i]->Write(buf,len);
+					renderers[rend]->Write(buf,len);
 				}
 			}
 
@@ -971,11 +1039,20 @@ namespace WinampOpenALOut {
 		int r = EMPTY_THE_BUFFER;
 		if(streamOpen)
 		{
+			/*
+			 * find out if the first renderer can accept data,
+			 * all the renderers should have the same amount of data
+			 * free so we only need to ask one
+			 */
 			if ( no_renderers > 0 && renderers[0] )
 			{
 				r = renderers[0]->CanWrite();
 			}
 
+			/*
+			 * don't attach the temp_size as it may cause overflows
+			 * as we may tell winamp that we want more than we can handle
+			 */
 			if ( r >= temp_size)
 			{
 				r -= temp_size;
@@ -1030,11 +1107,11 @@ namespace WinampOpenALOut {
 		
 		if ( !this->preBuffer )
 		{
-			for ( char i=0 ; i < no_renderers ; i++ )
+			for ( char rend=0 ; rend < no_renderers ; rend++ )
 			{
-				if ( renderers[i] )
+				if ( renderers[rend] )
 				{
-					renderers[i]->Pause(pause);
+					renderers[rend]->Pause(pause);
 				}
 			}
 		}
@@ -1074,11 +1151,11 @@ namespace WinampOpenALOut {
 		{
 			volume = newVolume;
 			
-			for ( char i=0 ; i < no_renderers ; i++ )
+			for ( char rend=0 ; rend < no_renderers ; rend++ )
 			{
-				if ( renderers[i] )
+				if ( renderers[rend] )
 				{
-					renderers[i]->SetVolumeInternal(volume);
+					renderers[rend]->SetVolumeInternal(volume);
 				}
 			}
 
@@ -1107,11 +1184,11 @@ namespace WinampOpenALOut {
 	{
 		SYNC_START;
 
-		for ( char i=0 ; i < no_renderers ; i++ )
+		for ( char rend=0 ; rend < no_renderers ; rend++ )
 		{
-			if ( renderers[i] )
+			if ( renderers[rend] )
 			{
-				renderers[i]->Flush();
+				renderers[rend]->Flush();
 			}
 		}
 
@@ -1125,6 +1202,13 @@ namespace WinampOpenALOut {
 #endif
 
 		bool closing = false;
+
+		/*
+		 * this checks that we can only flush (skip) when the steam is open
+		 * but also make sure that we're skipping within the track length.
+		 * if this isn't done, winamp will continue to skip past the end of
+		 * the file.
+		 */
 		if ( streamOpen && (newTimeMs < (Winamp::GetTrackLength()-c_bufferLength)) )
 		{
 			// calculate the number of bytes that will have been
@@ -1171,11 +1255,13 @@ namespace WinampOpenALOut {
 		log_debug_msg(dbg, __FILE__, __LINE__);
 #endif
 
-		for ( char i = 0 ; i < no_renderers ; i++ )
+		const unsigned __int64 new_time = calcTime / no_renderers;
+
+		for ( char rend = 0 ; rend < no_renderers ; rend++ )
 		{
-			if ( renderers[i] )
+			if ( renderers[rend] )
 			{
-				renderers[i]->SetPlayedTime(calcTime / no_renderers);
+				renderers[rend]->SetPlayedTime(new_time);
 			}
 		}
 
@@ -1206,6 +1292,10 @@ namespace WinampOpenALOut {
 			currentWrittenTime = total_written;
 			currentWrittenTime = get_current_written_time(currentWrittenTime, sampleRate) / bytesPerSampleChannel;
 
+			/*
+			 * we need to return the correct information. if we've expanded the data
+			 * we need to only return half those values
+			 */
 			if ( stereoExpand && originalNumberOfChannels == 2)
 			{
 				currentWrittenTime /= 2;
@@ -1243,11 +1333,11 @@ namespace WinampOpenALOut {
 			//SYNC_END;
 
 			__int64 new_total_played = 0;
-			for( char i=0; i < no_renderers ; i++ )
+			for( char rend=0; rend < no_renderers ; rend++ )
 			{
-				if ( renderers[i] )
+				if ( renderers[rend] )
 				{
-					new_total_played += renderers[i]->GetPlayedTime();
+					new_total_played += renderers[rend]->GetPlayedTime();
 				}
 			}
 

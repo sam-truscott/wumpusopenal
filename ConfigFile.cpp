@@ -10,8 +10,8 @@ namespace WinampOpenALOut {
 
 	char ConfigFile::INI_FILE[MAX_PATH];
 
-	static char app_name[] = "Wumpus OpenAL Output";
-	static char global_name[] = "Winamp";
+	const static char app_name[] = "Wumpus OpenAL Output";
+	const static char global_name[] = "Winamp";
 
 	void ConfigFile::ReadString(char *name,char *data, int mlen)
 	{
@@ -112,7 +112,6 @@ namespace WinampOpenALOut {
 	void ConfigFile::WriteInteger(char *name, int i)
 	{
 		char buf[DEFAULT_SIZE] = {'\0'};
-		/*_itoa_s(i, buf, DEFAULT_SIZE);*/
 		sprintf_s(buf, DEFAULT_SIZE,"%d\0",i);
 		WritePrivateProfileString(app_name,name,buf,INI_FILE);
 	}

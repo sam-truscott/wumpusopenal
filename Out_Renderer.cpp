@@ -52,9 +52,7 @@ namespace WinampOpenALOut
 	Output_Renderer::~Output_Renderer()
 	{
 		//ensure everything in memory is deleted
-		//SYNC_START;
-		//SYNC_END;
-		//DeleteCriticalSection(&criticalSection);
+		DeleteCriticalSection(&criticalSection);
 	}
 
 	void Output_Renderer::onError()
@@ -65,9 +63,9 @@ namespace WinampOpenALOut
 	void Output_Renderer::CheckProcessedBuffers() 
 	{
 
-		ALint			iBuffersProcessed;
-		ALuint			uiNextBuffer;
-		ALenum			err;
+		ALint	iBuffersProcessed;
+		ALuint	uiNextBuffer;
+		ALenum	err;
 
 		unsigned int selectedBuffer = 0u;
 
@@ -108,17 +106,18 @@ namespace WinampOpenALOut
 
 			// based on the bufferID determine the buffer index
 			selectedBuffer = UNKNOWN_BUFFER;
-			for(unsigned int i=0;i<noBuffers;i++)
+			for(unsigned int buffer_index=0 ; buffer_index < noBuffers ; buffer_index++)
 			{
-				if( (!uiBuffers[i].available) && uiBuffers[i].buffer_id == uiNextBuffer )
+				if( (!uiBuffers[buffer_index].available) && 
+					uiBuffers[buffer_index].buffer_id == uiNextBuffer )
 				{
-					selectedBuffer = i;
-					uiBuffers[i].available = true;
+					selectedBuffer = buffer_index;
+					uiBuffers[buffer_index].available = true;
 
-					if ( uiBuffers[i].data != NULL )
+					if ( uiBuffers[buffer_index].data != NULL )
 					{
-						delete uiBuffers[i].data;
-						uiBuffers[i].data = NULL;
+						delete uiBuffers[buffer_index].data;
+						uiBuffers[buffer_index].data = NULL;
 					}
 
 					buffers_free++;
@@ -146,8 +145,8 @@ namespace WinampOpenALOut
 
 	void Output_Renderer::CheckPlayState() {
 
-		ALint			iState = AL_SOURCE_STATE;
-		ALint			iQueuedBuffers = 0;
+		ALint	iState = AL_SOURCE_STATE;
+		ALint	iQueuedBuffers = 0;
 
 		/*
 			can the current state of the source
@@ -184,7 +183,7 @@ namespace WinampOpenALOut
 				this->onError();
 			}
 
-			if (iQueuedBuffers)
+			if (iQueuedBuffers > 0)
 			{
 				// if any buffers are queued and we're not playing - play!
 				if(!lastPause)
@@ -323,26 +322,27 @@ namespace WinampOpenALOut
 
 		// allocate some buffers
 		alGetError();
-		for(unsigned int i=0;i<MAX_NO_BUFFERS;i++)
+		for(unsigned int buffer_index=0 ; buffer_index<MAX_NO_BUFFERS ; buffer_index++)
 		{
-			if ( uiBuffers[i].buffer_id != 0)
+			if ( uiBuffers[buffer_index].buffer_id != 0)
 			{
-				uiBuffers[i].buffer_id = 0;
+				uiBuffers[buffer_index].buffer_id = 0;
 			}
-			uiBuffers[i].buffer_id = 0;
-			uiBuffers[i].size = 0;
-			uiBuffers[i].available = false;
-			if ( uiBuffers[i].data )
+			uiBuffers[buffer_index].buffer_id = 0;
+			uiBuffers[buffer_index].size = 0;
+			uiBuffers[buffer_index].available = false;
+			if ( uiBuffers[buffer_index].data )
 			{
-				delete uiBuffers[i].data;
-				uiBuffers[i].data = NULL;
+				delete uiBuffers[buffer_index].data;
+				uiBuffers[buffer_index].data = NULL;
 			}
 		}
 
-		for(unsigned int i=0;i<noBuffers;i++)
+		for(unsigned int buffer_index=0 ; buffer_index<noBuffers ; buffer_index++)
 		{
-			uiBuffers[i].available = true;
-			alGenBuffers( 1, &uiBuffers[i].buffer_id );
+			uiBuffers[buffer_index].available = true;
+			/* deallocate each buffer one-at-a-time */
+			alGenBuffers( 1, &uiBuffers[buffer_index].buffer_id );
 
 			/* if xram is enabled write the buffer to XRAM */
 			if ( xram_enabled == true &&
@@ -352,7 +352,7 @@ namespace WinampOpenALOut
 			{
 				ALboolean inhw = eaxSetBufferMode(
 					1,
-					&uiBuffers[i].buffer_id,
+					&uiBuffers[buffer_index].buffer_id,
 					eXRAMHardware);
 
 				if ( inhw == AL_FALSE )
@@ -481,13 +481,13 @@ namespace WinampOpenALOut
 			}
 		}
 
-		int c = 0;
+		int countTimeout = 0;
 		// wait for all the buffers to be used up
 		while(buffers_free != noBuffers)
 		{
 			CheckProcessedBuffers();
 			Sleep(1);
-			if ( ++c > CLOSE_TIMEOUT_COUNT )
+			if ( ++countTimeout > CLOSE_TIMEOUT_COUNT )
 			{
 				break;
 			}
@@ -497,21 +497,22 @@ namespace WinampOpenALOut
 
 		// delete the source
 		alDeleteSources( 1, &uiSource );
+
 		// delete all the buffers
-		for(unsigned int i=0;i<noBuffers;i++)
+		for(unsigned int buffer_index=0 ; buffer_index<noBuffers ; buffer_index++)
 		{
-			alDeleteBuffers( 1, &uiBuffers[i].buffer_id );
-			uiBuffers[i].buffer_id = 0;
+			alDeleteBuffers( 1, &uiBuffers[buffer_index].buffer_id );
+			uiBuffers[buffer_index].buffer_id = 0;
 		}
 
 		// make sure all memory from the buffers is freed up,
 		// if CheckProcessed is working correct this shouldn't run
-		for(unsigned int i=0;i<noBuffers;i++)
+		for(unsigned int buffer_index=0 ; buffer_index<noBuffers ; buffer_index++)
 		{
-			if ( uiBuffers[i].data != NULL )
+			if ( uiBuffers[buffer_index].data != NULL )
 			{
-				delete uiBuffers[i].data;
-				uiBuffers[i].data = NULL;
+				delete uiBuffers[buffer_index].data;
+				uiBuffers[buffer_index].data = NULL;
 			}
 		}
 
@@ -570,14 +571,14 @@ namespace WinampOpenALOut
 				if we're here (critical section, canWrite=true) then
 				we assume that one is! 
 			*/
-			for(ALuint i=0;i<noBuffers;i++)
+			for(ALuint buffer_index=0 ; buffer_index<noBuffers ; buffer_index++)
 			{
 				// find an available buffer
-				if ( uiBuffers[i].available == true )
+				if ( uiBuffers[buffer_index].available == true )
 				{
-					uiNextBuffer = uiBuffers[i].buffer_id;
-					uiBuffers[i].available = false;
-					selectedBuffer = i;
+					uiNextBuffer = uiBuffers[buffer_index].buffer_id;
+					uiBuffers[buffer_index].available = false;
+					selectedBuffer = buffer_index;
 					buffers_free--;
 					break;
 				}
@@ -755,9 +756,10 @@ namespace WinampOpenALOut
 
 	void Output_Renderer::SetMatrix ( speaker_T speaker )
 	{
-		ALfloat x = ((float)speaker.x) / 255.0f;
-		ALfloat y = ((float)speaker.y) / 255.0f;
-		ALfloat z = ((float)speaker.z) / 255.0f;
+		const ALfloat x = ((float)speaker.x) / 255.0f;
+		const ALfloat y = ((float)speaker.y) / 255.0f;
+		const ALfloat z = ((float)speaker.z) / 255.0f;
+
 		alSource3f(
 			this->uiSource,
 			AL_POSITION,
