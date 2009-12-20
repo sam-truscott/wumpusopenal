@@ -8,8 +8,8 @@
 	#include <crtdbg.h>
 #endif
 
-#define SYNC_START EnterCriticalSection(&criticalSection)
-#define SYNC_END LeaveCriticalSection(&criticalSection)
+#define SYNC_START EnterCriticalSection(&critical_section)
+#define SYNC_END LeaveCriticalSection(&critical_section)
 
 namespace WinampOpenALOut
 {
@@ -19,32 +19,32 @@ namespace WinampOpenALOut
 		unsigned char a_channel,
 		Output_Effects* the_effects)
 	{
-		InitializeCriticalSection(&criticalSection);
+		InitializeCriticalSection(&critical_section);
 
 		SYNC_START;
 
 		// make sure all the pointers are set to zero
-		c_bufferLength = buffer_len;
+		conf_buffer_length = buffer_len;
 		effects = the_effects;
 		this->channel = a_channel;
 
-		isPlaying = false;
-		streamOpen = false;
+		is_playing = false;
+		stream_open = false;
 		buffer_free = 0;
 		buffers_free = 0;
-		sampleRate = 0;
-		numberOfChannels = 0;
-		bitsPerSample = 0;
-		noBuffers = 0;
-		bytesPerSampleChannel = 0;
+		sample_rate = 0;
+		number_of_channels = 0;
+		bits_per_sample = 0;
+		no_buffers = 0;
+		bytes_per_sample_channel = 0;
 		volume = 0;
 		played = 0;
-		uiSource = 0;
-		lastPause = 0;
-		ulFormat = 0;
-		bufferSize = 0;
+		source = 0;
+		last_pause = 0;
+		format = 0;
+		buffer_size = 0;
 
-		memset(uiBuffers, 0, sizeof(buffer_type) * MAX_NO_BUFFERS);
+		memset(buffers, 0, sizeof(buffer_type) * MAX_NO_BUFFERS);
 
 		SYNC_END;
 	}
@@ -52,7 +52,7 @@ namespace WinampOpenALOut
 	Output_Renderer::~Output_Renderer()
 	{
 		//ensure everything in memory is deleted
-		DeleteCriticalSection(&criticalSection);
+		DeleteCriticalSection(&critical_section);
 	}
 
 	void Output_Renderer::onError()
@@ -63,17 +63,17 @@ namespace WinampOpenALOut
 	void Output_Renderer::CheckProcessedBuffers() 
 	{
 
-		ALint	iBuffersProcessed;
-		ALuint	uiNextBuffer;
-		ALenum	err;
+		ALint	buffers_processed = 0;
+		ALuint	next_buffer = 0;
+		ALenum	err = AL_NO_ERROR;
 
-		unsigned int selectedBuffer = 0u;
+		unsigned int selected_buffer = 0u;
 
-		iBuffersProcessed = NO_BUFFERS_PROCESSED;
+		buffers_processed = NO_BUFFERS_PROCESSED;
 
 		// ask open al how many buffers have been processed
 		alGetError();
-		alGetSourcei(uiSource, AL_BUFFERS_PROCESSED, &iBuffersProcessed);
+		alGetSourcei(source, AL_BUFFERS_PROCESSED, &buffers_processed);
 		if( (err = alGetError()) != AL_NO_ERROR )
 		{
 			if(err == AL_INVALID_VALUE) {
@@ -90,9 +90,9 @@ namespace WinampOpenALOut
 			onError();
 		}
 
-		while (iBuffersProcessed--)
+		while (buffers_processed--)
 		{
-			uiNextBuffer = DEFAULT_BUFFER;
+			next_buffer = DEFAULT_BUFFER;
 			
 			// clear any open al errors
 			alGetError();
@@ -100,24 +100,24 @@ namespace WinampOpenALOut
 			/* unqueue *any* processed buffer. the buffer that has been
 				processed will be put into uiNextBuffer */
 			alSourceUnqueueBuffers(
-				uiSource,
+				source,
 				GET_ONE_BUFFER,
-				&uiNextBuffer); 
+				&next_buffer); 
 
 			// based on the bufferID determine the buffer index
-			selectedBuffer = UNKNOWN_BUFFER;
-			for(unsigned int buffer_index=0 ; buffer_index < noBuffers ; buffer_index++)
+			selected_buffer = UNKNOWN_BUFFER;
+			for(unsigned int buffer_index=0 ; buffer_index < no_buffers ; buffer_index++)
 			{
-				if( (!uiBuffers[buffer_index].available) && 
-					uiBuffers[buffer_index].buffer_id == uiNextBuffer )
+				if( (!buffers[buffer_index].available) && 
+					buffers[buffer_index].buffer_id == next_buffer )
 				{
-					selectedBuffer = buffer_index;
-					uiBuffers[buffer_index].available = true;
+					selected_buffer = buffer_index;
+					buffers[buffer_index].available = true;
 
-					if ( uiBuffers[buffer_index].data != NULL )
+					if ( buffers[buffer_index].data != NULL )
 					{
-						delete uiBuffers[buffer_index].data;
-						uiBuffers[buffer_index].data = NULL;
+						delete buffers[buffer_index].data;
+						buffers[buffer_index].data = NULL;
 					}
 
 					buffers_free++;
@@ -132,9 +132,9 @@ namespace WinampOpenALOut
 				/* increase our played time position
 				 (the delta for where we are in the current buffer is done
 				 in get_output_time */
-				buffer_free += uiBuffers[selectedBuffer].size;
-				played += uiBuffers[selectedBuffer].size;
-				uiBuffers[selectedBuffer].size = 0;
+				buffer_free += buffers[selected_buffer].size;
+				played += buffers[selected_buffer].size;
+				buffers[selected_buffer].size = 0;
 
 			} else { 
 				MessageBoxA(NULL, "Error in Monitor Thread - Out of Range", "Error Monitoring", MB_OK);
@@ -145,37 +145,37 @@ namespace WinampOpenALOut
 
 	void Output_Renderer::CheckPlayState() {
 
-		ALint	iState = AL_SOURCE_STATE;
-		ALint	iQueuedBuffers = 0;
+		ALint	state = AL_SOURCE_STATE;
+		ALint	queued_buffers = 0;
 
 		/*
 			can the current state of the source
 		*/
 		/* AL_SOURCE_STATE, AL_INITIAL, AL_PLAYING, AL_PAUSED, AL_STOPPED */
 		alGetError();
-		alGetSourcei(uiSource, AL_SOURCE_STATE, &iState);
+		alGetSourcei(source, AL_SOURCE_STATE, &state);
 		
 		if(alGetError() != AL_NO_ERROR)
 		{
 			this->onError();
 		}
 
-		if (iState == AL_PLAYING)
+		if (state == AL_PLAYING)
 		{
 			// if the source is playing then we record that
-			isPlaying = true;
+			is_playing = true;
 		}else{
 
-			if(streamOpen && 
-				(iState == AL_STOPPED))
+			if(stream_open && 
+				(state == AL_STOPPED))
 			{
-				isPlaying = false;
+				is_playing = false;
 				return;
 			}
 
 			// if we're not playing check to see if any buffers are queued
 			alGetError();
-			alGetSourcei(uiSource, AL_BUFFERS_QUEUED, &iQueuedBuffers);
+			alGetSourcei(source, AL_BUFFERS_QUEUED, &queued_buffers);
 
 			if(alGetError() != AL_NO_ERROR)
 			{
@@ -183,12 +183,12 @@ namespace WinampOpenALOut
 				this->onError();
 			}
 
-			if (iQueuedBuffers > 0)
+			if (queued_buffers > 0)
 			{
 				// if any buffers are queued and we're not playing - play!
-				if(!lastPause)
+				if(!last_pause)
 				{
-					alSourcePlay(uiSource);
+					alSourcePlay(source);
 
 #ifdef _DEBUGGING
 					char dbg[DEBUG_BUFFER_SIZE] = {'\0'};
@@ -199,11 +199,11 @@ namespace WinampOpenALOut
 					this->log_debug_msg(dbg, __FILE__, __LINE__);
 #endif
 
-					isPlaying = true;
+					is_playing = true;
 				}
 			} else {
 				// otherwise we're finished
-				isPlaying = false;
+				is_playing = false;
 			}
 		}
 	}
@@ -255,59 +255,59 @@ namespace WinampOpenALOut
 #endif
 
 		//record the format of the data we're getting
-		sampleRate = samplerate;
-		numberOfChannels = numchannels;
-		bitsPerSample = bitspersamp;
+		sample_rate = samplerate;
+		number_of_channels = numchannels;
+		bits_per_sample = bitspersamp;
 
 		// determine the format to output in
-		switch(numberOfChannels)
+		switch(number_of_channels)
 		{
 			case 1:
-				ulFormat = bitsPerSample == 8 ? alGetEnumValue("AL_FORMAT_MONO8") : alGetEnumValue("AL_FORMAT_MONO16");
+				format = bits_per_sample == 8 ? alGetEnumValue("AL_FORMAT_MONO8") : alGetEnumValue("AL_FORMAT_MONO16");
 				break;
 			case 2:
-				ulFormat = bitsPerSample == 8 ? alGetEnumValue("AL_FORMAT_STEREO8") : alGetEnumValue("AL_FORMAT_STEREO16");
+				format = bits_per_sample == 8 ? alGetEnumValue("AL_FORMAT_STEREO8") : alGetEnumValue("AL_FORMAT_STEREO16");
 				break;
 			case 4:
-				ulFormat = alGetEnumValue("AL_FORMAT_QUAD16");
+				format = alGetEnumValue("AL_FORMAT_QUAD16");
 				break;
 			case 6:
-				ulFormat = alGetEnumValue("AL_FORMAT_51CHN16");
+				format = alGetEnumValue("AL_FORMAT_51CHN16");
 				break;
 			case 7:
-				ulFormat = alGetEnumValue("AL_FORMAT_61CHN16");
+				format = alGetEnumValue("AL_FORMAT_61CHN16");
 				break;
 			case 8:
-				ulFormat = alGetEnumValue("AL_FORMAT_71CHN16");
+				format = alGetEnumValue("AL_FORMAT_71CHN16");
 				break;
 		};
 
 		// reset the play position back to zero
-		lastPause = 0;
+		last_pause = 0;
 		played = 0;
 
 		// determine the size of the buffer
-		bytesPerSampleChannel = ((bitsPerSample >> SHIFT_BITS_TO_BYTES)*numberOfChannels);
+		bytes_per_sample_channel = ((bits_per_sample >> SHIFT_BITS_TO_BYTES)*number_of_channels);
 
-		bufferSize = (bytesPerSampleChannel * (sampleRate / ONE_SECOND_IN_MS)) * c_bufferLength;
+		buffer_size = (bytes_per_sample_channel * (sample_rate / ONE_SECOND_IN_MS)) * conf_buffer_length;
 
 		//noBuffers = MAX_NO_BUFFERS;
-		noBuffers = (bufferSize / MAXIMUM_BUFFER_SIZE);// + MAXIMUM_BUFFER_OFFSET;
+		no_buffers = (buffer_size / MAXIMUM_BUFFER_SIZE);// + MAXIMUM_BUFFER_OFFSET;
 
 		// if we have no buffers just assume we can use at least (MINIMUM_BUFFERS)
 		// we need more than one so we can listen to one and write t'other
 		// if that doesnt happen it will error anyway
-		if(noBuffers < MINIMUM_BUFFERS)
+		if(no_buffers < MINIMUM_BUFFERS)
 		{
-			noBuffers = MINIMUM_BUFFERS;
+			no_buffers = MINIMUM_BUFFERS;
 		}
-		if(noBuffers > MAX_NO_BUFFERS)
+		if(no_buffers > MAX_NO_BUFFERS)
 		{
-			noBuffers = MAX_NO_BUFFERS;
+			no_buffers = MAX_NO_BUFFERS;
 		}
 
-		this->buffer_free = noBuffers * MAXIMUM_BUFFER_SIZE;
-		this->buffers_free = noBuffers;
+		this->buffer_free = no_buffers * MAXIMUM_BUFFER_SIZE;
+		this->buffers_free = no_buffers;
 
 #ifdef _DEBUGGING
 		sprintf_s(
@@ -324,25 +324,25 @@ namespace WinampOpenALOut
 		alGetError();
 		for(unsigned int buffer_index=0 ; buffer_index<MAX_NO_BUFFERS ; buffer_index++)
 		{
-			if ( uiBuffers[buffer_index].buffer_id != 0)
+			if ( buffers[buffer_index].buffer_id != 0)
 			{
-				uiBuffers[buffer_index].buffer_id = 0;
+				buffers[buffer_index].buffer_id = 0;
 			}
-			uiBuffers[buffer_index].buffer_id = 0;
-			uiBuffers[buffer_index].size = 0;
-			uiBuffers[buffer_index].available = false;
-			if ( uiBuffers[buffer_index].data )
+			buffers[buffer_index].buffer_id = 0;
+			buffers[buffer_index].size = 0;
+			buffers[buffer_index].available = false;
+			if ( buffers[buffer_index].data )
 			{
-				delete uiBuffers[buffer_index].data;
-				uiBuffers[buffer_index].data = NULL;
+				delete buffers[buffer_index].data;
+				buffers[buffer_index].data = NULL;
 			}
 		}
 
-		for(unsigned int buffer_index=0 ; buffer_index<noBuffers ; buffer_index++)
+		for(unsigned int buffer_index=0 ; buffer_index<no_buffers ; buffer_index++)
 		{
-			uiBuffers[buffer_index].available = true;
+			buffers[buffer_index].available = true;
 			/* deallocate each buffer one-at-a-time */
-			alGenBuffers( 1, &uiBuffers[buffer_index].buffer_id );
+			alGenBuffers( 1, &buffers[buffer_index].buffer_id );
 
 			/* if xram is enabled write the buffer to XRAM */
 			if ( xram_enabled == true &&
@@ -352,7 +352,7 @@ namespace WinampOpenALOut
 			{
 				ALboolean inhw = eaxSetBufferMode(
 					1,
-					&uiBuffers[buffer_index].buffer_id,
+					&buffers[buffer_index].buffer_id,
 					eXRAMHardware);
 
 				if ( inhw == AL_FALSE )
@@ -396,13 +396,13 @@ namespace WinampOpenALOut
 			
 			/* if we've created too many buffers try and
 		     * use less */
-			while(err != AL_NO_ERROR && noBuffers > 1)
+			while(err != AL_NO_ERROR && no_buffers > 1)
 			{
 				alGetError();
-				noBuffers--;
-				for(unsigned int i=0;i<noBuffers;i++)
+				no_buffers--;
+				for(unsigned int i=0;i<no_buffers;i++)
 				{
-					alGenBuffers( noBuffers, &uiBuffers[i].buffer_id );
+					alGenBuffers( no_buffers, &buffers[i].buffer_id );
 				}
 				err = alGetError();
 			}
@@ -410,7 +410,7 @@ namespace WinampOpenALOut
 
 		// allocate a source
 		alGetError();
-		alGenSources( 1, &uiSource );
+		alGenSources( 1, &source );
 
 		if( (err = alGetError()) != AL_NO_ERROR)
 		{
@@ -427,7 +427,7 @@ namespace WinampOpenALOut
 		}
 		
 		alGetError();
-		alSourcei(uiSource, AL_LOOPING, AL_FALSE);
+		alSourcei(source, AL_LOOPING, AL_FALSE);
 		
 		if(alGetError() != AL_NO_ERROR)
 		{
@@ -437,20 +437,20 @@ namespace WinampOpenALOut
 		/* Effects */
 		if ( effects != NULL )
 		{
-			effects->add_source(uiSource);
+			effects->add_source(source);
 		}
 
 		// set the volume for the source
 		this->SetVolumeInternal(volume);
 
 		// we're not playing yet because we're prebuffering
-		isPlaying = false;
+		is_playing = false;
 		// the stream is open and ready for the main thread
-		streamOpen = true;
+		stream_open = true;
 
 		SYNC_END;
 
-		return c_bufferLength;
+		return conf_buffer_length;
 	}
 
 	/*
@@ -462,18 +462,18 @@ namespace WinampOpenALOut
 	{
 		SYNC_START;
 
-		streamOpen = false;
+		stream_open = false;
 
 		// stop the source
-		alSourceStop(uiSource);
+		alSourceStop(source);
 
 		played = 0;
 
-		ALint iState;
+		ALint state = 0;
 		unsigned int timeout = 0;
 		// query the state of the source and wait for it to stop
-		alGetSourcei(uiSource, AL_SOURCE_STATE, &iState);
-		while(iState != AL_STOPPED && iState != AL_INITIAL)
+		alGetSourcei(source, AL_SOURCE_STATE, &state);
+		while(state != AL_STOPPED && state != AL_INITIAL)
 		{
 			Sleep(1);
 			if(timeout++ > CLOSE_TIMEOUT_COUNT) {
@@ -481,50 +481,50 @@ namespace WinampOpenALOut
 			}
 		}
 
-		int countTimeout = 0;
+		int count_timeout = 0;
 		// wait for all the buffers to be used up
-		while(buffers_free != noBuffers)
+		while(buffers_free != no_buffers)
 		{
 			CheckProcessedBuffers();
 			Sleep(1);
-			if ( ++countTimeout > CLOSE_TIMEOUT_COUNT )
+			if ( ++count_timeout > CLOSE_TIMEOUT_COUNT )
 			{
 				break;
 			}
 		}
 		// remove all buffers
-		alSourcei(uiSource, AL_BUFFER, 0);
+		alSourcei(source, AL_BUFFER, 0);
 
 		// delete the source
-		alDeleteSources( 1, &uiSource );
+		alDeleteSources( 1, &source );
 
 		// delete all the buffers
-		for(unsigned int buffer_index=0 ; buffer_index<noBuffers ; buffer_index++)
+		for(unsigned int buffer_index=0 ; buffer_index<no_buffers ; buffer_index++)
 		{
-			alDeleteBuffers( 1, &uiBuffers[buffer_index].buffer_id );
-			uiBuffers[buffer_index].buffer_id = 0;
+			alDeleteBuffers( 1, &buffers[buffer_index].buffer_id );
+			buffers[buffer_index].buffer_id = 0;
 		}
 
 		// make sure all memory from the buffers is freed up,
 		// if CheckProcessed is working correct this shouldn't run
-		for(unsigned int buffer_index=0 ; buffer_index<noBuffers ; buffer_index++)
+		for(unsigned int buffer_index=0 ; buffer_index<no_buffers ; buffer_index++)
 		{
-			if ( uiBuffers[buffer_index].data != NULL )
+			if ( buffers[buffer_index].data != NULL )
 			{
-				delete uiBuffers[buffer_index].data;
-				uiBuffers[buffer_index].data = NULL;
+				delete buffers[buffer_index].data;
+				buffers[buffer_index].data = NULL;
 			}
 		}
 
 		// just incase the thread has exitted, assume playing has stopped
-		isPlaying = false;
+		is_playing = false;
 
-		noBuffers = NO_BUFFERS;
+		no_buffers = NO_BUFFERS;
 		buffer_free = 0;
 		buffers_free = 0;
-		sampleRate = NO_SAMPLE_RATE;
-		bitsPerSample = NO_BITS_PER_SAMPLE;
-		numberOfChannels = NO_NUMBER_OF_CHANNELS;
+		sample_rate = NO_SAMPLE_RATE;
+		bits_per_sample = NO_BITS_PER_SAMPLE;
+		number_of_channels = NO_NUMBER_OF_CHANNELS;
 
 		SYNC_END;
 
@@ -540,10 +540,10 @@ namespace WinampOpenALOut
 	{
 		SYNC_START;
 
-		ALenum err;
+		ALenum err = AL_NO_ERROR;
 
 		// if we cannot write exit now (non-blocking op)
-		if(buffers_free == 0 || !streamOpen)
+		if(buffers_free == 0 || !stream_open)
 		{
 			SYNC_END;
 			return -1;
@@ -563,22 +563,22 @@ namespace WinampOpenALOut
 #endif
 			
 			// set it to ERROR'd so we can detect errors
-			ALuint uiNextBuffer = UNKNOWN_BUFFER;
-			unsigned int selectedBuffer = UNKNOWN_BUFFER;
+			ALuint next_buffer = UNKNOWN_BUFFER;
+			unsigned int selected_buffer = UNKNOWN_BUFFER;
 
 			/*	go through the buffers and find an available one
 
 				if we're here (critical section, canWrite=true) then
 				we assume that one is! 
 			*/
-			for(ALuint buffer_index=0 ; buffer_index<noBuffers ; buffer_index++)
+			for(ALuint buffer_index=0 ; buffer_index<no_buffers ; buffer_index++)
 			{
 				// find an available buffer
-				if ( uiBuffers[buffer_index].available == true )
+				if ( buffers[buffer_index].available == true )
 				{
-					uiNextBuffer = uiBuffers[buffer_index].buffer_id;
-					uiBuffers[buffer_index].available = false;
-					selectedBuffer = buffer_index;
+					next_buffer = buffers[buffer_index].buffer_id;
+					buffers[buffer_index].available = false;
+					selected_buffer = buffer_index;
 					buffers_free--;
 					break;
 				}
@@ -590,16 +590,16 @@ namespace WinampOpenALOut
 				"Writing using buffer {%d}", selectedBuffer);
 			log_debug_msg(dbg, __FILE__, __LINE__);
 #endif
-			if(selectedBuffer == UNKNOWN_BUFFER)
+			if(selected_buffer == UNKNOWN_BUFFER)
 			{
 				SYNC_END;
 				return -1;
 			}
 
-			uiBuffers[selectedBuffer].data = buf;
+			buffers[selected_buffer].data = buf;
 
 			buffer_free -= len;
-			uiBuffers[selectedBuffer].size = len;
+			buffers[selected_buffer].size = len;
 
 #ifdef _DEBUGGING
 			sprintf_s(
@@ -610,7 +610,7 @@ namespace WinampOpenALOut
 #endif
 			// buffer the data with the correct format
 			alGetError();
-			alBufferData(uiNextBuffer, ulFormat, buf, len, sampleRate);
+			alBufferData(next_buffer, format, buf, len, sample_rate);
 			if( (err = alGetError()) != AL_NO_ERROR)
 			{
 				if(err == AL_OUT_OF_MEMORY) {
@@ -631,7 +631,7 @@ namespace WinampOpenALOut
 
 			// add the buffer to the source queue
 			alGetError();
-			alSourceQueueBuffers(uiSource, 1, &uiNextBuffer);
+			alSourceQueueBuffers(source, 1, &next_buffer);
 			if( (err = alGetError()) != AL_NO_ERROR)
 			{
 				if(err == AL_INVALID_NAME) {
@@ -662,7 +662,7 @@ namespace WinampOpenALOut
 		
 		int r = EMPTY_THE_BUFFER;
 		
-		if(streamOpen) {
+		if(stream_open) {
 
 			this->CheckProcessedBuffers();
 
@@ -686,7 +686,7 @@ namespace WinampOpenALOut
 
 		this->CheckProcessedBuffers();
 
-		bool r = isPlaying && streamOpen ? true : false;
+		bool r = is_playing && stream_open ? true : false;
 		SYNC_END;
 		return r;
 	}
@@ -698,7 +698,7 @@ namespace WinampOpenALOut
 	*/
 	int Output_Renderer::Pause(int pause) {
 		SYNC_START;
-		lastPause = pause;
+		last_pause = pause;
 		
 		// clear the error state
 		alGetError();
@@ -706,30 +706,30 @@ namespace WinampOpenALOut
 		// if this is un-paused during pre-buffering
 		// we may start to play data before it's ready
 		// and cause and under-run
-		if(streamOpen)
+		if(stream_open)
 		{
 			if(pause)
 			{
-				alSourcePause(uiSource);
+				alSourcePause(source);
 			}else{
-				alSourcePlay(uiSource);
+				alSourcePlay(source);
 			}
 		}
 
 		SYNC_END;
-		return lastPause;
+		return last_pause;
 	}
 
 	/*
 		set volume (internal) - used to check the volume range
 		and store the volume for later use
 	*/
-	void Output_Renderer::SetVolumeInternal(ALfloat newVolume)
+	void Output_Renderer::SetVolumeInternal(ALfloat new_volume)
 	{
-		if(newVolume <= VOLUME_MAX && newVolume >= VOLUME_MIN)
+		if(new_volume <= VOLUME_MAX && new_volume >= VOLUME_MIN)
 		{
-			volume = newVolume;
-			alSourcef(uiSource,AL_GAIN, newVolume);
+			volume = new_volume;
+			alSourcef(source,AL_GAIN, new_volume);
 		}
 	}
 
@@ -744,7 +744,7 @@ namespace WinampOpenALOut
 		SYNC_START;
 
 		// make sure we've stopped playing
-		alSourceStop(uiSource);
+		alSourceStop(source);
 
 		SYNC_END;
 	}
@@ -761,7 +761,7 @@ namespace WinampOpenALOut
 		const ALfloat z = ((float)speaker.z) / 255.0f;
 
 		alSource3f(
-			this->uiSource,
+			this->source,
 			AL_POSITION,
 			x,
 			y,

@@ -7,35 +7,35 @@ namespace WinampOpenALOut {
 
 	delegate void UpdateData();
 
-	Config::Config(Output_Wumpus *aPtrOw)
+	Config::Config(Output_Wumpus *output_plugin)
 		{
 		InitializeComponent();
 
-		ptrOw = aPtrOw;
+		output_plugin = output_plugin;
 		ptrForm = this;
 
 		overRide = false;
 
-		currentDevice = ConfigFile::ReadInteger(CONF_DEVICE);
+		current_device = ConfigFile::ReadInteger(CONF_DEVICE);
 
 		// get a list of all the devices and add them to the combo
-		ALDeviceList *pDeviceList = Framework::getInstance()->ALFWGetDeviceList();
-		if ((pDeviceList) && (pDeviceList->GetNumDevices())) {
-			for (ALint i = 0; i < pDeviceList->GetNumDevices(); i++) {
-				if( i == pDeviceList->GetDefaultDevice()) {
-					comboBoxDevices->Items->Add("Default: " + gcnew String(pDeviceList->GetDeviceName(i)));
+		ALDeviceList *device_list = Framework::getInstance()->ALFWGetDeviceList();
+		if ((device_list) && (device_list->GetNumDevices())) {
+			for (ALint i = 0; i < device_list->GetNumDevices(); i++) {
+				if( i == device_list->GetDefaultDevice()) {
+					comboBoxDevices->Items->Add("Default: " + gcnew String(device_list->GetDeviceName(i)));
 				}else{
-					comboBoxDevices->Items->Add(gcnew String(pDeviceList->GetDeviceName(i)));
+					comboBoxDevices->Items->Add(gcnew String(device_list->GetDeviceName(i)));
 				}
 			}
 		}
 
 		// if the current device is not set, use the default device
-		if(currentDevice == -1) {
-			comboBoxDevices->SelectedIndex = pDeviceList->GetDefaultDevice();
-			currentDevice = pDeviceList->GetDefaultDevice();
+		if(current_device == -1) {
+			comboBoxDevices->SelectedIndex = device_list->GetDefaultDevice();
+			current_device = device_list->GetDefaultDevice();
 		}else{
-			comboBoxDevices->SelectedIndex = currentDevice;
+			comboBoxDevices->SelectedIndex = current_device;
 		}
 
 		int buffer = ConfigFile::ReadInteger(CONF_BUFFER_LENGTH);
@@ -48,9 +48,9 @@ namespace WinampOpenALOut {
 		// update their captions with values
 		labelBufferLength->Text = "Buffer Length (" + trackBufferLength->Value + "ms)";
 
-		checkBoxExpandMono->Checked = ptrOw->IsMonoExpanded();
-		checkBoxExpandStereo->Checked = ptrOw->IsStereoExpanded();
-		checkBoxXRAM->Checked = ptrOw->IsXRAMEnabled();
+		checkBoxExpandMono->Checked = output_plugin->IsMonoExpanded();
+		checkBoxExpandStereo->Checked = output_plugin->IsStereoExpanded();
+		checkBoxXRAM->Checked = output_plugin->IsXRAMEnabled();
 
 		int i;
 		for ( i = 0 ; i < NO_OF_EFFECTS ; i++ )
@@ -70,7 +70,7 @@ namespace WinampOpenALOut {
 
 		this->checkBoxEfxEnabled->Checked = ConfigFile::ReadBoolean(CONF_EFX_ENABLED);
 
-		this->checkBoxSplit->Checked = ptrOw->IsSplit();
+		this->checkBoxSplit->Checked = output_plugin->IsSplit();
 
 		if(this->checkBoxSplit->Checked)
 		{
@@ -81,7 +81,7 @@ namespace WinampOpenALOut {
 			this->checkBoxEfxEnabled->Enabled = false;
 		}
 
-		speaker_matrix_T matrix = ptrOw->GetMatrix();
+		speaker_matrix_T matrix = output_plugin->GetMatrix();
 		numFLx->Value = (System::Decimal)matrix.speakers[0].x;
 		numFLy->Value = (System::Decimal)matrix.speakers[0].y;
 		numFLz->Value = (System::Decimal)matrix.speakers[0].z;
@@ -107,12 +107,12 @@ namespace WinampOpenALOut {
 	void Config::Load()
 	{
 		Show();
-		checkBoxExpandMono->Checked = ptrOw->IsMonoExpanded();
-		checkBoxExpandStereo->Checked = ptrOw->IsStereoExpanded();
-		if(ptrOw->IsXRAMPresent() == true)
+		checkBoxExpandMono->Checked = output_plugin->IsMonoExpanded();
+		checkBoxExpandStereo->Checked = output_plugin->IsStereoExpanded();
+		if(output_plugin->IsXRAMPresent() == true)
 		{
 			checkBoxXRAM->Enabled = true;
-			checkBoxXRAM->Checked = ptrOw->IsXRAMEnabled();
+			checkBoxXRAM->Checked = output_plugin->IsXRAMEnabled();
 		}
 		else
 		{
@@ -126,56 +126,56 @@ namespace WinampOpenALOut {
 
 	void Config::ApplyChanges()
 	{
-		Int32 newDevice = comboBoxDevices->SelectedIndex;
+		Int32 new_device = comboBoxDevices->SelectedIndex;
 
-		if ( ptrOw->IsSplit() != checkBoxSplit->Checked )
+		if ( output_plugin->IsSplit() != checkBoxSplit->Checked )
 		{
-			ptrOw->SetSplit( checkBoxSplit->Checked );
+			output_plugin->SetSplit( checkBoxSplit->Checked );
 		}
 
-		if(newDevice != currentDevice && newDevice != -1) {
+		if(new_device != current_device && new_device != -1) {
 			// if we've changed device switch device and save
-			ConfigFile::WriteInteger(CONF_DEVICE, newDevice);
-			currentDevice = newDevice;
-			ptrOw->SwitchOutputDevice(currentDevice);
+			ConfigFile::WriteInteger(CONF_DEVICE, new_device);
+			current_device = new_device;
+			output_plugin->SwitchOutputDevice(current_device);
 		}
-		if(ptrOw->GetConfBufferLength() != trackBufferLength->Value) {
+		if(output_plugin->GetConfBufferLength() != trackBufferLength->Value) {
 			// if we've changed the buffer length stop playback and change it
-			ptrOw->SetConfBufferLength(trackBufferLength->Value);
+			output_plugin->SetConfBufferLength(trackBufferLength->Value);
 			ConfigFile::WriteInteger(CONF_BUFFER_LENGTH, trackBufferLength->Value);
-			ptrOw->SwitchOutputDevice(currentDevice);
+			output_plugin->SwitchOutputDevice(current_device);
 		}
 		
 		// store settings regarding effects
-		if(ptrOw->IsMonoExpanded() != checkBoxExpandMono->Checked
-			|| ptrOw->IsStereoExpanded() != checkBoxExpandStereo->Checked) {
+		if(output_plugin->IsMonoExpanded() != checkBoxExpandMono->Checked
+			|| output_plugin->IsStereoExpanded() != checkBoxExpandStereo->Checked) {
 				
-				ptrOw->SetStereoExpanded(checkBoxExpandStereo->Checked);
-				ptrOw->SetMonoExpanded(checkBoxExpandMono->Checked);
-				ptrOw->SwitchOutputDevice(currentDevice);
+				output_plugin->SetStereoExpanded(checkBoxExpandStereo->Checked);
+				output_plugin->SetMonoExpanded(checkBoxExpandMono->Checked);
+				output_plugin->SwitchOutputDevice(current_device);
 		}
 
-		if(ptrOw->IsXRAMEnabled() != checkBoxXRAM->Checked)
+		if(output_plugin->IsXRAMEnabled() != checkBoxXRAM->Checked)
 		{
-			ptrOw->SetXRAMEnabled(checkBoxXRAM->Checked);
+			output_plugin->SetXRAMEnabled(checkBoxXRAM->Checked);
 		}
 
-		if(ptrOw->get_effects()->get_current_effect() != comboBoxEffect->SelectedIndex)
+		if(output_plugin->get_effects()->get_current_effect() != comboBoxEffect->SelectedIndex)
 		{
-			ptrOw->get_effects()->set_current_effect((effects_list)comboBoxEffect->SelectedIndex);
+			output_plugin->get_effects()->set_current_effect((effects_list)comboBoxEffect->SelectedIndex);
 			ConfigFile::WriteInteger(CONF_EFX_ENV, comboBoxEffect->SelectedIndex);
 		}
 
-		if(ptrOw->get_effects()->is_enabled() != checkBoxEfxEnabled->Checked)
+		if(output_plugin->get_effects()->is_enabled() != checkBoxEfxEnabled->Checked)
 		{
-			if ( !ptrOw->get_effects()->set_enabled(checkBoxEfxEnabled->Checked) )
+			if ( !output_plugin->get_effects()->set_enabled(checkBoxEfxEnabled->Checked) )
 			{
 				checkBoxEfxEnabled->Checked = false;
-				ptrOw->get_effects()->set_enabled(false);
+				output_plugin->get_effects()->set_enabled(false);
 			}
 		}
 
-		ptrOw->SetMatrix(matrix);
+		output_plugin->SetMatrix(matrix);
 
 		ConfigFile::WriteBoolean(CONF_MONO_EXPAND, checkBoxExpandMono->Checked);
 		ConfigFile::WriteBoolean(CONF_STEREO_EXPAND, checkBoxExpandStereo->Checked);
@@ -190,10 +190,10 @@ namespace WinampOpenALOut {
 		while(ptrForm->Visible && !overRide) {
 
 			// get all the dynamic values
-			written_ms			= ptrOw->GetLastWrittenTime();
-			played_ms			= ptrOw->GetLastOutputTime();
-			written_bytes		= ptrOw->GetWrittenBytes();
-			played_bytes		= ptrOw->GetPlayedBytes();
+			written_ms			= output_plugin->GetLastWrittenTime();
+			played_ms			= output_plugin->GetLastOutputTime();
+			written_bytes		= output_plugin->GetWrittenBytes();
+			played_bytes		= output_plugin->GetPlayedBytes();
 
 			if ( buffer_percent_full > 100 )
 			{
@@ -234,7 +234,7 @@ namespace WinampOpenALOut {
 		// clear down other items already in the list
 		listBoxExtensions->Items->Clear();
 
-		listBoxExtensions->Items->Add( "Device: " + comboBoxDevices->Items[currentDevice]->ToString());
+		listBoxExtensions->Items->Add( "Device: " + comboBoxDevices->Items[current_device]->ToString());
 
 		if (alcIsExtensionPresent(NULL, "ALC_ENUMERATION_EXT")) {
 			listBoxExtensions->Items->Add("Present: ALC_ENUMERATION_EXT");

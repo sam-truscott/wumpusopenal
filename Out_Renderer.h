@@ -33,7 +33,7 @@ namespace WinampOpenALOut
 		void Flush();
 
 		void SwitchOutputDevice(int device);	
-		inline bool IsStreamOpen()						{ return streamOpen; }
+		inline bool IsStreamOpen()						{ return stream_open; }
 		void SetXRAMEnabled( bool enabled );
 
 		inline unsigned int GetBufferFree(void)
@@ -43,13 +43,13 @@ namespace WinampOpenALOut
 
 		void CheckProcessedBuffers();
 		void CheckPlayState();
-		void SetVolumeInternal(ALfloat newVolume);
+		void SetVolumeInternal(ALfloat new_volume);
 		
 		inline unsigned long long GetPlayedTime()
 		{
-			ALint deltaBytes = 0;
-			alGetSourcei(uiSource, AL_BYTE_OFFSET, &deltaBytes);
-			return played + deltaBytes;
+			ALint delta_bytes = 0;
+			alGetSourcei(source, AL_BYTE_OFFSET, &delta_bytes);
+			return played + delta_bytes;
 		}
 
 		inline void SetPlayedTime(unsigned long long t)
@@ -64,46 +64,46 @@ namespace WinampOpenALOut
 		inline void onError();
 
 			// semaphore for the right access to buffers/open_al api
-		CRITICAL_SECTION criticalSection;
+		CRITICAL_SECTION critical_section;
 
-		unsigned int	c_bufferLength;
+		unsigned int	conf_buffer_length;
 
 		bool			xram_enabled;
 
 		// boolean to store internal playing state
-		bool			isPlaying;
+		bool			is_playing;
 		// boolean to store if the file steam is open and
 		// thread is running
-		bool			streamOpen;
+		bool			stream_open;
 
 		unsigned int	buffer_free;
 		unsigned int	buffers_free;
 
 		// integer to store the sample rate
-		unsigned int	sampleRate;
+		unsigned int	sample_rate;
 		// integer to store the number of channels
-		unsigned int	numberOfChannels;
+		unsigned int	number_of_channels;
 		// integer to store the bits per second
-		unsigned int	bitsPerSample;
+		unsigned int	bits_per_sample;
 		// integer to store the number of buffers we'll use
-		unsigned int	noBuffers;
+		unsigned int	no_buffers;
 		// integer to store bytes per sample (optimisation
-		unsigned int	bytesPerSampleChannel;
+		unsigned int	bytes_per_sample_channel;
 		// integer to store the last pause state
-		int				lastPause;
+		int				last_pause;
 
 		// floating point value to store the volume
 		ALfloat			volume;
 
 		// store the format
-		unsigned long	ulFormat;
+		unsigned long	format;
 
 		// the open al buffers themselves
-		buffer_type	    uiBuffers[MAX_NO_BUFFERS];
+		buffer_type	    buffers[MAX_NO_BUFFERS];
 		// integer used to reference the open al source
-		ALuint		    uiSource;
+		ALuint		    source;
 
-		unsigned int	bufferSize;
+		unsigned int	buffer_size;
 
 		class Output_Effects	*effects;
 

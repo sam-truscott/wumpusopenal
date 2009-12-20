@@ -59,18 +59,18 @@ namespace WinampOpenALOut {
 		is_loaded = false;
 		
 		channels = 0;
-		for(unsigned char c = 0; c < 8 ; c++ )
+		for(unsigned char c = 0; c < MAX_NO_CHANNELS ; c++ )
 		{
-			uiSource[c] = 0;
+			source[c] = 0;
 		}
 
 		effect = EFX_REVERB_PRESET_GENERIC;
-		uiEffectSlot = 0;
-		uiEffect = 0;
+		effect_slot = 0;
+		the_effect = 0;
 		memset(
-			&efxReverb,
+			&efx_reverb,
 			0,
-			sizeof(efxReverb));
+			sizeof(efx_reverb));
 	}
 
 	Output_Effects::~Output_Effects()
@@ -83,7 +83,7 @@ namespace WinampOpenALOut {
 
 	bool Output_Effects::setup(void)
 	{
-		bool			retval = false;
+		bool retval = false;
 
 		if ( this->is_on == true )
 		{
@@ -94,17 +94,17 @@ namespace WinampOpenALOut {
 
 			if ( Framework::getInstance()->ALFWIsEFXSupported() == AL_TRUE )
 			{
-				if (CreateAuxEffectSlot(&uiEffectSlot) == AL_TRUE )
+				if (CreateAuxEffectSlot(&effect_slot) == AL_TRUE )
 				{
-					if (CreateEffect(&uiEffect, AL_EFFECT_EAXREVERB))
+					if (CreateEffect(&the_effect, AL_EFFECT_EAXREVERB))
 					{
 						EAXREVERBPROPERTIES eaxEffect = REVERB_LOOKUP_TABLE[effect];
 						EFXEAXREVERBPROPERTIES efxReverb;
 						ConvertReverbParameters(&eaxEffect, &efxReverb);
 
-						if (SetEFXEAXReverbProperties(&efxReverb, uiEffect))
+						if (SetEFXEAXReverbProperties(&efxReverb, the_effect))
 						{
-							alAuxiliaryEffectSloti(uiEffectSlot, AL_EFFECTSLOT_EFFECT, uiEffect);
+							alAuxiliaryEffectSloti(effect_slot, AL_EFFECTSLOT_EFFECT, the_effect);
 							this->is_loaded = true;
 
 							retval = true;
@@ -131,23 +131,23 @@ namespace WinampOpenALOut {
 
 	void Output_Effects::add_source(ALuint the_source)
 	{
-		uiSource[channels++] = the_source;
-		alSource3i(the_source, AL_AUXILIARY_SEND_FILTER, uiEffectSlot, 0, AL_FILTER_NULL);
+		source[channels++] = the_source;
+		alSource3i(the_source, AL_AUXILIARY_SEND_FILTER, effect_slot, 0, AL_FILTER_NULL);
 	}
 
 	void Output_Effects::on_close(void)
 	{
 		for( unsigned char c = 0; c < channels ; c++ )
 		{
-			alSource3i(uiSource[c], AL_AUXILIARY_SEND_FILTER, AL_EFFECTSLOT_NULL, 0, AL_FILTER_NULL);
+			alSource3i(source[c], AL_AUXILIARY_SEND_FILTER, AL_EFFECTSLOT_NULL, 0, AL_FILTER_NULL);
 		}
 		channels = 0;
 
 		if ( this->is_loaded == true )
 		{
-			alAuxiliaryEffectSloti(uiEffectSlot, AL_EFFECTSLOT_EFFECT, AL_EFFECT_NULL);
-			alDeleteEffects(1, &uiEffect);
-			alDeleteAuxiliaryEffectSlots(1, &uiEffectSlot);
+			alAuxiliaryEffectSloti(effect_slot, AL_EFFECTSLOT_EFFECT, AL_EFFECT_NULL);
+			alDeleteEffects(1, &the_effect);
+			alDeleteAuxiliaryEffectSlots(1, &effect_slot);
 
 			this->is_loaded = false;
 		}
@@ -169,7 +169,7 @@ namespace WinampOpenALOut {
 
 		for(unsigned char c = 0 ; c < old_channels ; c++ )
 		{
-			this->add_source(uiSource[c]);
+			this->add_source(source[c]);
 		}
 	}
 
@@ -204,7 +204,7 @@ namespace WinampOpenALOut {
 			{
 				for(unsigned char c = 0 ; c < old_channels ; c++ )
 				{
-					this->add_source(uiSource[c]);
+					this->add_source(source[c]);
 				}
 
 				retval = true;
@@ -218,7 +218,7 @@ namespace WinampOpenALOut {
 		return retval;
 	}
 
-	ALboolean Output_Effects::CreateAuxEffectSlot(ALuint *puiAuxEffectSlot)
+	ALboolean Output_Effects::CreateAuxEffectSlot(ALuint *aux_effect_slot)
 	{
 		ALboolean bReturn = AL_FALSE;
 		ALenum err = AL_NO_ERROR;
@@ -227,7 +227,7 @@ namespace WinampOpenALOut {
 		alGetError();
 
 		// Generate an Auxiliary Effect Slot
-		alGenAuxiliaryEffectSlots(1, puiAuxEffectSlot);
+		alGenAuxiliaryEffectSlots(1, aux_effect_slot);
 		err = alGetError();
 		if (err == AL_NO_ERROR)
 		{
@@ -237,25 +237,25 @@ namespace WinampOpenALOut {
 		return bReturn;
 	}
 
-	ALboolean Output_Effects::CreateEffect(ALuint *puiEffect, ALenum eEffectType)
+	ALboolean Output_Effects::CreateEffect(ALuint *effect, ALenum effect_type)
 	{
 		ALboolean bReturn = AL_FALSE;
 
-		if (puiEffect)
+		if (effect)
 		{
 			// Clear AL Error State
 			alGetError();
 
 			// Generate an Effect
-			alGenEffects(1, puiEffect);
+			alGenEffects(1, effect);
 			if (alGetError() == AL_NO_ERROR)
 			{
 				// Set the Effect Type
-				alEffecti(*puiEffect, AL_EFFECT_TYPE, eEffectType);
+				alEffecti(*effect, AL_EFFECT_TYPE, effect_type);
 				if (alGetError() == AL_NO_ERROR)
 					bReturn = AL_TRUE;
 				else
-					alDeleteEffects(1, puiEffect);
+					alDeleteEffects(1, effect);
 			}
 		}
 

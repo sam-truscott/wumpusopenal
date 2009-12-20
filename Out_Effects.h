@@ -57,6 +57,8 @@ typedef enum
 
 #define NO_OF_EFFECTS EFX_REVERB_PRESET_SMALLWATERROOM + 1
 
+#define MAX_NO_CHANNELS 8
+
 static const char* REVERB_NAMES_TABLE[NO_OF_EFFECTS] = 
 {
 	"Generic Reverb",
@@ -132,15 +134,15 @@ namespace WinampOpenALOut
 
 			effects_list effect;
 
-			ALuint		uiSource[8];
+			ALuint		source[MAX_NO_CHANNELS];
 			unsigned char channels;
-			ALuint		uiEffectSlot;
-			ALuint		uiEffect;
-			EFXEAXREVERBPROPERTIES efxReverb;
+			ALuint		effect_slot;
+			ALuint		the_effect;
+			EFXEAXREVERBPROPERTIES efx_reverb;
 
-			ALboolean CreateAuxEffectSlot(ALuint *puiAuxEffectSlot);
-			ALboolean CreateEffect(ALuint *puiEffect, ALenum eEffectType);
-			ALboolean SetEFXEAXReverbProperties(EFXEAXREVERBPROPERTIES *pEFXEAXReverb, ALuint uiEffect);
+			ALboolean CreateAuxEffectSlot(ALuint *aux_effect_slot);
+			ALboolean CreateEffect(ALuint *effect, ALenum effect_type);
+			ALboolean SetEFXEAXReverbProperties(EFXEAXREVERBPROPERTIES *efx_eax_reverb, ALuint effect);
 	};
 };
 

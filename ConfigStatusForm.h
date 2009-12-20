@@ -29,14 +29,14 @@ namespace WinampOpenALOut {
 	public ref class Config : public System::Windows::Forms::Form
 	{
 	public:
-		Config(class Output_Wumpus *aPtrOw);
+		Config(class Output_Wumpus *output_plugin);
 
-		static Config^ GetInstance(Output_Wumpus *aPtrOw)
+		static Config^ GetInstance(Output_Wumpus *output)
 		{
 			if(!loaded)
 			{
 				loaded = true;
-				ptrForm = gcnew Config(aPtrOw);
+				ptrForm = gcnew Config(output);
 				ptrForm->Load();			
 				ptrForm->Visible = false;
 			}
@@ -55,9 +55,9 @@ namespace WinampOpenALOut {
 		void DoUpdate();
 		void UpdateMatrix(char speaker, char xyz, Decimal value); 
 
-		Int32 currentDevice;
+		Int32 current_device;
 
-		static class Output_Wumpus *ptrOw;
+		static class Output_Wumpus *output_plugin;
 		static Config^ ptrForm;
 		static bool loaded = false;
 
