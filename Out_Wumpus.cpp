@@ -823,7 +823,7 @@ namespace WinampOpenALOut {
 				buf = to_write;
 				len += temp_size;
 				temp_size = 0; 
-				memset(temp, 0, TEMP_BUFFER_SIZE);
+				memset(temp, 0, sizeof(temp));
 			}
 
 			// ############## MONO EXPANSION
@@ -936,13 +936,13 @@ namespace WinampOpenALOut {
 				// create a table of pointers to each channels buffer
 				char* buffers[MAX_RENDERERS];
 				memset(buffers,0, sizeof(char*) * MAX_RENDERERS);
-				const unsigned int csize = len / no_renderers;
+				const unsigned int renderer_size = len / no_renderers;
 
 				for ( char rend=0 ; rend < no_renderers ; rend++ )
 				{
 					// alloc a buffer to create it
-					buffers[rend] = new char[csize];
-					memset(buffers[rend],0,csize);
+					buffers[rend] = new char[renderer_size];
+					memset(buffers[rend],0,renderer_size);
 				
 					if ( bits_per_sample == EIGHT_BIT_PER_SAMPLE )
 					{
@@ -952,15 +952,10 @@ namespace WinampOpenALOut {
 						/* offset the channel number */
 						src+=rend;
 
-						/* work out top range */
-						const char* to = dst + (csize);
-
-						/* copy over */
-						while(dst < to)
+						for( unsigned int offset=0 ; offset < renderer_size ; offset++)
 						{
-							*dst = *src;
-							dst++;
-							src += no_renderers;
+							*(dst + offset) = *src;
+							src+=no_renderers;
 						}
 					}
 					else
@@ -968,18 +963,14 @@ namespace WinampOpenALOut {
 						/* create buffers for src/dst*/
 						short *dst = (short*)buffers[rend];
 						const short *src = (short*)buf;
-						/* offset the channel number */
-						src+=(rend * 2);	// * (times) by 2 coz its 16-bit
+						/* (initial) offset the channel number */
+						src+=rend;
 
-						/* work out top range */
-						const short* to = dst + (csize / 2); // 2 coz 2 bytes per sample (16bit)
-
-						/* copy over */
-						while(dst < to)
+						// divide by 2 because its 16/bit per sample
+						for( unsigned int offset=0 ; offset < (renderer_size/2) ; offset++)
 						{
-							*dst = *src;
-							dst++;
-							src += no_renderers;
+							*(dst + offset) = *src;
+							src+=no_renderers;
 						}
 					}
 				}
@@ -988,7 +979,7 @@ namespace WinampOpenALOut {
 				 * together, if they're in the loop above the audio may drift */
 				for ( char rend=0; rend < no_renderers ; rend++ )
 				{
-					renderers[rend]->Write(buffers[rend],csize);
+					renderers[rend]->Write(buffers[rend],renderer_size);
 				}
 
 				delete buf;
@@ -1013,6 +1004,9 @@ namespace WinampOpenALOut {
 				this->CheckPlayState();
 			}
 
+			/*
+			 * check the pre-buffer limit
+			 */
 			if(pre_buffer)
 			{
 				if(++pre_buffer_number == PREBUFFER_LIMIT)
