@@ -143,10 +143,31 @@ namespace WinampOpenALOut
 		}
 	}
 
-	void Output_Renderer::CheckPlayState() {
+	typedef struct
+	{
+		Output_Renderer* renderer;
+		HANDLE playEvent;
+	} play_Handle;
+
+	static DWORD PlayThread(LPVOID playEvent) {
+		play_Handle* p = (play_Handle*)playEvent;
+		p->renderer->Play(p->playEvent);
+		delete p;
+		return 0;
+	}
+
+	void Output_Renderer::Play(HANDLE playEvent) {
+
+		WaitForSingleObject(playEvent, INFINITE);
+
+		alSourcePlay(this->source);
+	}
+
+	HANDLE Output_Renderer::CheckPlayState(HANDLE playEvent) {
 
 		ALint	state = AL_SOURCE_STATE;
 		ALint	queued_buffers = 0;
+		HANDLE thread_handle = NULL;
 
 		/*
 			can the current state of the source
@@ -170,7 +191,7 @@ namespace WinampOpenALOut
 				(state == AL_STOPPED))
 			{
 				is_playing = false;
-				return;
+				return thread_handle;
 			}
 
 			// if we're not playing check to see if any buffers are queued
@@ -186,9 +207,15 @@ namespace WinampOpenALOut
 			if (queued_buffers > 0)
 			{
 				// if any buffers are queued and we're not playing - play!
-				if(!last_pause)
+				if(!last_pause && !is_playing)
 				{
-					alSourcePlay(source);
+					DWORD id = 0;
+
+					play_Handle * h = new play_Handle;
+					h->renderer = this;
+					h->playEvent = playEvent;
+
+					thread_handle = CreateThread(NULL, 0x1000,(LPTHREAD_START_ROUTINE)&PlayThread, h, NULL, &id);
 
 #ifdef _DEBUGGING
 					char dbg[DEBUG_BUFFER_SIZE] = {'\0'};
@@ -206,6 +233,8 @@ namespace WinampOpenALOut
 				is_playing = false;
 			}
 		}
+
+		return thread_handle;
 	}
 
 	void Output_Renderer::log_debug_msg(char* msg, char* file, int line)
@@ -306,6 +335,7 @@ namespace WinampOpenALOut
 			no_buffers = MAX_NO_BUFFERS;
 		}
 
+		next_buffer_index = 0;
 		this->buffer_free = no_buffers * MAXIMUM_BUFFER_SIZE;
 		this->buffers_free = no_buffers;
 
@@ -571,18 +601,23 @@ namespace WinampOpenALOut
 				if we're here (critical section, canWrite=true) then
 				we assume that one is! 
 			*/
-			for(ALuint buffer_index=0 ; buffer_index<no_buffers ; buffer_index++)
+
+			/* this block shouldn't be needed but it just makes
+			 * sure that the next buffer is available
+			 */
+			while ( !buffers[next_buffer_index].available )
 			{
-				// find an available buffer
-				if ( buffers[buffer_index].available == true )
-				{
-					next_buffer = buffers[buffer_index].buffer_id;
-					buffers[buffer_index].available = false;
-					selected_buffer = buffer_index;
-					buffers_free--;
-					break;
-				}
+				next_buffer_index++;
 			}
+
+			/* allocate the next buffer */
+			next_buffer = buffers[next_buffer_index].buffer_id;
+			buffers[next_buffer_index].available = false;
+			selected_buffer = next_buffer_index;
+			buffers_free--;
+
+			next_buffer_index = (next_buffer_index + 1) % no_buffers;
+
 #ifdef _DEBUGGING
 			sprintf_s(
 				dbg,

@@ -42,7 +42,8 @@ namespace WinampOpenALOut
 		}
 
 		void CheckProcessedBuffers();
-		void CheckPlayState();
+		void Play(HANDLE playEvent);
+		HANDLE CheckPlayState(HANDLE playEvent);
 		void SetVolumeInternal(ALfloat new_volume);
 		
 		inline unsigned long long GetPlayedTime()
@@ -100,6 +101,7 @@ namespace WinampOpenALOut
 
 		// the open al buffers themselves
 		buffer_type	    buffers[MAX_NO_BUFFERS];
+		ALuint			next_buffer_index;
 		// integer used to reference the open al source
 		ALuint		    source;
 

@@ -1,8 +1,8 @@
 Wumpus Out OpenAL is copyright (c) 2009 by Sam Truscott.
 =======================================================
 
-Wumpus Out OpenAL v0.9.10
-==========================
+Wumpus Out OpenAL v0.9.11 E[x]perimental
+========================================
 
 	Requirements
 	============
@@ -29,6 +29,7 @@ Wumpus Out OpenAL v0.9.10
 	Known Issues
 	============
 	* No 24bit audio support, OpenAL doesn't support it
+	* With 3D mode enabled, the streams go out of time
 	
 Development
 ===========
@@ -43,9 +44,15 @@ WA_SDK_DIR			The 'Winamp' folder of the Winamp SDK. This contains some of the st
 Change Log
 ==========
 
+	v0.9.11x
+	=======
+	* Added - Synchronised the start of audio (affects multiple renderers)
+	* Updated - Removed O(n) algorithm for finding next free buffer.
+		This should reduce CPU usage quite a bit
+
 	v0.9.10
 	=======
-	* [Probably] Fixed - 3D issue where it went out of phase.
+	* [Attempt] Fixed - 3D issue where it went out of phase.
 
 	v0.9.9.1
 	========

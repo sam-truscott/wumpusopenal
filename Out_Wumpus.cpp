@@ -192,6 +192,11 @@ namespace WinampOpenALOut {
 	{
 		this->is_playing = false;
 
+		//HANDLE playEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+		HANDLE playMutex = CreateMutex(NULL, FALSE, NULL);
+		HANDLE threads[MAX_RENDERERS];
+		memset(threads,0,sizeof(HANDLE)*MAX_RENDERERS);
+
 		/*
 		 * ask all of the renderers if they're playing
 		 */
@@ -199,10 +204,18 @@ namespace WinampOpenALOut {
 		{
 			if ( this->renderers[rend] )
 			{
-				this->renderers[rend]->CheckPlayState();
+				threads[rend] = this->renderers[rend]->CheckPlayState(playMutex);
 				this->is_playing |= this->renderers[rend]->IsPlaying();
 			}
 		}
+
+		WaitForMultipleObjects(no_renderers, threads,TRUE,INFINITE);
+
+		//SetEvent(playEvent);
+		ReleaseMutex(playMutex);
+
+		CloseHandle(playMutex);
+		
 	}
 
 	/*
@@ -972,6 +985,9 @@ namespace WinampOpenALOut {
 							*(dst + offset) = *src;
 							src+=no_renderers;
 						}
+
+						// TODO maybe we need some sexy sync (WaitForSingle etc) to trigger
+						// both writes to run at the same time?
 					}
 				}
 
