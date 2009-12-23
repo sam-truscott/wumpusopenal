@@ -1294,9 +1294,7 @@ namespace WinampOpenALOut {
 		returns the time in ms of current position
 	*/
 	int Output_Wumpus::GetWrittenTime()
-	{
-		//SYNC_START;
-		
+	{	
 		if(stream_open)
 		{
 			current_written_time = total_written;
@@ -1320,8 +1318,6 @@ namespace WinampOpenALOut {
 			current_written_time = ZERO_TIME;
 		}
 		
-		//SYNC_END;
-		
 		// make sure we only use the first 32bits of the 64bit value
 		last_written_time = (int)(current_written_time & THIRTY_TWO_BIT_BIT_MASK);
 		return last_written_time;
@@ -1334,14 +1330,8 @@ namespace WinampOpenALOut {
 	*/
 	int Output_Wumpus::GetOutputTime()
 	{
-		//SYNC_START;
-
 		if(stream_open)
 		{
-			//SYNC_START;
-			//CheckProcessedBuffers();
-			//SYNC_END;
-
 			__int64 new_total_played = 0;
 			for( char rend=0; rend < no_renderers ; rend++ )
 			{
@@ -1373,8 +1363,6 @@ namespace WinampOpenALOut {
 		}else{
 			current_output_time = ZERO_TIME;
 		}
-
-		//SYNC_END;
 
 		last_output_time = (int)(current_output_time & THIRTY_TWO_BIT_BIT_MASK);
 		return last_output_time;
