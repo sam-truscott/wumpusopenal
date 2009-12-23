@@ -951,43 +951,53 @@ namespace WinampOpenALOut {
 				memset(buffers,0, sizeof(char*) * MAX_RENDERERS);
 				const unsigned int renderer_size = len / no_renderers;
 
-				for ( char rend=0 ; rend < no_renderers ; rend++ )
+				if ( bits_per_sample == EIGHT_BIT_PER_SAMPLE )
 				{
-					// alloc a buffer to create it
-					buffers[rend] = new char[renderer_size];
-					memset(buffers[rend],0,renderer_size);
-				
-					if ( bits_per_sample == EIGHT_BIT_PER_SAMPLE )
+					/*
+					 * create a new buffer for each renderer
+					 */
+					for ( char rend=0; rend < no_renderers ; rend++ )
 					{
-						/* create buffers for src/dst*/
-						char *dst = (char*)buffers[rend];
-						const char *src = (char*)buf;
-						/* offset the channel number */
-						src+=rend;
-
-						for( unsigned int offset=0 ; offset < renderer_size ; offset++)
-						{
-							*(dst + offset) = *src;
-							src+=no_renderers;
-						}
+						buffers[rend] = new char[renderer_size];
+						memset(buffers[rend],0, renderer_size);
 					}
-					else
+					/*
+					 * treat each sample of the source as an array - one item for each channel.
+					 * treat each sample of the destination as a pointer and add the sample
+					 * index to it and copy the source to it.
+					 */
+					const char* src = (const char*)buf;
+					for ( int sample = 0 ; sample < renderer_size ; sample++ )
 					{
-						/* create buffers for src/dst*/
-						short *dst = (short*)buffers[rend];
-						const short *src = (short*)buf;
-						/* (initial) offset the channel number */
-						src+=rend;
-
-						// divide by 2 because its 16/bit per sample
-						for( unsigned int offset=0 ; offset < (renderer_size/2) ; offset++)
+						for ( unsigned char rend=0; rend < no_renderers ; rend++ )
 						{
-							*(dst + offset) = *src;
-							src+=no_renderers;
+							char* dst = (char*)buffers[rend];
+							*(char*)(dst + sample) = (src[rend]);
 						}
-
-						// TODO maybe we need some sexy sync (WaitForSingle etc) to trigger
-						// both writes to run at the same time?
+						src += number_of_channels;
+					}
+				} else {
+					/*
+					 * create a new buffer for each renderer
+					 */
+					for ( char rend=0; rend < no_renderers ; rend++ )
+					{
+						buffers[rend] = new char[renderer_size];
+						memset(buffers[rend],0, renderer_size);
+					}
+					/*
+					 * treat each sample of the source as an array - one item for each channel.
+					 * treat each sample of the destination as a pointer and add the sample
+					 * index to it and copy the source to it.
+					 */
+					const short* src = (const short*)buf;
+					for ( int sample = 0 ; sample < (renderer_size/2) ; sample++ )
+					{
+						for ( unsigned char rend=0; rend < no_renderers ; rend++ )
+						{
+							*(short*)(((short*)buffers[rend]) + sample) = (src[rend]);
+						}
+						src += number_of_channels;
 					}
 				}
 
