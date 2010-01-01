@@ -1,8 +1,8 @@
 Wumpus Out OpenAL is copyright (c) 2009 by Sam Truscott.
 =======================================================
 
-Wumpus Out OpenAL v0.9.11 E[x]perimental
-========================================
+Wumpus Out OpenAL v0.9.11.1
+===========================
 
 	Requirements
 	============
@@ -44,11 +44,12 @@ WA_SDK_DIR			The 'Winamp' folder of the Winamp SDK. This contains some of the st
 Change Log
 ==========
 
-	v0.9.11x
-	=======
+	v0.9.11.1
+	=========
 	* Added - Synchronised the start of audio (affects multiple renderers)
 	* Updated - Removed O(n) algorithm for finding next free buffer.
 		This should reduce CPU usage quite a bit
+	* Added - x/y/z for listener position and direction
 
 	v0.9.10
 	=======

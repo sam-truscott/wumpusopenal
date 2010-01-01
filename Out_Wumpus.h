@@ -61,7 +61,7 @@ namespace WinampOpenALOut
 		inline __int64 GetWrittenBytes() { return total_written; }
 		inline __int64 GetPlayedBytes() { return total_played; }
 
-		void SetMatrix( speaker_matrix_T m );
+		void SetMatrix( const speaker_matrix_T m );
 		inline speaker_matrix_T GetMatrix(void)
 		{
 			return speaker_matrix;
@@ -72,7 +72,10 @@ namespace WinampOpenALOut
 	protected:
 
 		inline void OnError();
-		void Relocate(int device, int current_position, bool is_split);
+		void Relocate(
+			int device, 
+			int current_position, 
+			bool is_split);
 
 		void CheckProcessedBuffers();
 		void CheckPlayState();
@@ -150,8 +153,18 @@ namespace WinampOpenALOut
 
 	private:
 
+		void LoadSpeakerValues(
+			speaker_T * speaker, 
+			const speaker_T * default_speaker, 
+			const char * setting, 
+			const int offset);
+
+		void SaveSpeakerValues(
+			const speaker_T * speaker,
+			const char * setting,
+			const int offset);
+
 		void log_debug_msg(char* msg, char* file = __FILE__, int line = __LINE__);
-		inline void fmemcpy(char* dest, int dest_pos, char* src, int src_pos, int size);
 	};
 
 }

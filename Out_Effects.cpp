@@ -57,6 +57,7 @@ namespace WinampOpenALOut {
 	{
 		is_on = false;
 		is_loaded = false;
+		status = EAX_NOT_LOADED;
 		
 		channels = 0;
 		for(unsigned char c = 0; c < MAX_NO_CHANNELS ; c++ )
@@ -67,6 +68,7 @@ namespace WinampOpenALOut {
 		effect = EFX_REVERB_PRESET_GENERIC;
 		effect_slot = 0;
 		the_effect = 0;
+
 		memset(
 			&efx_reverb,
 			0,
@@ -77,20 +79,24 @@ namespace WinampOpenALOut {
 	{
 		if ( is_loaded == true )
 		{
-			this->on_close();
+			this->OnClose();
 		}
 	}
 
-	bool Output_Effects::setup(void)
+	eax_load_status Output_Effects::Setup(void)
 	{
-		bool retval = false;
+		eax_load_status retval = EAX_NOT_SUPPORTED;
 
 		if ( this->is_on == true )
 		{
-			if ( this->is_loaded == true )
+			if ( this->is_loaded == EAX_LOADED_OK )
 			{
-				this->on_close();
+				// if we're setup already we need to shutdown
+				// and start again with new slots for new sources
+				this->OnClose();
 			}
+
+			alGetError();
 
 			if ( Framework::getInstance()->ALFWIsEFXSupported() == AL_TRUE )
 			{
@@ -98,6 +104,12 @@ namespace WinampOpenALOut {
 				{
 					if (CreateEffect(&the_effect, AL_EFFECT_EAXREVERB))
 					{
+
+						/*
+						 * once a reverb effect is loaded, use the configuration 
+						 * from the table.
+						 */
+
 						EAXREVERBPROPERTIES eaxEffect = REVERB_LOOKUP_TABLE[effect];
 						EFXEAXREVERBPROPERTIES efxReverb;
 						ConvertReverbParameters(&eaxEffect, &efxReverb);
@@ -107,104 +119,145 @@ namespace WinampOpenALOut {
 							alAuxiliaryEffectSloti(effect_slot, AL_EFFECTSLOT_EFFECT, the_effect);
 							this->is_loaded = true;
 
-							retval = true;
+							retval = EAX_LOADED_OK;
 						}
 						else
 						{
-							this->on_close();
+							// failed to set the EAX properties
+							ALenum err = alGetError();
+							retval = EAX_FAIL_PROPERTIES;
 						}
 					}
 					else
 					{
-						this->on_close();
+						// failed to create the effect
+						retval = EAX_FAIL_CREATE_EFFECT;
 					}
 				}
 				else
 				{
-					this->on_close();
+					// failed to create an effect slot
+					retval = EAX_FAIL_EFFECT_SLOT;
 				}
 			}
+			else
+			{
+				// eax not supported
+				retval = EAX_NOT_SUPPORTED;
+			}
+		}
+
+		if ( retval != EAX_LOADED_OK )
+		{
+			this->CleanUp(retval);
 		}
 
 		return retval;
 	}
 
-	void Output_Effects::add_source(ALuint the_source)
+	void Output_Effects::AddSource(ALuint the_source)
 	{
+		/*
+		 * keep track of the source and add the source to the list of effects slots
+		 */
 		source[channels++] = the_source;
 		alSource3i(the_source, AL_AUXILIARY_SEND_FILTER, effect_slot, 0, AL_FILTER_NULL);
 	}
 
-	void Output_Effects::on_close(void)
+	void Output_Effects::OnClose()
 	{
+		/*
+		 * remove each source from the effects slot
+		 */
 		for( unsigned char c = 0; c < channels ; c++ )
 		{
 			alSource3i(source[c], AL_AUXILIARY_SEND_FILTER, AL_EFFECTSLOT_NULL, 0, AL_FILTER_NULL);
 		}
 		channels = 0;
 
-		if ( this->is_loaded == true )
-		{
-			alAuxiliaryEffectSloti(effect_slot, AL_EFFECTSLOT_EFFECT, AL_EFFECT_NULL);
-			alDeleteEffects(1, &the_effect);
-			alDeleteAuxiliaryEffectSlots(1, &effect_slot);
-
-			this->is_loaded = false;
-		}
+		this->CleanUp(status);
 	}
 
-	effects_list Output_Effects::get_current_effect(void)
+	void Output_Effects::CleanUp(eax_load_status close)
+	{
+		switch(close)
+		{
+			case EAX_LOADED_OK:
+				// nothing to do
+				// intentional fall-through
+			case EAX_FAIL_PROPERTIES:
+				// nothing to remove, just remove the effect slot
+				// intentional fall-through
+			case EAX_FAIL_CREATE_EFFECT:
+				alAuxiliaryEffectSloti(effect_slot, AL_EFFECTSLOT_EFFECT, AL_EFFECT_NULL);
+				// intentional fall-through
+			case EAX_FAIL_EFFECT_SLOT:
+				alDeleteEffects(1, &the_effect);
+				alDeleteAuxiliaryEffectSlots(1, &effect_slot);
+				break;
+			case EAX_NOT_SUPPORTED:
+				// intentional fall-through
+			case EAX_NOT_LOADED:
+				// nothing to do
+				break;
+		};
+			
+		this->is_loaded = false;
+	}
+
+	effects_list Output_Effects::GetCurrentEffect(void)
 	{
 		return effect;
 	}
 
-	void Output_Effects::set_current_effect(effects_list an_effect)
+	void Output_Effects::SetCurrentEffect(effects_list an_effect)
 	{
 		unsigned char old_channels = channels;
 		
-		this->on_close();
+		this->OnClose();
 		effect = an_effect;
 
-		this->setup();
+		this->Setup();
 
 		for(unsigned char c = 0 ; c < old_channels ; c++ )
 		{
-			this->add_source(source[c]);
+			this->AddSource(source[c]);
 		}
 	}
 
-	bool Output_Effects::is_enabled(void)
+	bool Output_Effects::IsEnabled(void)
 	{
 		return is_on;
 	}
 
-	bool Output_Effects::set_enabled(bool enable)
+	bool Output_Effects::Enable(bool enable)
 	{
 		bool retval = false;
 
 		if ( enable == false &&
 			is_loaded == true )
 		{
-			this->on_close();
+			this->OnClose();
 		}
 
 		if ( enable != is_on )
 		{
 			unsigned char old_channels = channels;
 
-			this->on_close();
+			this->OnClose();
 			is_on = enable;
 
 			// failed to setup effects
-			if ( this->setup() == false )
+			if ( this->Setup() != EAX_LOADED_OK )
 			{
 				is_on = false;
+				is_loaded = false;
 			}
 			else
 			{
 				for(unsigned char c = 0 ; c < old_channels ; c++ )
 				{
-					this->add_source(source[c]);
+					this->AddSource(source[c]);
 				}
 
 				retval = true;

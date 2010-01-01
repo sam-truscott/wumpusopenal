@@ -13,6 +13,11 @@
 
 namespace WinampOpenALOut
 {
+	typedef struct
+	{
+		Output_Renderer* renderer;
+		HANDLE playEvent;
+	} play_Handle;
 
 	Output_Renderer::Output_Renderer(
 		unsigned int buffer_len,
@@ -142,12 +147,6 @@ namespace WinampOpenALOut
 			}
 		}
 	}
-
-	typedef struct
-	{
-		Output_Renderer* renderer;
-		HANDLE playEvent;
-	} play_Handle;
 
 	static DWORD PlayThread(LPVOID playEvent) {
 		play_Handle* p = (play_Handle*)playEvent;
@@ -467,7 +466,7 @@ namespace WinampOpenALOut
 		/* Effects */
 		if ( effects != NULL )
 		{
-			effects->add_source(source);
+			effects->AddSource(source);
 		}
 
 		// set the volume for the source
@@ -566,7 +565,7 @@ namespace WinampOpenALOut
 		this procedure is invoked by winamp when it attempts to write
 		data to the plugin
 	*/
-	int Output_Renderer::Write(char *buf, int len)
+	void Output_Renderer::Write(char *buf, int len)
 	{
 		SYNC_START;
 
@@ -576,7 +575,7 @@ namespace WinampOpenALOut
 		if(buffers_free == 0 || !stream_open)
 		{
 			SYNC_END;
-			return -1;
+			return;
 		}
 
 		// if the buffer is valid (non-NULL)
@@ -628,12 +627,17 @@ namespace WinampOpenALOut
 			if(selected_buffer == UNKNOWN_BUFFER)
 			{
 				SYNC_END;
-				return -1;
+				return;
 			}
 
-			buffers[selected_buffer].data = buf;
-
+			// reduce the size of the buffer
 			buffer_free -= len;
+
+			/*
+			 * track the buffer so we can delete it from the heap
+			 * and track our play time
+			 */
+			buffers[selected_buffer].data = buf;
 			buffers[selected_buffer].size = len;
 
 #ifdef _DEBUGGING
@@ -664,6 +668,12 @@ namespace WinampOpenALOut
 				this->onError();
 			}
 
+			/*
+			 * if there's a write event, we need to create a thread and wait
+			 * this will ensure that all threads write to the openal buffer at
+			 * the same time
+			 */
+			
 			// add the buffer to the source queue
 			alGetError();
 			alSourceQueueBuffers(source, 1, &next_buffer);
@@ -678,11 +688,12 @@ namespace WinampOpenALOut
 				}
 				this->onError();
 			}
+			
 		}
 
 		SYNC_END;
 
-		return 0;
+		return;
 	}
 
 	/*
@@ -789,7 +800,7 @@ namespace WinampOpenALOut
 		xram_enabled = enabled;
 	}
 
-	void Output_Renderer::SetMatrix ( speaker_T speaker )
+	void Output_Renderer::SetMatrix ( const speaker_T speaker )
 	{
 		const ALfloat x = ((float)speaker.x) / 255.0f;
 		const ALfloat y = ((float)speaker.y) / 255.0f;

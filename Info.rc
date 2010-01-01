@@ -53,8 +53,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 0,9,11,0
- PRODUCTVERSION 0,9,11,0
+ FILEVERSION 0,9,11,1
+ PRODUCTVERSION 0,9,11,1
  FILEFLAGSMASK 0x37L
 #ifdef _DEBUG
  FILEFLAGS 0x21L
@@ -71,12 +71,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "wumpus.co.uk"
             VALUE "FileDescription", "OpenAL Out for Winamp"
-            VALUE "FileVersion", "0, 9, 11, 0"
+            VALUE "FileVersion", "0, 9, 11, 1"
             VALUE "InternalName", "out_openal"
             VALUE "LegalCopyright", "Released under GPL"
             VALUE "OriginalFilename", "out_openal.dll"
             VALUE "ProductName", "OpenAL Out for Winamp"
-            VALUE "ProductVersion", "0, 9, 11, 0"
+            VALUE "ProductVersion", "0, 9, 11, 1"
             VALUE "SpecialBuild", "Experimental"
         END
     END

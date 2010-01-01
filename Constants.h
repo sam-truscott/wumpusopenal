@@ -65,17 +65,28 @@ typedef struct
 
 typedef struct 
 {
+	speaker_T position;
+	speaker_T direction;
 	speaker_T speakers[MAX_RENDERERS];
 } speaker_matrix_T;
 
-static const float DEFAULT_MATRIX[MAX_RENDERERS][3] = 
+static const speaker_matrix_T DEFAULT_MATRIX = 
 {
-	{-12.50	,0.0,	-10.0},
-	{12.50	,0.0,	-10.0},
-	{-12.50	,0.0,	10.0},
-	{12.50	,0.0,	10.0},
-	{0.0	,0.0,	-10.0},
-	{0.0	,0.0,	0.0}
+	/*	 x.x	,y.y ,	z.z	*/
+	{	// position
+		0.0	,0.0,	0.0
+	},
+	{	// direction
+		0.0	,0.0,	0.0
+	},
+	{	// speakers
+		{-12.50	,0.0,	-10.0},		// FL
+		{12.50	,0.0,	-10.0},		// FR
+		{-12.50	,0.0,	10.0},		// RL
+		{12.50	,0.0,	10.0},		// RR
+		{0.0	,0.0,	-10.0},		// C
+		{0.0	,0.0,	0.0}		// S
+	}
 };
 
 #define MATRIX_BUFFER_SIZE 11u

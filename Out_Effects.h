@@ -111,28 +111,47 @@ static const char* REVERB_NAMES_TABLE[NO_OF_EFFECTS] =
 
 namespace WinampOpenALOut
 {
+
+	typedef enum
+	{
+		EAX_LOADED_OK,
+		EAX_FAIL_PROPERTIES,
+		EAX_FAIL_CREATE_EFFECT,
+		EAX_FAIL_EFFECT_SLOT,
+		EAX_NOT_SUPPORTED,
+		EAX_NOT_LOADED
+	} eax_load_status;
+
+	/*
+	 * This class abstracts the [reverb] effects for multiple
+	 * sources.
+	 */
 	public class Output_Effects
 	{
 		public:
 			Output_Effects();
 			~Output_Effects();
 
-			bool setup(void);
-			void add_source(ALuint the_source);
-			void on_close(void);
+			eax_load_status Setup(void);
+			void AddSource(ALuint the_source);
+			void OnClose(void);
 
-			effects_list get_current_effect(void);
-			void set_current_effect(effects_list an_effect);
+			effects_list GetCurrentEffect(void);
+			void SetCurrentEffect(effects_list an_effect);
 
-			bool is_enabled(void);
-			bool set_enabled(bool enable);
+			bool IsEnabled(void);
+			bool Enable(bool enable);
 
 		private:
+
+			void CleanUp(eax_load_status cleanup_reason);
 
 			bool is_on;
 			bool is_loaded;
 
 			effects_list effect;
+
+			eax_load_status status;
 
 			ALuint		source[MAX_NO_CHANNELS];
 			unsigned char channels;

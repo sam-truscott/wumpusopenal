@@ -3,6 +3,9 @@ namespace WinampOpenALOut {
 #define CONF_TRUE "true"
 #define CONF_FALSE "false"
 
+/*
+ * The string variables present in the configuration file
+ */
 #define CONF_DEVICE "DefaultDevice"
 #define CONF_BUFFER_LENGTH "BufferLength"
 #define CONF_MONO_EXPAND "MonoExpansion"
@@ -19,6 +22,8 @@ namespace WinampOpenALOut {
 	private:
 		static char INI_FILE[MAX_PATH];
 	public:
+
+		/* initialise the configuration file */
 		static void Initialise(HWND hMainWindow);
 
 		static void ReadString(char *name,char *data, int mlen);

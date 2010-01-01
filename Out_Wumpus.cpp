@@ -90,16 +90,6 @@ namespace WinampOpenALOut {
 		return MulDiv( (int)(the_current_written_time & THIRTY_TWO_BIT_BIT_MASK),ONE_SECOND_IN_MS,sample_rate);
 	}
 
-	void Output_Wumpus::fmemcpy(char* dest, int dest_pos, char* src, int src_pos, int size) {
-		
-		// get a pointer to the memory data with an offset
-		void* ptr_dst = (void*)&dest[dest_pos];
-		void* ptr_src = (void*)&src[src_pos];
-
-		// now copy from this position onwards
-		memcpy_s(ptr_dst, MAXIMUM_BUFFER_SIZE, ptr_src, size);
-	}
-
 	void Output_Wumpus::OnError()
 	{
 		this->Close();
@@ -192,7 +182,6 @@ namespace WinampOpenALOut {
 	{
 		this->is_playing = false;
 
-		//HANDLE playEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 		HANDLE playMutex = CreateMutex(NULL, FALSE, NULL);
 		HANDLE threads[MAX_RENDERERS];
 		memset(threads,0,sizeof(HANDLE)*MAX_RENDERERS);
@@ -211,11 +200,9 @@ namespace WinampOpenALOut {
 
 		WaitForMultipleObjects(no_renderers, threads,TRUE,INFINITE);
 
-		//SetEvent(playEvent);
 		ReleaseMutex(playMutex);
 
 		CloseHandle(playMutex);
-		
 	}
 
 	/*
@@ -363,8 +350,8 @@ namespace WinampOpenALOut {
 			efx_env = EFX_REVERB_PRESET_GENERIC;
 		}
 
-		effects->set_enabled(efx_enabled);
-		effects->set_current_effect(efx_env);
+		effects->Enable(efx_enabled);
+		effects->SetCurrentEffect(efx_env);
 
 		/*
 			initialise openal itself - this has been modified
@@ -438,55 +425,90 @@ namespace WinampOpenALOut {
 		char setting[MATRIX_BUFFER_SIZE];
 		memset(setting, '\0', MATRIX_BUFFER_SIZE);
 		//pump out the default format for the string
-		// the _x_ is the x/y/z axis position
-		// the _y is the renderer number
-		strcpy_s(setting,MATRIX_BUFFER_SIZE,"matrix_x_y\0");
+		// the _a_ is the x/y/z axis position
+		// the _r is the renderer number
+		strcpy_s(setting,MATRIX_BUFFER_SIZE,"matrix_a_r\0");
 		for (char rend=0 ; rend < MAX_RENDERERS ; rend++ )
 		{
 			this->renderers[rend] = NULL;
 
-			// offset the ascii value
-			setting[MATRIX_RENDERER_POSITION] = rend + '0';
-			bool valid = false;
-			float tempf = 0.0;
-			setting[MATRIX_AXIS_POSITION] = 'x';
-			tempf = ConfigFile::ReadFloat(setting, &valid);
-			if ( valid )
-			{
-				speaker_matrix.speakers[rend].x = tempf;
-			} else {
-				speaker_matrix.speakers[rend].x = DEFAULT_MATRIX[rend][0];
-			}
-			setting[MATRIX_AXIS_POSITION] = 'y';
-			tempf = ConfigFile::ReadFloat(setting, &valid);
-			if ( valid )
-			{
-				speaker_matrix.speakers[rend].y = tempf;
-			} else {
-				speaker_matrix.speakers[rend].y = DEFAULT_MATRIX[rend][1];
-			}
-			setting[MATRIX_AXIS_POSITION] = 'z';
-			tempf = ConfigFile::ReadFloat(setting, &valid);
-			if ( valid )
-			{
-				speaker_matrix.speakers[rend].z = tempf;
-			} else {
-				speaker_matrix.speakers[rend].z = DEFAULT_MATRIX[rend][2];
-			}
+			LoadSpeakerValues(
+				&speaker_matrix.speakers[rend],
+				&DEFAULT_MATRIX.speakers[rend],
+				setting,
+				rend);
 		}
+
+		LoadSpeakerValues(
+			&speaker_matrix.position,
+			&DEFAULT_MATRIX.position,
+			setting,
+			'P' - '0');
+
+		LoadSpeakerValues(
+			&speaker_matrix.direction,
+			&DEFAULT_MATRIX.direction,
+			setting,
+			'D' - '0');
 
 		SYNC_END;
 
 	}
 
-	void Output_Wumpus::SetMatrix( speaker_matrix_T m )
+	void Output_Wumpus::LoadSpeakerValues(
+		speaker_T * speaker, 
+		const speaker_T * default_speaker, 
+		const char * setting, 
+		const int offset)
+	{
+
+		if ( speaker && setting )
+		{
+			char name[11];
+			memset(name, 0, 11);
+
+			// copy the name over for manipulation
+			memcpy_s(name, 11, setting, strlen(setting));
+
+			// offset the ascii value
+			name[MATRIX_RENDERER_POSITION] = (char)offset + '0';
+			bool valid = false;
+			float tempf = 0.0;
+			name[MATRIX_AXIS_POSITION] = 'x';
+			tempf = ConfigFile::ReadFloat(name, &valid);
+			if ( valid )
+			{
+				speaker->x = tempf;
+			} else {
+				speaker->x = default_speaker->x;
+			}
+			name[MATRIX_AXIS_POSITION] = 'y';
+			tempf = ConfigFile::ReadFloat(name, &valid);
+			if ( valid )
+			{
+				speaker->y = tempf;
+			} else {
+				speaker->y = default_speaker->y;
+			}
+			name[MATRIX_AXIS_POSITION] = 'z';
+			tempf = ConfigFile::ReadFloat(name, &valid);
+			if ( valid )
+			{
+				speaker->z = tempf;
+			} else {
+				speaker->z = default_speaker->z;
+			}
+		}
+	}
+
+	void Output_Wumpus::SetMatrix( const speaker_matrix_T m )
 	{
 		speaker_matrix = m;
 
 		// if it's a mono source or single stereo
 		// then leave it in the middle otherwise it'll be
 		// wherever the user configured the left speaker to be
-		if ( no_renderers > 1 )
+		if ( no_renderers > 1 && split_out == true)
 		{
 			for( char rend=0 ; rend < no_renderers ; rend++ )
 			{
@@ -495,6 +517,18 @@ namespace WinampOpenALOut {
 					renderers[rend]->SetMatrix( m.speakers[rend] );
 				}
 			}
+
+			alListener3f(
+				AL_POSITION,
+				speaker_matrix.position.x,
+				speaker_matrix.position.y,
+				speaker_matrix.position.z);
+
+			alListener3f(
+				AL_DIRECTION,
+				speaker_matrix.direction.x,
+				speaker_matrix.direction.y,
+				speaker_matrix.direction.z);
 		}
 
 		char setting[MATRIX_BUFFER_SIZE];
@@ -502,15 +536,41 @@ namespace WinampOpenALOut {
 		strcpy_s(setting,11,"matrix_x_y\0");
 		for (char rend=0 ; rend < MAX_RENDERERS ; rend++ )
 		{
-			setting[MATRIX_RENDERER_POSITION] = rend + '0';
-
-			setting[MATRIX_AXIS_POSITION] = 'x';
-				ConfigFile::WriteFloat( setting, speaker_matrix.speakers[rend].x );
-			setting[MATRIX_AXIS_POSITION] = 'y';	
-				ConfigFile::WriteFloat( setting, speaker_matrix.speakers[rend].y );
-			setting[MATRIX_AXIS_POSITION] = 'z';	
-				ConfigFile::WriteFloat( setting, speaker_matrix.speakers[rend].z );
+			SaveSpeakerValues(
+				&speaker_matrix.speakers[rend],
+				setting,
+				rend);
 		}
+
+		SaveSpeakerValues(
+			&speaker_matrix.position,
+			setting,
+			'P' - '0');
+
+		SaveSpeakerValues(
+			&speaker_matrix.direction,
+			setting,
+			'D' - '0');
+	}
+
+	void Output_Wumpus::SaveSpeakerValues(
+			const speaker_T * speaker,
+			const char * setting,
+			const int offset)
+	{
+		char name[11];
+		memset(name, 0, 11);
+
+		memcpy_s(name, 11, setting, strlen(setting));
+
+		name[MATRIX_RENDERER_POSITION] = (char)offset + '0';
+
+		name[MATRIX_AXIS_POSITION] = 'x';
+			ConfigFile::WriteFloat( name, speaker->x );
+		name[MATRIX_AXIS_POSITION] = 'y';	
+			ConfigFile::WriteFloat( name, speaker->y );
+		name[MATRIX_AXIS_POSITION] = 'z';	
+			ConfigFile::WriteFloat( name, speaker->z );
 	}
 
 	/*
@@ -623,7 +683,7 @@ namespace WinampOpenALOut {
 
 		if( effects!= NULL)
 		{
-			effects->setup();
+			effects->Setup();
 		}
 
 		/* stereo and mono expansion 
@@ -728,7 +788,7 @@ namespace WinampOpenALOut {
 		 */
 		if ( this->effects )
 		{
-			effects->on_close();
+			effects->OnClose();
 		}
 
 		// just incase the thread has exitted, assume playing has stopped
@@ -967,7 +1027,7 @@ namespace WinampOpenALOut {
 					 * index to it and copy the source to it.
 					 */
 					const char* src = (const char*)buf;
-					for ( int sample = 0 ; sample < renderer_size ; sample++ )
+					for ( unsigned int sample = 0 ; sample < renderer_size ; sample++ )
 					{
 						for ( unsigned char rend=0; rend < no_renderers ; rend++ )
 						{
@@ -991,8 +1051,9 @@ namespace WinampOpenALOut {
 					 * index to it and copy the source to it.
 					 */
 					const short* src = (const short*)buf;
-					for ( int sample = 0 ; sample < (renderer_size/2) ; sample++ )
+					for ( unsigned int sample = 0 ; sample < (renderer_size/2) ; sample++ )
 					{
+
 						for ( unsigned char rend=0; rend < no_renderers ; rend++ )
 						{
 							*(short*)(((short*)buffers[rend]) + sample) = (src[rend]);
@@ -1005,7 +1066,7 @@ namespace WinampOpenALOut {
 				 * together, if they're in the loop above the audio may drift */
 				for ( char rend=0; rend < no_renderers ; rend++ )
 				{
-					renderers[rend]->Write(buffers[rend],renderer_size);
+					renderers[rend]->Write(buffers[rend], renderer_size);
 				}
 
 				delete buf;

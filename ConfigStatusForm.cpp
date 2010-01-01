@@ -101,6 +101,14 @@ namespace WinampOpenALOut {
 		numSy->Value = (System::Decimal)matrix.speakers[5].y;
 		numSz->Value = (System::Decimal)matrix.speakers[5].z;
 
+		numPosX->Value = (System::Decimal)matrix.position.x;
+		numPosY->Value = (System::Decimal)matrix.position.y;
+		numPosZ->Value = (System::Decimal)matrix.position.z;
+
+		numDirectionX->Value = (System::Decimal)matrix.direction.x;
+		numDirectionY->Value = (System::Decimal)matrix.direction.y;
+		numDirectionZ->Value = (System::Decimal)matrix.direction.z;
+
 		ShowDeviceDetails();
 	}
 
@@ -160,20 +168,29 @@ namespace WinampOpenALOut {
 			output_plugin->SetXRAMEnabled(checkBoxXRAM->Checked);
 		}
 
-		if(output_plugin->get_effects()->get_current_effect() != comboBoxEffect->SelectedIndex)
+		if(output_plugin->get_effects()->GetCurrentEffect() != comboBoxEffect->SelectedIndex)
 		{
-			output_plugin->get_effects()->set_current_effect((effects_list)comboBoxEffect->SelectedIndex);
+			output_plugin->get_effects()->SetCurrentEffect((effects_list)comboBoxEffect->SelectedIndex);
 			ConfigFile::WriteInteger(CONF_EFX_ENV, comboBoxEffect->SelectedIndex);
 		}
 
-		if(output_plugin->get_effects()->is_enabled() != checkBoxEfxEnabled->Checked)
+		if(output_plugin->get_effects()->IsEnabled() != checkBoxEfxEnabled->Checked)
 		{
-			if ( !output_plugin->get_effects()->set_enabled(checkBoxEfxEnabled->Checked) )
+			if ( !output_plugin->get_effects()->Enable(checkBoxEfxEnabled->Checked) )
 			{
 				checkBoxEfxEnabled->Checked = false;
-				output_plugin->get_effects()->set_enabled(false);
+				output_plugin->get_effects()->Enable(false);
+				MessageBoxA(NULL, "Failed to enable effects", "Error", MB_ICONSTOP);
 			}
 		}
+
+		matrix.position.x = (float)numPosX->Value;
+		matrix.position.y = (float)numPosY->Value;
+		matrix.position.z = (float)numPosZ->Value;
+
+		matrix.direction.x = (float)numDirectionX->Value;
+		matrix.direction.y = (float)numDirectionY->Value;
+		matrix.direction.z = (float)numDirectionZ->Value;
 
 		output_plugin->SetMatrix(matrix);
 

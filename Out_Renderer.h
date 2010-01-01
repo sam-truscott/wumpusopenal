@@ -23,9 +23,10 @@ namespace WinampOpenALOut
 			unsigned char a_channel,
 			class Output_Effects* the_effects);
 		~Output_Renderer();
+
 		int	Open(int samplerate, int numchannels, int bitspersamp, int bufferlenms, int prebufferms);
 		void Close();
-		int Write(char *buf, int len);
+		void Write(char *buf, int len);
 		int CanWrite();
 		bool IsPlaying();
 		int Pause(int pause);
@@ -58,7 +59,7 @@ namespace WinampOpenALOut
 			played = t;
 		}
 
-		void SetMatrix ( speaker_T speaker );
+		void SetMatrix ( const speaker_T speaker );
 
 	protected:
 

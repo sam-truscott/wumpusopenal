@@ -176,6 +176,23 @@ private: System::Windows::Forms::Label^  label33;
 private: System::Windows::Forms::Label^  label36;
 private: System::Windows::Forms::Label^  label35;
 private: System::Windows::Forms::Label^  label34;
+private: System::Windows::Forms::Label^  label37;
+private: System::Windows::Forms::Label^  label38;
+private: System::Windows::Forms::Label^  label39;
+private: System::Windows::Forms::Label^  label40;
+private: System::Windows::Forms::Label^  label41;
+private: System::Windows::Forms::Label^  label42;
+private: System::Windows::Forms::Label^  label43;
+private: System::Windows::Forms::Label^  label44;
+private: System::Windows::Forms::NumericUpDown^  numDirectionZ;
+
+private: System::Windows::Forms::NumericUpDown^  numDirectionY;
+
+private: System::Windows::Forms::NumericUpDown^  numDirectionX;
+
+private: System::Windows::Forms::NumericUpDown^  numPosZ;
+private: System::Windows::Forms::NumericUpDown^  numPosY;
+private: System::Windows::Forms::NumericUpDown^  numPosX;
 
 
 
@@ -270,6 +287,9 @@ private: System::ComponentModel::IContainer^  components;
 			this->comboBoxDevices = (gcnew System::Windows::Forms::ComboBox());
 			this->label1 = (gcnew System::Windows::Forms::Label());
 			this->tabPageEffects = (gcnew System::Windows::Forms::TabPage());
+			this->label36 = (gcnew System::Windows::Forms::Label());
+			this->label35 = (gcnew System::Windows::Forms::Label());
+			this->label34 = (gcnew System::Windows::Forms::Label());
 			this->label28 = (gcnew System::Windows::Forms::Label());
 			this->label29 = (gcnew System::Windows::Forms::Label());
 			this->label30 = (gcnew System::Windows::Forms::Label());
@@ -333,9 +353,20 @@ private: System::ComponentModel::IContainer^  components;
 			this->buttonOk = (gcnew System::Windows::Forms::Button());
 			this->buttonCancel = (gcnew System::Windows::Forms::Button());
 			this->buttonApply = (gcnew System::Windows::Forms::Button());
-			this->label34 = (gcnew System::Windows::Forms::Label());
-			this->label35 = (gcnew System::Windows::Forms::Label());
-			this->label36 = (gcnew System::Windows::Forms::Label());
+			this->label37 = (gcnew System::Windows::Forms::Label());
+			this->label38 = (gcnew System::Windows::Forms::Label());
+			this->label39 = (gcnew System::Windows::Forms::Label());
+			this->label40 = (gcnew System::Windows::Forms::Label());
+			this->label41 = (gcnew System::Windows::Forms::Label());
+			this->label42 = (gcnew System::Windows::Forms::Label());
+			this->label43 = (gcnew System::Windows::Forms::Label());
+			this->label44 = (gcnew System::Windows::Forms::Label());
+			this->numDirectionZ = (gcnew System::Windows::Forms::NumericUpDown());
+			this->numDirectionY = (gcnew System::Windows::Forms::NumericUpDown());
+			this->numDirectionX = (gcnew System::Windows::Forms::NumericUpDown());
+			this->numPosZ = (gcnew System::Windows::Forms::NumericUpDown());
+			this->numPosY = (gcnew System::Windows::Forms::NumericUpDown());
+			this->numPosX = (gcnew System::Windows::Forms::NumericUpDown());
 			this->tabConfiguration->SuspendLayout();
 			this->tabPageConfig->SuspendLayout();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->trackBufferLength))->BeginInit();
@@ -359,6 +390,12 @@ private: System::ComponentModel::IContainer^  components;
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numFLy))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numFLx))->BeginInit();
 			this->tabPageStatistics->SuspendLayout();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numDirectionZ))->BeginInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numDirectionY))->BeginInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numDirectionX))->BeginInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numPosZ))->BeginInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numPosY))->BeginInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numPosX))->BeginInit();
 			this->SuspendLayout();
 			// 
 			// tabConfiguration
@@ -453,7 +490,7 @@ private: System::ComponentModel::IContainer^  components;
 			this->trackBufferLength->Maximum = 6000;
 			this->trackBufferLength->Minimum = 250;
 			this->trackBufferLength->Name = L"trackBufferLength";
-			this->trackBufferLength->Size = System::Drawing::Size(386, 45);
+			this->trackBufferLength->Size = System::Drawing::Size(386, 42);
 			this->trackBufferLength->SmallChange = 250;
 			this->trackBufferLength->TabIndex = 10;
 			this->trackBufferLength->TickFrequency = 256;
@@ -497,6 +534,20 @@ private: System::ComponentModel::IContainer^  components;
 			// 
 			// tabPageEffects
 			// 
+			this->tabPageEffects->Controls->Add(this->label37);
+			this->tabPageEffects->Controls->Add(this->label38);
+			this->tabPageEffects->Controls->Add(this->label39);
+			this->tabPageEffects->Controls->Add(this->label40);
+			this->tabPageEffects->Controls->Add(this->label41);
+			this->tabPageEffects->Controls->Add(this->label42);
+			this->tabPageEffects->Controls->Add(this->label43);
+			this->tabPageEffects->Controls->Add(this->label44);
+			this->tabPageEffects->Controls->Add(this->numDirectionZ);
+			this->tabPageEffects->Controls->Add(this->numDirectionY);
+			this->tabPageEffects->Controls->Add(this->numDirectionX);
+			this->tabPageEffects->Controls->Add(this->numPosZ);
+			this->tabPageEffects->Controls->Add(this->numPosY);
+			this->tabPageEffects->Controls->Add(this->numPosX);
 			this->tabPageEffects->Controls->Add(this->label36);
 			this->tabPageEffects->Controls->Add(this->label35);
 			this->tabPageEffects->Controls->Add(this->label34);
@@ -554,10 +605,37 @@ private: System::ComponentModel::IContainer^  components;
 			this->tabPageEffects->Text = L"3D/Effects";
 			this->tabPageEffects->UseVisualStyleBackColor = true;
 			// 
+			// label36
+			// 
+			this->label36->AutoSize = true;
+			this->label36->Location = System::Drawing::Point(153, 50);
+			this->label36->Name = L"label36";
+			this->label36->Size = System::Drawing::Size(117, 13);
+			this->label36->TabIndex = 50;
+			this->label36->Text = L"-z is forward, +z is back";
+			// 
+			// label35
+			// 
+			this->label35->AutoSize = true;
+			this->label35->Location = System::Drawing::Point(153, 37);
+			this->label35->Name = L"label35";
+			this->label35->Size = System::Drawing::Size(96, 13);
+			this->label35->TabIndex = 49;
+			this->label35->Text = L"-y is down, +y is up";
+			// 
+			// label34
+			// 
+			this->label34->AutoSize = true;
+			this->label34->Location = System::Drawing::Point(153, 24);
+			this->label34->Name = L"label34";
+			this->label34->Size = System::Drawing::Size(92, 13);
+			this->label34->TabIndex = 48;
+			this->label34->Text = L"-x is left, +x is right";
+			// 
 			// label28
 			// 
 			this->label28->AutoSize = true;
-			this->label28->Location = System::Drawing::Point(306, 236);
+			this->label28->Location = System::Drawing::Point(208, 236);
 			this->label28->Name = L"label28";
 			this->label28->Size = System::Drawing::Size(12, 13);
 			this->label28->TabIndex = 47;
@@ -566,7 +644,7 @@ private: System::ComponentModel::IContainer^  components;
 			// label29
 			// 
 			this->label29->AutoSize = true;
-			this->label29->Location = System::Drawing::Point(306, 210);
+			this->label29->Location = System::Drawing::Point(208, 210);
 			this->label29->Name = L"label29";
 			this->label29->Size = System::Drawing::Size(12, 13);
 			this->label29->TabIndex = 46;
@@ -575,7 +653,7 @@ private: System::ComponentModel::IContainer^  components;
 			// label30
 			// 
 			this->label30->AutoSize = true;
-			this->label30->Location = System::Drawing::Point(306, 186);
+			this->label30->Location = System::Drawing::Point(208, 186);
 			this->label30->Name = L"label30";
 			this->label30->Size = System::Drawing::Size(12, 13);
 			this->label30->TabIndex = 45;
@@ -584,7 +662,7 @@ private: System::ComponentModel::IContainer^  components;
 			// label31
 			// 
 			this->label31->AutoSize = true;
-			this->label31->Location = System::Drawing::Point(306, 136);
+			this->label31->Location = System::Drawing::Point(208, 136);
 			this->label31->Name = L"label31";
 			this->label31->Size = System::Drawing::Size(12, 13);
 			this->label31->TabIndex = 44;
@@ -593,7 +671,7 @@ private: System::ComponentModel::IContainer^  components;
 			// label32
 			// 
 			this->label32->AutoSize = true;
-			this->label32->Location = System::Drawing::Point(306, 110);
+			this->label32->Location = System::Drawing::Point(208, 110);
 			this->label32->Name = L"label32";
 			this->label32->Size = System::Drawing::Size(12, 13);
 			this->label32->TabIndex = 43;
@@ -602,7 +680,7 @@ private: System::ComponentModel::IContainer^  components;
 			// label33
 			// 
 			this->label33->AutoSize = true;
-			this->label33->Location = System::Drawing::Point(306, 86);
+			this->label33->Location = System::Drawing::Point(208, 86);
 			this->label33->Name = L"label33";
 			this->label33->Size = System::Drawing::Size(12, 13);
 			this->label33->TabIndex = 42;
@@ -665,7 +743,7 @@ private: System::ComponentModel::IContainer^  components;
 			// label19
 			// 
 			this->label19->AutoSize = true;
-			this->label19->Location = System::Drawing::Point(153, 238);
+			this->label19->Location = System::Drawing::Point(103, 238);
 			this->label19->Name = L"label19";
 			this->label19->Size = System::Drawing::Size(12, 13);
 			this->label19->TabIndex = 35;
@@ -674,7 +752,7 @@ private: System::ComponentModel::IContainer^  components;
 			// label20
 			// 
 			this->label20->AutoSize = true;
-			this->label20->Location = System::Drawing::Point(153, 212);
+			this->label20->Location = System::Drawing::Point(103, 212);
 			this->label20->Name = L"label20";
 			this->label20->Size = System::Drawing::Size(12, 13);
 			this->label20->TabIndex = 34;
@@ -683,7 +761,7 @@ private: System::ComponentModel::IContainer^  components;
 			// label21
 			// 
 			this->label21->AutoSize = true;
-			this->label21->Location = System::Drawing::Point(153, 188);
+			this->label21->Location = System::Drawing::Point(103, 188);
 			this->label21->Name = L"label21";
 			this->label21->Size = System::Drawing::Size(12, 13);
 			this->label21->TabIndex = 33;
@@ -692,7 +770,7 @@ private: System::ComponentModel::IContainer^  components;
 			// label18
 			// 
 			this->label18->AutoSize = true;
-			this->label18->Location = System::Drawing::Point(153, 138);
+			this->label18->Location = System::Drawing::Point(103, 138);
 			this->label18->Name = L"label18";
 			this->label18->Size = System::Drawing::Size(12, 13);
 			this->label18->TabIndex = 32;
@@ -701,7 +779,7 @@ private: System::ComponentModel::IContainer^  components;
 			// label17
 			// 
 			this->label17->AutoSize = true;
-			this->label17->Location = System::Drawing::Point(153, 112);
+			this->label17->Location = System::Drawing::Point(103, 112);
 			this->label17->Name = L"label17";
 			this->label17->Size = System::Drawing::Size(12, 13);
 			this->label17->TabIndex = 31;
@@ -710,7 +788,7 @@ private: System::ComponentModel::IContainer^  components;
 			// label15
 			// 
 			this->label15->AutoSize = true;
-			this->label15->Location = System::Drawing::Point(153, 88);
+			this->label15->Location = System::Drawing::Point(103, 88);
 			this->label15->Name = L"label15";
 			this->label15->Size = System::Drawing::Size(12, 13);
 			this->label15->TabIndex = 30;
@@ -719,7 +797,7 @@ private: System::ComponentModel::IContainer^  components;
 			// label14
 			// 
 			this->label14->AutoSize = true;
-			this->label14->Location = System::Drawing::Point(321, 172);
+			this->label14->Location = System::Drawing::Point(223, 172);
 			this->label14->Name = L"label14";
 			this->label14->Size = System::Drawing::Size(58, 13);
 			this->label14->TabIndex = 29;
@@ -737,7 +815,7 @@ private: System::ComponentModel::IContainer^  components;
 			// label12
 			// 
 			this->label12->AutoSize = true;
-			this->label12->Location = System::Drawing::Point(168, 172);
+			this->label12->Location = System::Drawing::Point(118, 172);
 			this->label12->Name = L"label12";
 			this->label12->Size = System::Drawing::Size(61, 13);
 			this->label12->TabIndex = 27;
@@ -746,7 +824,7 @@ private: System::ComponentModel::IContainer^  components;
 			// label11
 			// 
 			this->label11->AutoSize = true;
-			this->label11->Location = System::Drawing::Point(321, 70);
+			this->label11->Location = System::Drawing::Point(223, 70);
 			this->label11->Name = L"label11";
 			this->label11->Size = System::Drawing::Size(59, 13);
 			this->label11->TabIndex = 26;
@@ -755,7 +833,7 @@ private: System::ComponentModel::IContainer^  components;
 			// label9
 			// 
 			this->label9->AutoSize = true;
-			this->label9->Location = System::Drawing::Point(168, 70);
+			this->label9->Location = System::Drawing::Point(118, 70);
 			this->label9->Name = L"label9";
 			this->label9->Size = System::Drawing::Size(38, 13);
 			this->label9->TabIndex = 25;
@@ -773,7 +851,7 @@ private: System::ComponentModel::IContainer^  components;
 			// numSz
 			// 
 			this->numSz->Increment = System::Decimal(gcnew cli::array< System::Int32 >(4) {25, 0, 0, 65536});
-			this->numSz->Location = System::Drawing::Point(171, 240);
+			this->numSz->Location = System::Drawing::Point(121, 240);
 			this->numSz->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {255, 0, 0, 0});
 			this->numSz->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) {255, 0, 0, System::Int32::MinValue});
 			this->numSz->Name = L"numSz";
@@ -784,7 +862,7 @@ private: System::ComponentModel::IContainer^  components;
 			// numSy
 			// 
 			this->numSy->Increment = System::Decimal(gcnew cli::array< System::Int32 >(4) {25, 0, 0, 65536});
-			this->numSy->Location = System::Drawing::Point(171, 214);
+			this->numSy->Location = System::Drawing::Point(121, 214);
 			this->numSy->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {255, 0, 0, 0});
 			this->numSy->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) {255, 0, 0, System::Int32::MinValue});
 			this->numSy->Name = L"numSy";
@@ -795,7 +873,7 @@ private: System::ComponentModel::IContainer^  components;
 			// numSx
 			// 
 			this->numSx->Increment = System::Decimal(gcnew cli::array< System::Int32 >(4) {25, 0, 0, 65536});
-			this->numSx->Location = System::Drawing::Point(171, 188);
+			this->numSx->Location = System::Drawing::Point(121, 188);
 			this->numSx->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {255, 0, 0, 0});
 			this->numSx->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) {255, 0, 0, System::Int32::MinValue});
 			this->numSx->Name = L"numSx";
@@ -806,7 +884,7 @@ private: System::ComponentModel::IContainer^  components;
 			// numCz
 			// 
 			this->numCz->Increment = System::Decimal(gcnew cli::array< System::Int32 >(4) {25, 0, 0, 65536});
-			this->numCz->Location = System::Drawing::Point(171, 138);
+			this->numCz->Location = System::Drawing::Point(121, 138);
 			this->numCz->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {255, 0, 0, 0});
 			this->numCz->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) {255, 0, 0, System::Int32::MinValue});
 			this->numCz->Name = L"numCz";
@@ -817,7 +895,7 @@ private: System::ComponentModel::IContainer^  components;
 			// numCy
 			// 
 			this->numCy->Increment = System::Decimal(gcnew cli::array< System::Int32 >(4) {25, 0, 0, 65536});
-			this->numCy->Location = System::Drawing::Point(171, 112);
+			this->numCy->Location = System::Drawing::Point(121, 112);
 			this->numCy->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {255, 0, 0, 0});
 			this->numCy->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) {255, 0, 0, System::Int32::MinValue});
 			this->numCy->Name = L"numCy";
@@ -828,7 +906,7 @@ private: System::ComponentModel::IContainer^  components;
 			// numCx
 			// 
 			this->numCx->Increment = System::Decimal(gcnew cli::array< System::Int32 >(4) {25, 0, 0, 65536});
-			this->numCx->Location = System::Drawing::Point(171, 86);
+			this->numCx->Location = System::Drawing::Point(121, 86);
 			this->numCx->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {255, 0, 0, 0});
 			this->numCx->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) {255, 0, 0, System::Int32::MinValue});
 			this->numCx->Name = L"numCx";
@@ -839,7 +917,7 @@ private: System::ComponentModel::IContainer^  components;
 			// numRRz
 			// 
 			this->numRRz->Increment = System::Decimal(gcnew cli::array< System::Int32 >(4) {25, 0, 0, 65536});
-			this->numRRz->Location = System::Drawing::Point(324, 240);
+			this->numRRz->Location = System::Drawing::Point(226, 240);
 			this->numRRz->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {255, 0, 0, 0});
 			this->numRRz->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) {255, 0, 0, System::Int32::MinValue});
 			this->numRRz->Name = L"numRRz";
@@ -850,7 +928,7 @@ private: System::ComponentModel::IContainer^  components;
 			// numRRy
 			// 
 			this->numRRy->Increment = System::Decimal(gcnew cli::array< System::Int32 >(4) {25, 0, 0, 65536});
-			this->numRRy->Location = System::Drawing::Point(324, 214);
+			this->numRRy->Location = System::Drawing::Point(226, 214);
 			this->numRRy->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {255, 0, 0, 0});
 			this->numRRy->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) {255, 0, 0, System::Int32::MinValue});
 			this->numRRy->Name = L"numRRy";
@@ -861,7 +939,7 @@ private: System::ComponentModel::IContainer^  components;
 			// numRRx
 			// 
 			this->numRRx->Increment = System::Decimal(gcnew cli::array< System::Int32 >(4) {25, 0, 0, 65536});
-			this->numRRx->Location = System::Drawing::Point(324, 188);
+			this->numRRx->Location = System::Drawing::Point(226, 188);
 			this->numRRx->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {255, 0, 0, 0});
 			this->numRRx->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) {255, 0, 0, System::Int32::MinValue});
 			this->numRRx->Name = L"numRRx";
@@ -872,7 +950,7 @@ private: System::ComponentModel::IContainer^  components;
 			// numFRz
 			// 
 			this->numFRz->Increment = System::Decimal(gcnew cli::array< System::Int32 >(4) {25, 0, 0, 65536});
-			this->numFRz->Location = System::Drawing::Point(324, 138);
+			this->numFRz->Location = System::Drawing::Point(226, 138);
 			this->numFRz->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {255, 0, 0, 0});
 			this->numFRz->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) {255, 0, 0, System::Int32::MinValue});
 			this->numFRz->Name = L"numFRz";
@@ -883,7 +961,7 @@ private: System::ComponentModel::IContainer^  components;
 			// numFRy
 			// 
 			this->numFRy->Increment = System::Decimal(gcnew cli::array< System::Int32 >(4) {25, 0, 0, 65536});
-			this->numFRy->Location = System::Drawing::Point(324, 112);
+			this->numFRy->Location = System::Drawing::Point(226, 112);
 			this->numFRy->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {255, 0, 0, 0});
 			this->numFRy->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) {255, 0, 0, System::Int32::MinValue});
 			this->numFRy->Name = L"numFRy";
@@ -894,7 +972,7 @@ private: System::ComponentModel::IContainer^  components;
 			// numFRx
 			// 
 			this->numFRx->Increment = System::Decimal(gcnew cli::array< System::Int32 >(4) {25, 0, 0, 65536});
-			this->numFRx->Location = System::Drawing::Point(324, 86);
+			this->numFRx->Location = System::Drawing::Point(226, 86);
 			this->numFRx->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {255, 0, 0, 0});
 			this->numFRx->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) {255, 0, 0, System::Int32::MinValue});
 			this->numFRx->Name = L"numFRx";
@@ -1178,32 +1256,137 @@ private: System::ComponentModel::IContainer^  components;
 			this->buttonApply->UseVisualStyleBackColor = true;
 			this->buttonApply->Click += gcnew System::EventHandler(this, &Config::buttonApply_Click_1);
 			// 
-			// label34
+			// label37
 			// 
-			this->label34->AutoSize = true;
-			this->label34->Location = System::Drawing::Point(153, 24);
-			this->label34->Name = L"label34";
-			this->label34->Size = System::Drawing::Size(92, 13);
-			this->label34->TabIndex = 48;
-			this->label34->Text = L"-x is left, +x is right";
+			this->label37->AutoSize = true;
+			this->label37->Location = System::Drawing::Point(304, 236);
+			this->label37->Name = L"label37";
+			this->label37->Size = System::Drawing::Size(12, 13);
+			this->label37->TabIndex = 64;
+			this->label37->Text = L"z";
 			// 
-			// label35
+			// label38
 			// 
-			this->label35->AutoSize = true;
-			this->label35->Location = System::Drawing::Point(153, 37);
-			this->label35->Name = L"label35";
-			this->label35->Size = System::Drawing::Size(96, 13);
-			this->label35->TabIndex = 49;
-			this->label35->Text = L"-y is down, +y is up";
+			this->label38->AutoSize = true;
+			this->label38->Location = System::Drawing::Point(304, 210);
+			this->label38->Name = L"label38";
+			this->label38->Size = System::Drawing::Size(12, 13);
+			this->label38->TabIndex = 63;
+			this->label38->Text = L"y";
 			// 
-			// label36
+			// label39
 			// 
-			this->label36->AutoSize = true;
-			this->label36->Location = System::Drawing::Point(153, 50);
-			this->label36->Name = L"label36";
-			this->label36->Size = System::Drawing::Size(117, 13);
-			this->label36->TabIndex = 50;
-			this->label36->Text = L"-z is forward, +z is back";
+			this->label39->AutoSize = true;
+			this->label39->Location = System::Drawing::Point(304, 186);
+			this->label39->Name = L"label39";
+			this->label39->Size = System::Drawing::Size(12, 13);
+			this->label39->TabIndex = 62;
+			this->label39->Text = L"x";
+			// 
+			// label40
+			// 
+			this->label40->AutoSize = true;
+			this->label40->Location = System::Drawing::Point(304, 136);
+			this->label40->Name = L"label40";
+			this->label40->Size = System::Drawing::Size(12, 13);
+			this->label40->TabIndex = 61;
+			this->label40->Text = L"z";
+			// 
+			// label41
+			// 
+			this->label41->AutoSize = true;
+			this->label41->Location = System::Drawing::Point(304, 110);
+			this->label41->Name = L"label41";
+			this->label41->Size = System::Drawing::Size(12, 13);
+			this->label41->TabIndex = 60;
+			this->label41->Text = L"y";
+			// 
+			// label42
+			// 
+			this->label42->AutoSize = true;
+			this->label42->Location = System::Drawing::Point(304, 86);
+			this->label42->Name = L"label42";
+			this->label42->Size = System::Drawing::Size(12, 13);
+			this->label42->TabIndex = 59;
+			this->label42->Text = L"x";
+			// 
+			// label43
+			// 
+			this->label43->AutoSize = true;
+			this->label43->Location = System::Drawing::Point(319, 172);
+			this->label43->Name = L"label43";
+			this->label43->Size = System::Drawing::Size(49, 13);
+			this->label43->TabIndex = 58;
+			this->label43->Text = L"Direction";
+			// 
+			// label44
+			// 
+			this->label44->AutoSize = true;
+			this->label44->Location = System::Drawing::Point(319, 70);
+			this->label44->Name = L"label44";
+			this->label44->Size = System::Drawing::Size(44, 13);
+			this->label44->TabIndex = 57;
+			this->label44->Text = L"Position";
+			// 
+			// numDirectionZ
+			// 
+			this->numDirectionZ->Increment = System::Decimal(gcnew cli::array< System::Int32 >(4) {25, 0, 0, 65536});
+			this->numDirectionZ->Location = System::Drawing::Point(322, 240);
+			this->numDirectionZ->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {255, 0, 0, 0});
+			this->numDirectionZ->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) {255, 0, 0, System::Int32::MinValue});
+			this->numDirectionZ->Name = L"numDirectionZ";
+			this->numDirectionZ->Size = System::Drawing::Size(67, 20);
+			this->numDirectionZ->TabIndex = 56;
+			// 
+			// numDirectionY
+			// 
+			this->numDirectionY->Increment = System::Decimal(gcnew cli::array< System::Int32 >(4) {25, 0, 0, 65536});
+			this->numDirectionY->Location = System::Drawing::Point(322, 214);
+			this->numDirectionY->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {255, 0, 0, 0});
+			this->numDirectionY->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) {255, 0, 0, System::Int32::MinValue});
+			this->numDirectionY->Name = L"numDirectionY";
+			this->numDirectionY->Size = System::Drawing::Size(67, 20);
+			this->numDirectionY->TabIndex = 55;
+			// 
+			// numDirectionX
+			// 
+			this->numDirectionX->Increment = System::Decimal(gcnew cli::array< System::Int32 >(4) {25, 0, 0, 65536});
+			this->numDirectionX->Location = System::Drawing::Point(322, 188);
+			this->numDirectionX->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {255, 0, 0, 0});
+			this->numDirectionX->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) {255, 0, 0, System::Int32::MinValue});
+			this->numDirectionX->Name = L"numDirectionX";
+			this->numDirectionX->Size = System::Drawing::Size(67, 20);
+			this->numDirectionX->TabIndex = 54;
+			// 
+			// numPosZ
+			// 
+			this->numPosZ->Increment = System::Decimal(gcnew cli::array< System::Int32 >(4) {25, 0, 0, 65536});
+			this->numPosZ->Location = System::Drawing::Point(322, 138);
+			this->numPosZ->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {255, 0, 0, 0});
+			this->numPosZ->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) {255, 0, 0, System::Int32::MinValue});
+			this->numPosZ->Name = L"numPosZ";
+			this->numPosZ->Size = System::Drawing::Size(67, 20);
+			this->numPosZ->TabIndex = 53;
+			// 
+			// numPosY
+			// 
+			this->numPosY->Increment = System::Decimal(gcnew cli::array< System::Int32 >(4) {25, 0, 0, 65536});
+			this->numPosY->Location = System::Drawing::Point(322, 112);
+			this->numPosY->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {255, 0, 0, 0});
+			this->numPosY->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) {255, 0, 0, System::Int32::MinValue});
+			this->numPosY->Name = L"numPosY";
+			this->numPosY->Size = System::Drawing::Size(67, 20);
+			this->numPosY->TabIndex = 52;
+			// 
+			// numPosX
+			// 
+			this->numPosX->Increment = System::Decimal(gcnew cli::array< System::Int32 >(4) {25, 0, 0, 65536});
+			this->numPosX->Location = System::Drawing::Point(322, 86);
+			this->numPosX->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {255, 0, 0, 0});
+			this->numPosX->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) {255, 0, 0, System::Int32::MinValue});
+			this->numPosX->Name = L"numPosX";
+			this->numPosX->Size = System::Drawing::Size(67, 20);
+			this->numPosX->TabIndex = 51;
 			// 
 			// Config
 			// 
@@ -1250,6 +1433,12 @@ private: System::ComponentModel::IContainer^  components;
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numFLx))->EndInit();
 			this->tabPageStatistics->ResumeLayout(false);
 			this->tabPageStatistics->PerformLayout();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numDirectionZ))->EndInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numDirectionY))->EndInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numDirectionX))->EndInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numPosZ))->EndInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numPosY))->EndInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numPosX))->EndInit();
 			this->ResumeLayout(false);
 
 		}
