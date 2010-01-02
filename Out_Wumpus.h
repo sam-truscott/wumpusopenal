@@ -6,7 +6,11 @@
 
 namespace WinampOpenALOut
 {
+#ifndef NATIVE
 	public class Output_Wumpus
+#else
+	class Output_Wumpus
+#endif
 	{
 
 	public:

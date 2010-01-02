@@ -1,7 +1,10 @@
 #include "Out_Wumpus.h"
 #include "Version.h"
 #include "Out_Effects.h"
+#ifndef NATIVE
 #include "ConfigStatusForm.h"
+#endif
+#include "ConfigFile.h"
 #include "Out_Renderer.h"
 #include "Winamp.h"
 
@@ -182,8 +185,8 @@ namespace WinampOpenALOut {
 	{
 		this->is_playing = false;
 
-		HANDLE playMutex = CreateMutex(NULL, FALSE, NULL);
 		HANDLE threads[MAX_RENDERERS];
+		int threadCount = 0;
 		memset(threads,0,sizeof(HANDLE)*MAX_RENDERERS);
 
 		/*
@@ -193,16 +196,15 @@ namespace WinampOpenALOut {
 		{
 			if ( this->renderers[rend] )
 			{
-				threads[rend] = this->renderers[rend]->CheckPlayState(playMutex);
+				threads[threadCount++] = this->renderers[rend]->CheckPlayState();
 				this->is_playing |= this->renderers[rend]->IsPlaying();
 			}
 		}
 
-		WaitForMultipleObjects(no_renderers, threads,TRUE,INFINITE);
-
-		ReleaseMutex(playMutex);
-
-		CloseHandle(playMutex);
+		for ( char rend=0 ; rend < threadCount ; rend++ )
+		{
+			ResumeThread(threads[rend]);
+		}
 	}
 
 	/*
@@ -210,10 +212,12 @@ namespace WinampOpenALOut {
 
 		this procedure is invoked by winamp when the configure button is clicked
 	*/
-	void Output_Wumpus::Config(HWND hwnd) {
-
+	void Output_Wumpus::Config(HWND hwnd)
+	{
+#ifndef NATIVE
 		WinampOpenALOut::Config^ config = WinampOpenALOut::Config::GetInstance(this);
 		config->Load();
+#endif
 	}
 
 	void Output_Wumpus::log_debug_msg(char* msg, char* file, int line)
@@ -368,8 +372,8 @@ namespace WinampOpenALOut {
 			dbg,
 			DEBUG_BUFFER_SIZE,
 			"Using Device {%d} with buffer of {%d}",
-			currentDevice,
-			c_bufferLength);
+			current_device,
+			conf_buffer_length);
 		this->log_debug_msg(dbg, __FILE__, __LINE__);
 #endif
 
@@ -382,8 +386,8 @@ namespace WinampOpenALOut {
 			dbg,
 			DEBUG_BUFFER_SIZE,
 			"Mono expansion {%d}, Stereo expansion {%d}, Use XRAM? {%d}",
-			this->monoExpand,
-			this->stereoExpand,
+			this->is_mono_expanded,
+			this->is_stereo_expanded,
 			this->xram_enabled);
 		this->log_debug_msg(dbg, __FILE__, __LINE__);
 		this->log_debug_msg("Looking for XRAM, all values need to be larger than Zero");
@@ -706,7 +710,10 @@ namespace WinampOpenALOut {
 		{
 			for ( unsigned char rend=0 ; rend < number_of_channels ; rend++ )
 			{
-				renderers[rend] = new Output_Renderer(conf_buffer_length, rend, effects);
+				renderers[rend] = new Output_Renderer(
+					conf_buffer_length, 
+					rend, 
+					effects);
 				renderers[rend]->SetXRAMEnabled(use_xram);
 				// if we're splitting out, there will always be '1' channel
 				// because we'll split multiple channels out to many single renderers
@@ -720,7 +727,10 @@ namespace WinampOpenALOut {
 			 * otherwise, create one renderer and just use that to represent
 			 * the whole stream
 			 */
-			renderers[0] = new Output_Renderer(conf_buffer_length, 0, effects);
+			renderers[0] = new Output_Renderer(
+				conf_buffer_length,
+				0,
+				effects);
 			renderers[0]->SetXRAMEnabled(use_xram);
 			renderers[0]->Open(samplerate,this->number_of_channels,bitspersamp,0,0);
 			no_renderers++;
@@ -909,7 +919,7 @@ namespace WinampOpenALOut {
 				// expand buffer here
 				char* new_buffer = new char[new_len];
 #ifdef _DEBUGGING
-				memset(newBuffer, 0, new_len);
+				memset(new_buffer, 0, new_len);
 #endif
 
 				// set relative value to zero
@@ -1252,7 +1262,8 @@ namespace WinampOpenALOut {
 	void Output_Wumpus::SetPan(int new_pan)
 	{
 		ALfloat f = ((ALfloat)new_pan)/255.0f; 
-		alListener3f(AL_POSITION, -f ,0.0,0.0);
+		this->speaker_matrix.position.x = -f;
+		//alListener3f(AL_POSITION, -f ,0.0,0.0);
 	}
 
 	/*
@@ -1278,7 +1289,7 @@ namespace WinampOpenALOut {
 		sprintf_s(
 			dbg,
 			DEBUG_BUFFER_SIZE,
-			"Jump to %d, max length is %d\n", newTimeMs, Winamp::GetTrackLength());
+			"Jump to %d, max length is %d\n", new_time_in_ms, Winamp::GetTrackLength());
 		log_debug_msg(dbg, __FILE__, __LINE__);
 #endif
 
@@ -1327,12 +1338,12 @@ namespace WinampOpenALOut {
 		sprintf_s(
 			dbg,
 			DEBUG_BUFFER_SIZE,
-			"Calc to %dms, calc'd to be %d bytes", tMs, calcTime);
+			"Calc to %dms, calc'd to be %d bytes", new_ms, calcTime);
 		log_debug_msg(dbg, __FILE__, __LINE__);
 		sprintf_s(
 			dbg,
 			DEBUG_BUFFER_SIZE,
-			"Using sample rate %d, bps %d channels %d", sampleRate, bitsPerSample, numberOfChannels);
+			"Using sample rate %d, bps %d channels %d", sample_rate, bits_per_sample, number_of_channels);
 		log_debug_msg(dbg, __FILE__, __LINE__);
 #endif
 

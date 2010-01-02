@@ -1,3 +1,6 @@
+#ifndef CONFIG_FILE_H
+#define CONFIG_FILE_H
+
 namespace WinampOpenALOut {
 
 #define CONF_TRUE "true"
@@ -17,8 +20,12 @@ namespace WinampOpenALOut {
 #define CONF_PITCH "OpenALPitch"
 #define CONF_SPLIT "Enable3D"
 
-	public class ConfigFile {
-
+#ifndef NATIVE
+	public class ConfigFile
+#else
+	class ConfigFile
+#endif
+	{
 	private:
 		static char INI_FILE[MAX_PATH];
 	public:
@@ -42,3 +49,5 @@ namespace WinampOpenALOut {
 		static int ReadGlobalInteger(char *name);
 	};
 }
+
+#endif

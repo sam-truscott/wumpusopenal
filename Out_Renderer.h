@@ -7,7 +7,11 @@
 
 namespace WinampOpenALOut
 {
+#ifndef NATIVE
 	public class Output_Renderer
+#else
+	class Output_Renderer
+#endif
 	{
 		typedef struct
 		{
@@ -39,12 +43,12 @@ namespace WinampOpenALOut
 
 		inline unsigned int GetBufferFree(void)
 		{
-			return buffer_free;
+			return buffer_size_free;
 		}
 
 		void CheckProcessedBuffers();
-		void Play(HANDLE playEvent);
-		HANDLE CheckPlayState(HANDLE playEvent);
+		inline void Play();
+		HANDLE CheckPlayState();
 		void SetVolumeInternal(ALfloat new_volume);
 		
 		inline unsigned long long GetPlayedTime()
@@ -65,9 +69,6 @@ namespace WinampOpenALOut
 
 		inline void onError();
 
-			// semaphore for the right access to buffers/open_al api
-		CRITICAL_SECTION critical_section;
-
 		unsigned int	conf_buffer_length;
 
 		bool			xram_enabled;
@@ -78,8 +79,8 @@ namespace WinampOpenALOut
 		// thread is running
 		bool			stream_open;
 
-		unsigned int	buffer_free;
-		unsigned int	buffers_free;
+		unsigned int	buffer_size_free;
+		unsigned int	number_buffers_free;
 
 		// integer to store the sample rate
 		unsigned int	sample_rate;
@@ -88,7 +89,7 @@ namespace WinampOpenALOut
 		// integer to store the bits per second
 		unsigned int	bits_per_sample;
 		// integer to store the number of buffers we'll use
-		unsigned int	no_buffers;
+		unsigned int	number_of_buffers;
 		// integer to store bytes per sample (optimisation
 		unsigned int	bytes_per_sample_channel;
 		// integer to store the last pause state
@@ -106,7 +107,7 @@ namespace WinampOpenALOut
 		// integer used to reference the open al source
 		ALuint		    source;
 
-		unsigned int	buffer_size;
+		unsigned int	calculated_buffer_size;
 
 		class Output_Effects	*effects;
 

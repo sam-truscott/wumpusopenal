@@ -1,15 +1,8 @@
-Wumpus Out OpenAL is copyright (c) 2009 by Sam Truscott.
+Wumpus Out OpenAL is copyright (c) 2010 by Sam Truscott.
 =======================================================
 
 Wumpus Out OpenAL v0.9.11.1
 ===========================
-
-	Requirements
-	============
-	OpenAL (32bit version) which is available from:
-	http://connect.creativelabs.com/openal/Downloads/Forms/AllItems.aspx
-
-	Select oalist - OpenAL Installer for Windows
 
 	Install
 	=======
@@ -47,9 +40,10 @@ Change Log
 	v0.9.11.1
 	=========
 	* Added - Synchronised the start of audio (affects multiple renderers)
-	* Updated - Removed O(n) algorithm for finding next free buffer.
-		This should reduce CPU usage quite a bit
 	* Added - x/y/z for listener position and direction
+	* Added - Restore default settings for speaker matrix
+	* Updated - Removed algorithm for finding next free buffer.
+		This should reduce CPU usage quite a bit
 
 	v0.9.10
 	=======

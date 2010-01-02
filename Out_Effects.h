@@ -126,7 +126,11 @@ namespace WinampOpenALOut
 	 * This class abstracts the [reverb] effects for multiple
 	 * sources.
 	 */
+#ifndef NATIVE
 	public class Output_Effects
+#else
+	class Output_Effects
+#endif
 	{
 		public:
 			Output_Effects();

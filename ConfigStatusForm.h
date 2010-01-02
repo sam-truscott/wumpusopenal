@@ -1476,7 +1476,35 @@ private: System::Void buttonReset_Click_1(System::Object^  sender, System::Event
 			 checkBoxExpandMono->Checked = false;
 			 checkBoxExpandStereo->Checked = false;
 			 checkBoxSplit->Checked = false;
-			 //numFRx->Text =
+			 
+
+			 speaker_matrix_T matrix = DEFAULT_MATRIX;
+			 numFLx->Value = (System::Decimal)matrix.speakers[0].x;
+			 numFLy->Value = (System::Decimal)matrix.speakers[0].y;
+			 numFLz->Value = (System::Decimal)matrix.speakers[0].z;
+			 numFRx->Value = (System::Decimal)matrix.speakers[1].x;
+			 numFRy->Value = (System::Decimal)matrix.speakers[1].y;
+			 numFRz->Value = (System::Decimal)matrix.speakers[1].z;
+			 numRLx->Value = (System::Decimal)matrix.speakers[2].x;
+			 numRLy->Value = (System::Decimal)matrix.speakers[2].y;
+			 numRLz->Value = (System::Decimal)matrix.speakers[2].z;
+			 numRRx->Value = (System::Decimal)matrix.speakers[3].x;
+			 numRRy->Value = (System::Decimal)matrix.speakers[3].y;
+			 numRRz->Value = (System::Decimal)matrix.speakers[3].z;
+			 numCx->Value = (System::Decimal)matrix.speakers[4].x;
+			 numCy->Value = (System::Decimal)matrix.speakers[4].y;
+			 numCz->Value = (System::Decimal)matrix.speakers[4].z;
+			 numSx->Value = (System::Decimal)matrix.speakers[5].x;
+			 numSy->Value = (System::Decimal)matrix.speakers[5].y;
+			 numSz->Value = (System::Decimal)matrix.speakers[5].z;
+
+			 numPosX->Value = (System::Decimal)matrix.position.x;
+			 numPosY->Value = (System::Decimal)matrix.position.y;
+			 numPosZ->Value = (System::Decimal)matrix.position.z;
+
+			 numDirectionX->Value = (System::Decimal)matrix.direction.x;
+			 numDirectionY->Value = (System::Decimal)matrix.direction.y;
+			 numDirectionZ->Value = (System::Decimal)matrix.direction.z;
 		 }
 private: System::Void Config_Unload(System::Object^  sender, System::EventArgs^  e) {
 			 overRide = true;

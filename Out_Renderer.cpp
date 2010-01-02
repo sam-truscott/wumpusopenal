@@ -8,24 +8,16 @@
 	#include <crtdbg.h>
 #endif
 
-#define SYNC_START EnterCriticalSection(&critical_section)
-#define SYNC_END LeaveCriticalSection(&critical_section)
+#define SYNC_START
+#define SYNC_END
 
 namespace WinampOpenALOut
 {
-	typedef struct
-	{
-		Output_Renderer* renderer;
-		HANDLE playEvent;
-	} play_Handle;
-
 	Output_Renderer::Output_Renderer(
 		unsigned int buffer_len,
 		unsigned char a_channel,
 		Output_Effects* the_effects)
 	{
-		InitializeCriticalSection(&critical_section);
-
 		SYNC_START;
 
 		// make sure all the pointers are set to zero
@@ -35,19 +27,19 @@ namespace WinampOpenALOut
 
 		is_playing = false;
 		stream_open = false;
-		buffer_free = 0;
-		buffers_free = 0;
+		buffer_size_free = 0;
+		number_buffers_free = 0;
 		sample_rate = 0;
 		number_of_channels = 0;
 		bits_per_sample = 0;
-		no_buffers = 0;
+		number_of_buffers = 0;
 		bytes_per_sample_channel = 0;
 		volume = 0;
 		played = 0;
 		source = 0;
 		last_pause = 0;
 		format = 0;
-		buffer_size = 0;
+		calculated_buffer_size = 0;
 
 		memset(buffers, 0, sizeof(buffer_type) * MAX_NO_BUFFERS);
 
@@ -56,8 +48,6 @@ namespace WinampOpenALOut
 
 	Output_Renderer::~Output_Renderer()
 	{
-		//ensure everything in memory is deleted
-		DeleteCriticalSection(&critical_section);
 	}
 
 	void Output_Renderer::onError()
@@ -95,6 +85,15 @@ namespace WinampOpenALOut
 			onError();
 		}
 
+#ifdef _DEBUGGING
+		char dbg[DEBUG_BUFFER_SIZE] = {'\0'};
+		sprintf_s(
+			dbg,
+			DEBUG_BUFFER_SIZE,
+			"%d buffers were freed", buffers_processed);
+		this->log_debug_msg(dbg, __FILE__, __LINE__);
+#endif
+
 		while (buffers_processed--)
 		{
 			next_buffer = DEFAULT_BUFFER;
@@ -111,13 +110,12 @@ namespace WinampOpenALOut
 
 			// based on the bufferID determine the buffer index
 			selected_buffer = UNKNOWN_BUFFER;
-			for(unsigned int buffer_index=0 ; buffer_index < no_buffers ; buffer_index++)
+			for(unsigned int buffer_index=0 ; buffer_index < number_of_buffers ; buffer_index++)
 			{
 				if( (!buffers[buffer_index].available) && 
 					buffers[buffer_index].buffer_id == next_buffer )
 				{
 					selected_buffer = buffer_index;
-					buffers[buffer_index].available = true;
 
 					if ( buffers[buffer_index].data != NULL )
 					{
@@ -125,10 +123,29 @@ namespace WinampOpenALOut
 						buffers[buffer_index].data = NULL;
 					}
 
-					buffers_free++;
+					buffers[buffer_index].available = true;
+					number_buffers_free++;
+#ifdef _DEBUGGING
+		sprintf_s(
+			dbg,
+			DEBUG_BUFFER_SIZE,
+			"the buffer was index %d", buffer_index);
+		this->log_debug_msg(dbg, __FILE__, __LINE__);
+#endif
 					break;
 				}
 			}
+
+#ifdef _DEBUGGING
+			if ( selected_buffer == UNKNOWN_BUFFER )
+			{
+		sprintf_s(
+			dbg,
+			DEBUG_BUFFER_SIZE,
+			"!! couldn't find processed buffer %d", next_buffer);
+		this->log_debug_msg(dbg, __FILE__, __LINE__);
+			}
+#endif
 
 			/* if no errors have occured we can mark that
 				buffer as available again */
@@ -137,7 +154,7 @@ namespace WinampOpenALOut
 				/* increase our played time position
 				 (the delta for where we are in the current buffer is done
 				 in get_output_time */
-				buffer_free += buffers[selected_buffer].size;
+				buffer_size_free += buffers[selected_buffer].size;
 				played += buffers[selected_buffer].size;
 				buffers[selected_buffer].size = 0;
 
@@ -148,22 +165,19 @@ namespace WinampOpenALOut
 		}
 	}
 
-	static DWORD PlayThread(LPVOID playEvent) {
-		play_Handle* p = (play_Handle*)playEvent;
-		p->renderer->Play(p->playEvent);
-		delete p;
+	static DWORD PlayThread(LPVOID renderer)
+	{
+		((Output_Renderer*)renderer)->Play();
 		return 0;
 	}
 
-	void Output_Renderer::Play(HANDLE playEvent) {
-
-		WaitForSingleObject(playEvent, INFINITE);
-
+	void Output_Renderer::Play()
+	{
 		alSourcePlay(this->source);
 	}
 
-	HANDLE Output_Renderer::CheckPlayState(HANDLE playEvent) {
-
+	HANDLE Output_Renderer::CheckPlayState()
+	{
 		ALint	state = AL_SOURCE_STATE;
 		ALint	queued_buffers = 0;
 		HANDLE thread_handle = NULL;
@@ -210,11 +224,13 @@ namespace WinampOpenALOut
 				{
 					DWORD id = 0;
 
-					play_Handle * h = new play_Handle;
-					h->renderer = this;
-					h->playEvent = playEvent;
-
-					thread_handle = CreateThread(NULL, 0x1000,(LPTHREAD_START_ROUTINE)&PlayThread, h, NULL, &id);
+					thread_handle = CreateThread(
+						NULL, 
+						0x1000,
+						(LPTHREAD_START_ROUTINE)&PlayThread,
+						this, 
+						CREATE_SUSPENDED, 
+						&id);
 
 #ifdef _DEBUGGING
 					char dbg[DEBUG_BUFFER_SIZE] = {'\0'};
@@ -260,8 +276,8 @@ namespace WinampOpenALOut
 		int numchannels, 
 		int bitspersamp, 
 		int bufferlenms, 
-		int prebufferms) {
-		
+		int prebufferms)
+	{	
 		SYNC_START;
 
 		if(bitspersamp > SIXTEEN_BIT_PER_SAMPLE)
@@ -317,34 +333,34 @@ namespace WinampOpenALOut
 		// determine the size of the buffer
 		bytes_per_sample_channel = ((bits_per_sample >> SHIFT_BITS_TO_BYTES)*number_of_channels);
 
-		buffer_size = (bytes_per_sample_channel * (sample_rate / ONE_SECOND_IN_MS)) * conf_buffer_length;
+		calculated_buffer_size = (bytes_per_sample_channel * (sample_rate / ONE_SECOND_IN_MS)) * conf_buffer_length;
 
 		//noBuffers = MAX_NO_BUFFERS;
-		no_buffers = (buffer_size / MAXIMUM_BUFFER_SIZE);// + MAXIMUM_BUFFER_OFFSET;
+		number_of_buffers = (calculated_buffer_size / MAXIMUM_BUFFER_SIZE);// + MAXIMUM_BUFFER_OFFSET;
 
 		// if we have no buffers just assume we can use at least (MINIMUM_BUFFERS)
 		// we need more than one so we can listen to one and write t'other
 		// if that doesnt happen it will error anyway
-		if(no_buffers < MINIMUM_BUFFERS)
+		if(number_of_buffers < MINIMUM_BUFFERS)
 		{
-			no_buffers = MINIMUM_BUFFERS;
+			number_of_buffers = MINIMUM_BUFFERS;
 		}
-		if(no_buffers > MAX_NO_BUFFERS)
+		if(number_of_buffers > MAX_NO_BUFFERS)
 		{
-			no_buffers = MAX_NO_BUFFERS;
+			number_of_buffers = MAX_NO_BUFFERS;
 		}
 
 		next_buffer_index = 0;
-		this->buffer_free = no_buffers * MAXIMUM_BUFFER_SIZE;
-		this->buffers_free = no_buffers;
+		this->buffer_size_free = number_of_buffers * MAXIMUM_BUFFER_SIZE;
+		this->number_buffers_free = number_of_buffers;
 
 #ifdef _DEBUGGING
 		sprintf_s(
 			dbg,
 			DEBUG_BUFFER_SIZE,
 			"-> Using {%d} buffers for total size of {%d}", 
-			noBuffers,
-			bufferSize);
+			number_of_buffers,
+			calculated_buffer_size);
 		this->log_debug_msg(dbg, __FILE__, __LINE__);
 #endif
 		unsigned int in_xram_ok = 0;
@@ -367,7 +383,7 @@ namespace WinampOpenALOut
 			}
 		}
 
-		for(unsigned int buffer_index=0 ; buffer_index<no_buffers ; buffer_index++)
+		for(unsigned int buffer_index=0 ; buffer_index<number_of_buffers ; buffer_index++)
 		{
 			buffers[buffer_index].available = true;
 			/* deallocate each buffer one-at-a-time */
@@ -403,7 +419,7 @@ namespace WinampOpenALOut
 				DEBUG_BUFFER_SIZE, 
 				"--> {%d} Buffers from {%d} were stored in XRAM OK", 
 				in_xram_ok, 
-				noBuffers);
+				number_of_buffers);
 			log_debug_msg(dbg, __FILE__, __LINE__);
 		}
 #endif
@@ -425,13 +441,13 @@ namespace WinampOpenALOut
 			
 			/* if we've created too many buffers try and
 		     * use less */
-			while(err != AL_NO_ERROR && no_buffers > 1)
+			while(err != AL_NO_ERROR && number_of_buffers > 1)
 			{
 				alGetError();
-				no_buffers--;
-				for(unsigned int i=0;i<no_buffers;i++)
+				number_of_buffers--;
+				for(unsigned int i=0;i<number_of_buffers;i++)
 				{
-					alGenBuffers( no_buffers, &buffers[i].buffer_id );
+					alGenBuffers( number_of_buffers, &buffers[i].buffer_id );
 				}
 				err = alGetError();
 			}
@@ -512,7 +528,7 @@ namespace WinampOpenALOut
 
 		int count_timeout = 0;
 		// wait for all the buffers to be used up
-		while(buffers_free != no_buffers)
+		while(number_buffers_free != number_of_buffers)
 		{
 			CheckProcessedBuffers();
 			Sleep(1);
@@ -528,7 +544,7 @@ namespace WinampOpenALOut
 		alDeleteSources( 1, &source );
 
 		// delete all the buffers
-		for(unsigned int buffer_index=0 ; buffer_index<no_buffers ; buffer_index++)
+		for(unsigned int buffer_index=0 ; buffer_index<number_of_buffers ; buffer_index++)
 		{
 			alDeleteBuffers( 1, &buffers[buffer_index].buffer_id );
 			buffers[buffer_index].buffer_id = 0;
@@ -536,7 +552,7 @@ namespace WinampOpenALOut
 
 		// make sure all memory from the buffers is freed up,
 		// if CheckProcessed is working correct this shouldn't run
-		for(unsigned int buffer_index=0 ; buffer_index<no_buffers ; buffer_index++)
+		for(unsigned int buffer_index=0 ; buffer_index<number_of_buffers ; buffer_index++)
 		{
 			if ( buffers[buffer_index].data != NULL )
 			{
@@ -548,9 +564,9 @@ namespace WinampOpenALOut
 		// just incase the thread has exitted, assume playing has stopped
 		is_playing = false;
 
-		no_buffers = NO_BUFFERS;
-		buffer_free = 0;
-		buffers_free = 0;
+		number_of_buffers = NO_BUFFERS;
+		buffer_size_free = 0;
+		number_buffers_free = 0;
 		sample_rate = NO_SAMPLE_RATE;
 		bits_per_sample = NO_BITS_PER_SAMPLE;
 		number_of_channels = NO_NUMBER_OF_CHANNELS;
@@ -572,7 +588,7 @@ namespace WinampOpenALOut
 		ALenum err = AL_NO_ERROR;
 
 		// if we cannot write exit now (non-blocking op)
-		if(buffers_free == 0 || !stream_open)
+		if(number_buffers_free == 0 || !stream_open)
 		{
 			SYNC_END;
 			return;
@@ -613,15 +629,15 @@ namespace WinampOpenALOut
 			next_buffer = buffers[next_buffer_index].buffer_id;
 			buffers[next_buffer_index].available = false;
 			selected_buffer = next_buffer_index;
-			buffers_free--;
+			number_buffers_free--;
 
-			next_buffer_index = (next_buffer_index + 1) % no_buffers;
+			next_buffer_index = (next_buffer_index + 1) % number_of_buffers;
 
 #ifdef _DEBUGGING
 			sprintf_s(
 				dbg,
 				DEBUG_BUFFER_SIZE,
-				"Writing using buffer {%d}", selectedBuffer);
+				"Writing using buffer {%d}", selected_buffer);
 			log_debug_msg(dbg, __FILE__, __LINE__);
 #endif
 			if(selected_buffer == UNKNOWN_BUFFER)
@@ -631,7 +647,7 @@ namespace WinampOpenALOut
 			}
 
 			// reduce the size of the buffer
-			buffer_free -= len;
+			buffer_size_free -= len;
 
 			/*
 			 * track the buffer so we can delete it from the heap
@@ -702,7 +718,8 @@ namespace WinampOpenALOut
 		this procedure is invoked by winamp when it determining
 		if more data can be written to the plugin
 	*/
-	int Output_Renderer::CanWrite() {
+	int Output_Renderer::CanWrite()
+	{
 		
 		SYNC_START;
 		
@@ -712,7 +729,7 @@ namespace WinampOpenALOut
 
 			this->CheckProcessedBuffers();
 
-			r = ((buffers_free > 0) ? buffer_free : 0);
+			r = ((number_buffers_free > 0) ? buffer_size_free : 0);
 		}
 
 		SYNC_END;
@@ -727,7 +744,8 @@ namespace WinampOpenALOut
 		return 0 if empty
 		return <0> if data present
 	*/
-	bool Output_Renderer::IsPlaying() {
+	bool Output_Renderer::IsPlaying()
+	{
 		SYNC_START;
 
 		this->CheckProcessedBuffers();
@@ -742,7 +760,8 @@ namespace WinampOpenALOut
 
 		returns the previous pause state
 	*/
-	int Output_Renderer::Pause(int pause) {
+	int Output_Renderer::Pause(int pause)
+	{
 		SYNC_START;
 		last_pause = pause;
 		

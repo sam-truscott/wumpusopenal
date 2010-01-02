@@ -124,7 +124,6 @@ namespace WinampOpenALOut {
 						else
 						{
 							// failed to set the EAX properties
-							ALenum err = alGetError();
 							retval = EAX_FAIL_PROPERTIES;
 						}
 					}
