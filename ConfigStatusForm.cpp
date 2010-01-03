@@ -168,19 +168,18 @@ namespace WinampOpenALOut {
 			output_plugin->SetXRAMEnabled(checkBoxXRAM->Checked);
 		}
 
-		if(output_plugin->get_effects()->GetCurrentEffect() != comboBoxEffect->SelectedIndex)
+		if(output_plugin->GetEffects()->GetCurrentEffect() != comboBoxEffect->SelectedIndex)
 		{
-			output_plugin->get_effects()->SetCurrentEffect((effects_list)comboBoxEffect->SelectedIndex);
+			output_plugin->GetEffects()->SetCurrentEffect((effects_list)comboBoxEffect->SelectedIndex);
 			ConfigFile::WriteInteger(CONF_EFX_ENV, comboBoxEffect->SelectedIndex);
 		}
 
-		if(output_plugin->get_effects()->IsEnabled() != checkBoxEfxEnabled->Checked)
+		if(output_plugin->GetEffects()->IsEnabled() != checkBoxEfxEnabled->Checked)
 		{
-			if ( !output_plugin->get_effects()->Enable(checkBoxEfxEnabled->Checked) )
+			if ( !output_plugin->GetEffects()->Enable(checkBoxEfxEnabled->Checked) )
 			{
 				checkBoxEfxEnabled->Checked = false;
-				output_plugin->get_effects()->Enable(false);
-				MessageBoxA(NULL, "Failed to enable effects", "Error", MB_ICONSTOP);
+				output_plugin->GetEffects()->Enable(false);
 			}
 		}
 

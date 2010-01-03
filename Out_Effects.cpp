@@ -56,7 +56,6 @@ namespace WinampOpenALOut {
 	Output_Effects::Output_Effects()
 	{
 		is_on = false;
-		is_loaded = false;
 		status = EAX_NOT_LOADED;
 		
 		channels = 0;
@@ -77,7 +76,7 @@ namespace WinampOpenALOut {
 
 	Output_Effects::~Output_Effects()
 	{
-		if ( is_loaded == true )
+		if ( status != EAX_NOT_LOADED )
 		{
 			this->OnClose();
 		}
@@ -89,7 +88,7 @@ namespace WinampOpenALOut {
 
 		if ( this->is_on == true )
 		{
-			if ( this->is_loaded == EAX_LOADED_OK )
+			if ( this->status == EAX_LOADED_OK )
 			{
 				// if we're setup already we need to shutdown
 				// and start again with new slots for new sources
@@ -117,7 +116,6 @@ namespace WinampOpenALOut {
 						if (SetEFXEAXReverbProperties(&efxReverb, the_effect))
 						{
 							alAuxiliaryEffectSloti(effect_slot, AL_EFFECTSLOT_EFFECT, the_effect);
-							this->is_loaded = true;
 
 							retval = EAX_LOADED_OK;
 						}
@@ -150,6 +148,8 @@ namespace WinampOpenALOut {
 		{
 			this->CleanUp(retval);
 		}
+
+		status = retval;
 
 		return retval;
 	}
@@ -200,8 +200,6 @@ namespace WinampOpenALOut {
 				// nothing to do
 				break;
 		};
-			
-		this->is_loaded = false;
 	}
 
 	effects_list Output_Effects::GetCurrentEffect(void)
@@ -234,7 +232,7 @@ namespace WinampOpenALOut {
 		bool retval = false;
 
 		if ( enable == false &&
-			is_loaded == true )
+			status != EAX_NOT_LOADED )
 		{
 			this->OnClose();
 		}
@@ -250,7 +248,6 @@ namespace WinampOpenALOut {
 			if ( this->Setup() != EAX_LOADED_OK )
 			{
 				is_on = false;
-				is_loaded = false;
 			}
 			else
 			{
@@ -275,15 +272,29 @@ namespace WinampOpenALOut {
 		ALboolean bReturn = AL_FALSE;
 		ALenum err = AL_NO_ERROR;
 
-		// Clear AL Error state
-		alGetError();
+		ALCint iSends = 0;
+		// query the number of slots the device can support
+		alcGetIntegerv(Framework::getInstance()->GetDevice(), ALC_MAX_AUXILIARY_SENDS, 1, &iSends);
 
-		// Generate an Auxiliary Effect Slot
-		alGenAuxiliaryEffectSlots(1, aux_effect_slot);
+		// Clear AL Error state
 		err = alGetError();
-		if (err == AL_NO_ERROR)
+
+		if ( iSends > 0 )
 		{
-			bReturn = AL_TRUE;
+			// ensure that the slot is empty
+			(*aux_effect_slot) = 0u;
+
+			// Generate an Auxiliary Effect Slot
+			alGenAuxiliaryEffectSlots(1, aux_effect_slot);
+			err = alGetError();
+			if (err == AL_NO_ERROR)
+			{
+				bReturn = AL_TRUE;
+			}
+			else if ( err == AL_OUT_OF_MEMORY)
+			{
+				MessageBox(NULL, "Failed to create an Effect - out of memory", "Error", NULL);
+			}
 		}
 
 		return bReturn;

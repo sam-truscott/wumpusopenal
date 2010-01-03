@@ -130,6 +130,9 @@ ALboolean Framework::ALFWInitOpenAL(int myDevice, ALint attrs[])
 				alcCloseDevice(pDevice);
 			}
 		}
+		
+		ptrContext = pContext;
+		ptrDevice = pDevice;
 	}
 
 	return bReturn;

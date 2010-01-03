@@ -151,7 +151,6 @@ namespace WinampOpenALOut
 			void CleanUp(eax_load_status cleanup_reason);
 
 			bool is_on;
-			bool is_loaded;
 
 			effects_list effect;
 

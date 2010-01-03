@@ -354,9 +354,6 @@ namespace WinampOpenALOut {
 			efx_env = EFX_REVERB_PRESET_GENERIC;
 		}
 
-		effects->Enable(efx_enabled);
-		effects->SetCurrentEffect(efx_env);
-
 		/*
 			initialise openal itself - this has been modified
 			and will also select the default sound card
@@ -365,6 +362,9 @@ namespace WinampOpenALOut {
 		{
 			MessageBoxA(NULL, "Could not initialise OpenAL", "Error", MB_OK);
 		}
+
+		effects->Enable(efx_enabled);
+		effects->SetCurrentEffect(efx_env);
 
 #ifdef _DEBUGGING
 		char dbg[DEBUG_BUFFER_SIZE] = {'\0'};
@@ -910,178 +910,24 @@ namespace WinampOpenALOut {
 			}
 
 			// ############## MONO EXPANSION
-#pragma region MONO_EXPAND 
-			if(is_mono_expanded && original_number_of_channels == 1) {
-				// we're writing out four as much data so
-				// increase this value by three more times
-				const unsigned int new_len = (len*4);
-
-				// expand buffer here
-				char* new_buffer = new char[new_len];
-#ifdef _DEBUGGING
-				memset(new_buffer, 0, new_len);
-#endif
-
-				// set relative value to zero
-				int nPos = 0;
-
-				const unsigned char sample_size = 
-					((bits_per_sample == 8) ? ONE_BYTE_SAMPLE : TWO_BYTE_SAMPLE);
-				
-				/* expand the samples out */
-				for(int pos=0; pos < len; pos++) {
-
-					if ( sample_size == ONE_BYTE_SAMPLE)
-					{
-						new_buffer[nPos++] = buf[pos];
-						new_buffer[nPos++] = buf[pos];
-						new_buffer[nPos++] = buf[pos];
-						new_buffer[nPos++] = buf[pos];
-					}
-					else
-					{
-						const short* src = (short*)(buf + pos);
-						short* dst_a = (short*)(new_buffer + nPos);
-						short* dst_b = (short*)(new_buffer + nPos + TWO_BYTE_SAMPLE);
-						short* dst_c = (short*)(new_buffer + nPos + (TWO_BYTE_SAMPLE * 2));
-						short* dst_d = (short*)(new_buffer + nPos + (TWO_BYTE_SAMPLE * 4));
-
-						(*dst_a) = (*src);
-						(*dst_b) = (*src);
-						(*dst_c) = (*src);
-						(*dst_d) = (*src);
-
-						nPos += (sample_size * 4);
-						pos += sample_size;
-					}
-				}
-
-				delete buf;
-				buf = new_buffer;
-				len = new_len;
+			if(is_mono_expanded && original_number_of_channels == 1)
+			{
+				ExpandMonoToQuad( &buf, &len);
 			}
-#pragma endregion MONO_EXPAND
 			// ############## END MONO EXPANSION
 
 			// ############## STEREO EXPANSION
-#pragma region STEREO_EXPAND
-			if(is_stereo_expanded && original_number_of_channels == 2) {
-
-				// we're writing out twice as much data so
-				// increase this value again
-				const unsigned int old_length = len;
-				const unsigned int new_len = old_length * 2;
-
-				// expand buffer here
-				char* new_buffer = new char[new_len];
-#ifdef _DEBUGGING
-				memset(new_buffer, 0, new_len);
-#endif
-				const unsigned char sample_size = 
-					((bits_per_sample == 8) ? TWO_BYTE_SAMPLE : FOUR_BYTE_SAMPLE);
-				
-				/* expand the samples out */
-				int new_pos = 0;
-				for(unsigned int pos=0; pos < old_length; )
-				{
-					if ( sample_size == TWO_BYTE_SAMPLE )
-					{
-						memcpy_s(new_buffer + new_pos, new_len, buf + pos, TWO_BYTE_SAMPLE);
-						memcpy_s(new_buffer + new_pos + TWO_BYTE_SAMPLE, new_len, buf + pos, TWO_BYTE_SAMPLE);
-					}
-					else
-					{
-						void* dst1 = new_buffer + new_pos;
-						void* dst2 = new_buffer + new_pos + FOUR_BYTE_SAMPLE;
-						const char* src = buf + pos;
-
-						const size_t red_len = new_len - new_pos;
-
-						memcpy_s(dst1, red_len,src, FOUR_BYTE_SAMPLE);
-						memcpy_s(dst2, red_len,src, FOUR_BYTE_SAMPLE);	
-					}
-
-					new_pos += (sample_size * 2);
-					pos += sample_size;
-				}
-
-				delete buf;
-				len = new_len;
-				buf = new_buffer;
+			if(is_stereo_expanded && original_number_of_channels == 2)
+			{
+				ExpandStereoToQuad( &buf, &len);	
 			}
-#pragma endregion STEREO_EXPAND
 
 			total_written += len;
 
-#pragma region SPLIT_OUTPUT
 			if ( split_out == true )
 			{
-				// create a table of pointers to each channels buffer
-				char* buffers[MAX_RENDERERS];
-				memset(buffers,0, sizeof(char*) * MAX_RENDERERS);
-				const unsigned int renderer_size = len / no_renderers;
-
-				if ( bits_per_sample == EIGHT_BIT_PER_SAMPLE )
-				{
-					/*
-					 * create a new buffer for each renderer
-					 */
-					for ( char rend=0; rend < no_renderers ; rend++ )
-					{
-						buffers[rend] = new char[renderer_size];
-						memset(buffers[rend],0, renderer_size);
-					}
-					/*
-					 * treat each sample of the source as an array - one item for each channel.
-					 * treat each sample of the destination as a pointer and add the sample
-					 * index to it and copy the source to it.
-					 */
-					const char* src = (const char*)buf;
-					for ( unsigned int sample = 0 ; sample < renderer_size ; sample++ )
-					{
-						for ( unsigned char rend=0; rend < no_renderers ; rend++ )
-						{
-							char* dst = (char*)buffers[rend];
-							*(char*)(dst + sample) = (src[rend]);
-						}
-						src += number_of_channels;
-					}
-				} else {
-					/*
-					 * create a new buffer for each renderer
-					 */
-					for ( char rend=0; rend < no_renderers ; rend++ )
-					{
-						buffers[rend] = new char[renderer_size];
-						memset(buffers[rend],0, renderer_size);
-					}
-					/*
-					 * treat each sample of the source as an array - one item for each channel.
-					 * treat each sample of the destination as a pointer and add the sample
-					 * index to it and copy the source to it.
-					 */
-					const short* src = (const short*)buf;
-					for ( unsigned int sample = 0 ; sample < (renderer_size/2) ; sample++ )
-					{
-
-						for ( unsigned char rend=0; rend < no_renderers ; rend++ )
-						{
-							*(short*)(((short*)buffers[rend]) + sample) = (src[rend]);
-						}
-						src += number_of_channels;
-					}
-				}
-
-				/* we write in a sepeate loop to ensure that they're close
-				 * together, if they're in the loop above the audio may drift */
-				for ( char rend=0; rend < no_renderers ; rend++ )
-				{
-					renderers[rend]->Write(buffers[rend], renderer_size);
-				}
-
-				delete buf;
+				SplitAudioToMonoChannels(buf, len);
 			}
-#pragma endregion SPLIT_OUTPUT
 			else
 			{
 				/* if we're not splitting out, throw it to the renderers */
@@ -1118,13 +964,192 @@ namespace WinampOpenALOut {
 		return 0;
 	}
 
+	void Output_Wumpus::ExpandMonoToQuad(char ** pbuf, int * plen)
+	{
+
+		int len = *plen;
+		char * buf = *pbuf;
+
+		// we're writing out four as much data so
+		// increase this value by three more times
+		const unsigned int new_len = (len*4);
+
+		// expand buffer here
+		char* new_buffer = new char[new_len];
+#ifdef _DEBUGGING
+		memset(new_buffer, 0, new_len);
+#endif
+
+		// set relative value to zero
+		int nPos = 0;
+
+		const unsigned char sample_size = 
+			((bits_per_sample == 8) ? ONE_BYTE_SAMPLE : TWO_BYTE_SAMPLE);
+		
+		/* expand the samples out */
+		for(int pos=0; pos < len; pos++) {
+
+			if ( sample_size == ONE_BYTE_SAMPLE)
+			{
+				new_buffer[nPos++] = buf[pos];
+				new_buffer[nPos++] = buf[pos];
+				new_buffer[nPos++] = buf[pos];
+				new_buffer[nPos++] = buf[pos];
+			}
+			else
+			{
+				const short* src = (short*)(buf + pos);
+				short* dst_a = (short*)(new_buffer + nPos);
+				short* dst_b = (short*)(new_buffer + nPos + TWO_BYTE_SAMPLE);
+				short* dst_c = (short*)(new_buffer + nPos + (TWO_BYTE_SAMPLE * 2));
+				short* dst_d = (short*)(new_buffer + nPos + (TWO_BYTE_SAMPLE * 4));
+
+				(*dst_a) = (*src);
+				(*dst_b) = (*src);
+				(*dst_c) = (*src);
+				(*dst_d) = (*src);
+
+				nPos += (sample_size * 4);
+				pos += sample_size;
+			}
+		}
+
+		delete buf;
+		buf = new_buffer;
+		len = new_len;
+
+		*plen = len;
+		*pbuf = buf;
+	}
+
+	void Output_Wumpus::ExpandStereoToQuad(char ** pbuf, int * plen)
+	{
+
+		int len = *plen;
+		char * buf = *pbuf;
+
+		// we're writing out twice as much data so
+		// increase this value again
+		const unsigned int old_length = len;
+		const unsigned int new_len = old_length * 2;
+
+		// expand buffer here
+		char* new_buffer = new char[new_len];
+#ifdef _DEBUGGING
+		memset(new_buffer, 0, new_len);
+#endif
+		const unsigned char sample_size = 
+			((bits_per_sample == 8) ? TWO_BYTE_SAMPLE : FOUR_BYTE_SAMPLE);
+		
+		/* expand the samples out */
+		int new_pos = 0;
+		for(unsigned int pos=0; pos < old_length; )
+		{
+			if ( sample_size == TWO_BYTE_SAMPLE )
+			{
+				memcpy_s(new_buffer + new_pos, new_len, buf + pos, TWO_BYTE_SAMPLE);
+				memcpy_s(new_buffer + new_pos + TWO_BYTE_SAMPLE, new_len, buf + pos, TWO_BYTE_SAMPLE);
+			}
+			else
+			{
+				void* dst1 = new_buffer + new_pos;
+				void* dst2 = new_buffer + new_pos + FOUR_BYTE_SAMPLE;
+				const char* src = buf + pos;
+
+				const size_t red_len = new_len - new_pos;
+
+				memcpy_s(dst1, red_len,src, FOUR_BYTE_SAMPLE);
+				memcpy_s(dst2, red_len,src, FOUR_BYTE_SAMPLE);	
+			}
+
+			new_pos += (sample_size * 2);
+			pos += sample_size;
+		}
+
+		delete buf;
+		len = new_len;
+		buf = new_buffer;
+
+		*plen = len;
+		*pbuf = buf;
+	}
+
+	void Output_Wumpus::SplitAudioToMonoChannels(const char * buf, const int len)
+	{
+		// create a table of pointers to each channels buffer
+		char* buffers[MAX_RENDERERS];
+		memset(buffers,0, sizeof(char*) * MAX_RENDERERS);
+		const unsigned int renderer_size = len / no_renderers;
+
+		if ( bits_per_sample == EIGHT_BIT_PER_SAMPLE )
+		{
+			/*
+			 * create a new buffer for each renderer
+			 */
+			for ( char rend=0; rend < no_renderers ; rend++ )
+			{
+				buffers[rend] = new char[renderer_size];
+				memset(buffers[rend],0, renderer_size);
+			}
+			/*
+			 * treat each sample of the source as an array - one item for each channel.
+			 * treat each sample of the destination as a pointer and add the sample
+			 * index to it and copy the source to it.
+			 */
+			const char* src = (const char*)buf;
+			for ( unsigned int sample = 0 ; sample < renderer_size ; sample++ )
+			{
+				for ( unsigned char rend=0; rend < no_renderers ; rend++ )
+				{
+					char* dst = (char*)buffers[rend];
+					*(char*)(dst + sample) = (src[rend]);
+				}
+				src += number_of_channels;
+			}
+		} else {
+			/*
+			 * create a new buffer for each renderer
+			 */
+			for ( char rend=0; rend < no_renderers ; rend++ )
+			{
+				buffers[rend] = new char[renderer_size];
+				memset(buffers[rend],0, renderer_size);
+			}
+			/*
+			 * treat each sample of the source as an array - one item for each channel.
+			 * treat each sample of the destination as a pointer and add the sample
+			 * index to it and copy the source to it.
+			 */
+			const short* src = (const short*)buf;
+			for ( unsigned int sample = 0 ; sample < (renderer_size/2) ; sample++ )
+			{
+
+				for ( unsigned char rend=0; rend < no_renderers ; rend++ )
+				{
+					*(short*)(((short*)buffers[rend]) + sample) = (src[rend]);
+				}
+				src += number_of_channels;
+			}
+		}
+
+		/* we write in a sepeate loop to ensure that they're close
+		 * together, if they're in the loop above the audio may drift */
+		for ( char rend=0; rend < no_renderers ; rend++ )
+		{
+			renderers[rend]->Write(buffers[rend], renderer_size);
+		}
+
+		delete buf;
+	}
+
 	/*
 		canwrite
 
 		this procedure is invoked by winamp when it determining
 		if more data can be written to the plugin
 	*/
-	int Output_Wumpus::CanWrite() {
+	int Output_Wumpus::CanWrite()
+	{
 		SYNC_START;
 
 		int r = EMPTY_THE_BUFFER;
@@ -1162,7 +1187,8 @@ namespace WinampOpenALOut {
 		return 0 if empty
 		return <0> if data present
 	*/
-	int Output_Wumpus::IsPlaying() {
+	int Output_Wumpus::IsPlaying()
+	{
 		SYNC_START;
 
 		if ( stream_open )
@@ -1185,7 +1211,8 @@ namespace WinampOpenALOut {
 
 		returns the previous pause state
 	*/
-	int Output_Wumpus::Pause(int pause) {
+	int Output_Wumpus::Pause(int pause)
+	{
 		SYNC_START;
 		last_pause = pause;
 		
@@ -1216,7 +1243,8 @@ namespace WinampOpenALOut {
 
 		this procedure is invoked by winamp to set the volume
 	*/
-	void Output_Wumpus::SetVolume(int new_volume) {
+	void Output_Wumpus::SetVolume(int new_volume)
+	{
 		/*
 			work out the % volume (as a float) and set it
 		*/
@@ -1321,7 +1349,8 @@ namespace WinampOpenALOut {
 		}
 	}
 
-	int Output_Wumpus::SetBufferTime(int new_ms) {
+	int Output_Wumpus::SetBufferTime(int new_ms)
+	{
 		// calculate the number of bytes that will have been
 		// processed after (t)ms
 		int calcTime;
@@ -1475,7 +1504,7 @@ namespace WinampOpenALOut {
 		SwitchOutputDevice(Framework::getInstance()->GetCurrentDevice(),split_out);
 	}
 
-	Output_Effects* Output_Wumpus::get_effects()
+	Output_Effects* Output_Wumpus::GetEffects()
 	{
 		return this->effects;
 	}

@@ -33,17 +33,15 @@ namespace WinampOpenALOut
 		int GetWrittenTime();
 
 		void SwitchOutputDevice(int device);
-		void SwitchOutputDevice(int device, bool is_split);
 		
 		inline bool IsStreamOpen()						{ return stream_open; }
-
 		inline unsigned int	GetSampleRate()				{ return sample_rate; }
 		inline unsigned int GetBitsPerSample()			{ return bits_per_sample; }
 		inline unsigned int GetNumberOfChannels()		{ return number_of_channels; }
 		inline int GetLastOutputTime()					{ return last_output_time; }
 		inline int GetLastWrittenTime()					{ return last_written_time; }
-
-		inline unsigned int GetNumberOfBuffers()		{ return no_buffers; }
+		inline __int64 GetWrittenBytes() { return total_written; }
+		inline __int64 GetPlayedBytes() { return total_played; }
 
 		inline int GetConfBufferLength() { return conf_buffer_length;}
 		inline void SetConfBufferLength( unsigned int i) { conf_buffer_length = i;}
@@ -62,20 +60,20 @@ namespace WinampOpenALOut
 
 		inline bool	IsXRAMPresent() { return xram_detected; }
 
-		inline __int64 GetWrittenBytes() { return total_written; }
-		inline __int64 GetPlayedBytes() { return total_played; }
-
 		void SetMatrix( const speaker_matrix_T m );
 		inline speaker_matrix_T GetMatrix(void)
 		{
 			return speaker_matrix;
 		}
 
-		class Output_Effects* get_effects();
+		class Output_Effects* GetEffects();
 
 	protected:
 
 		inline void OnError();
+
+		void SwitchOutputDevice(int device, bool is_split);
+
 		void Relocate(
 			int device, 
 			int current_position, 
@@ -83,6 +81,11 @@ namespace WinampOpenALOut
 
 		void CheckProcessedBuffers();
 		void CheckPlayState();
+
+		void ExpandMonoToQuad(char ** pbuf, int * plen);
+		void ExpandStereoToQuad(char ** pbuf, int * plen);
+		void SplitAudioToMonoChannels(const char * buf, const int len);
+
 		int SetBufferTime(int new_ms);
 
 		void SetVolumeInternal(ALfloat new_volume);
