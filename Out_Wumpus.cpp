@@ -914,8 +914,6 @@ namespace WinampOpenALOut {
 			{
 				ExpandMonoToQuad( &buf, &len);
 			}
-			// ############## END MONO EXPANSION
-
 			// ############## STEREO EXPANSION
 			if(is_stereo_expanded && original_number_of_channels == 2)
 			{
@@ -966,7 +964,6 @@ namespace WinampOpenALOut {
 
 	void Output_Wumpus::ExpandMonoToQuad(char ** pbuf, int * plen)
 	{
-
 		int len = *plen;
 		char * buf = *pbuf;
 
@@ -1024,7 +1021,6 @@ namespace WinampOpenALOut {
 
 	void Output_Wumpus::ExpandStereoToQuad(char ** pbuf, int * plen)
 	{
-
 		int len = *plen;
 		char * buf = *pbuf;
 
@@ -1035,9 +1031,6 @@ namespace WinampOpenALOut {
 
 		// expand buffer here
 		char* new_buffer = new char[new_len];
-#ifdef _DEBUGGING
-		memset(new_buffer, 0, new_len);
-#endif
 		const unsigned char sample_size = 
 			((bits_per_sample == 8) ? TWO_BYTE_SAMPLE : FOUR_BYTE_SAMPLE);
 		
@@ -1047,19 +1040,17 @@ namespace WinampOpenALOut {
 		{
 			if ( sample_size == TWO_BYTE_SAMPLE )
 			{
-				memcpy_s(new_buffer + new_pos, new_len, buf + pos, TWO_BYTE_SAMPLE);
-				memcpy_s(new_buffer + new_pos + TWO_BYTE_SAMPLE, new_len, buf + pos, TWO_BYTE_SAMPLE);
+				short* dst = (short*)(new_buffer + new_pos);
+				const short* src = (const short*)(buf + pos);
+				*dst++ = *src;
+				*dst = *src;
 			}
 			else
 			{
-				void* dst1 = new_buffer + new_pos;
-				void* dst2 = new_buffer + new_pos + FOUR_BYTE_SAMPLE;
-				const char* src = buf + pos;
-
-				const size_t red_len = new_len - new_pos;
-
-				memcpy_s(dst1, red_len,src, FOUR_BYTE_SAMPLE);
-				memcpy_s(dst2, red_len,src, FOUR_BYTE_SAMPLE);	
+				int* dst = (int*)(new_buffer + new_pos);
+				const int* src = (const int*)(buf + pos);
+				*dst++ = *src;
+				*dst = *src;
 			}
 
 			new_pos += (sample_size * 2);
