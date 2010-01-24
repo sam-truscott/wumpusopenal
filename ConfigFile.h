@@ -33,20 +33,20 @@ namespace WinampOpenALOut {
 		/* initialise the configuration file */
 		static void Initialise(HWND hMainWindow);
 
-		static void ReadString(char *name,char *data, int mlen);
-		static void WriteString(char *name,char *data);
+		static void ReadString(const char *name,char *data, const int mlen);
+		static void WriteString(const char *name, const char *data);
 		
-		static int ReadInteger(char *name);
-		static void WriteInteger(char *name, int i);
+		static int ReadInteger(const char *name);
+		static void WriteInteger(const char *name, int i);
 
-		static float ReadFloat(char *name, bool* valid);
-		static void WriteFloat(char* name, float f);
+		static float ReadFloat(const char *name, bool* valid);
+		static void WriteFloat(const char* name, const float f);
 
-		static bool ReadBoolean(char *name);
-		static void WriteBoolean(char* name, bool v);
+		static bool ReadBoolean(const char *name);
+		static void WriteBoolean(const char* name, const bool v);
 
-		static void ReadGlobalString(char *name,char *data, int mlen);
-		static int ReadGlobalInteger(char *name);
+		static void ReadGlobalString(const char *name,char *data, const int mlen);
+		static int ReadGlobalInteger(const char *name);
 	};
 }
 

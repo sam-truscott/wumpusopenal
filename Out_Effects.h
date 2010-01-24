@@ -137,18 +137,18 @@ namespace WinampOpenALOut
 			~Output_Effects();
 
 			eax_load_status Setup(void);
-			void AddSource(ALuint the_source);
+			void AddSource(const ALuint the_source);
 			void OnClose(void);
 
 			effects_list GetCurrentEffect(void);
-			void SetCurrentEffect(effects_list an_effect);
+			void SetCurrentEffect(const effects_list an_effect);
 
 			bool IsEnabled(void);
-			bool Enable(bool enable);
+			bool Enable(const bool enable);
 
 		private:
 
-			void CleanUp(eax_load_status cleanup_reason);
+			void CleanUp(const eax_load_status cleanup_reason);
 
 			bool is_on;
 

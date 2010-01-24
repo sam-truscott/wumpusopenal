@@ -272,11 +272,11 @@ namespace WinampOpenALOut
 		the open al buffers are created and an open al source
 	*/
 	int Output_Renderer::Open(
-		int samplerate, 
-		int numchannels, 
-		int bitspersamp, 
-		int bufferlenms, 
-		int prebufferms)
+		const int samplerate, 
+		const int numchannels, 
+		const int bitspersamp, 
+		const int bufferlenms, 
+		const int prebufferms)
 	{	
 		SYNC_START;
 
@@ -581,7 +581,7 @@ namespace WinampOpenALOut
 		this procedure is invoked by winamp when it attempts to write
 		data to the plugin
 	*/
-	void Output_Renderer::Write(char *buf, int len)
+	void Output_Renderer::Write(const char *buf, const int len)
 	{
 		SYNC_START;
 
@@ -653,7 +653,7 @@ namespace WinampOpenALOut
 			 * track the buffer so we can delete it from the heap
 			 * and track our play time
 			 */
-			buffers[selected_buffer].data = buf;
+			buffers[selected_buffer].data = (void*)buf;
 			buffers[selected_buffer].size = len;
 
 #ifdef _DEBUGGING
@@ -760,7 +760,7 @@ namespace WinampOpenALOut
 
 		returns the previous pause state
 	*/
-	int Output_Renderer::Pause(int pause)
+	int Output_Renderer::Pause(const int pause)
 	{
 		SYNC_START;
 		last_pause = pause;
@@ -789,7 +789,7 @@ namespace WinampOpenALOut
 		set volume (internal) - used to check the volume range
 		and store the volume for later use
 	*/
-	void Output_Renderer::SetVolumeInternal(ALfloat new_volume)
+	void Output_Renderer::SetVolumeInternal(const ALfloat new_volume)
 	{
 		if(new_volume <= VOLUME_MAX && new_volume >= VOLUME_MIN)
 		{
@@ -814,7 +814,7 @@ namespace WinampOpenALOut
 		SYNC_END;
 	}
 
-	void Output_Renderer::SetXRAMEnabled( bool enabled )
+	void Output_Renderer::SetXRAMEnabled( const bool enabled )
 	{
 		xram_enabled = enabled;
 	}

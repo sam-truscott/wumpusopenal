@@ -28,18 +28,23 @@ namespace WinampOpenALOut
 			class Output_Effects* the_effects);
 		~Output_Renderer();
 
-		int	Open(int samplerate, int numchannels, int bitspersamp, int bufferlenms, int prebufferms);
+		int	Open(
+			const int samplerate, 
+			const int numchannels, 
+			const int bitspersamp, 
+			const int bufferlenms, 
+			const int prebufferms);
 		void Close();
-		void Write(char *buf, int len);
+		void Write(
+			const char *buf,
+			const int len);
 		int CanWrite();
 		bool IsPlaying();
-		int Pause(int pause);
-		void SetPan(int newPan);
+		int Pause(const int pause);
 		void Flush();
 
-		void SwitchOutputDevice(int device);	
 		inline bool IsStreamOpen()						{ return stream_open; }
-		void SetXRAMEnabled( bool enabled );
+		void SetXRAMEnabled( const bool enabled );
 
 		inline unsigned int GetBufferFree(void)
 		{
@@ -49,7 +54,7 @@ namespace WinampOpenALOut
 		void CheckProcessedBuffers();
 		inline void Play();
 		HANDLE CheckPlayState();
-		void SetVolumeInternal(ALfloat new_volume);
+		void SetVolumeInternal(const ALfloat new_volume);
 		
 		inline unsigned long long GetPlayedTime()
 		{
@@ -58,7 +63,7 @@ namespace WinampOpenALOut
 			return played + delta_bytes;
 		}
 
-		inline void SetPlayedTime(unsigned long long t)
+		inline void SetPlayedTime(const unsigned long long t)
 		{
 			played = t;
 		}

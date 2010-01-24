@@ -1,7 +1,7 @@
 Wumpus Out OpenAL is copyright (c) 2010 by Sam Truscott.
 =======================================================
 
-Wumpus Out OpenAL v0.9.11.1
+Wumpus Out OpenAL v0.9.11.2
 ===========================
 
 	Install
@@ -36,6 +36,11 @@ WA_SDK_DIR			The 'Winamp' folder of the Winamp SDK. This contains some of the st
 
 Change Log
 ==========
+
+	v0.9.11.2
+	=========
+	* Minor fix to try and sync multiple speakers to stop the out-of-phase or
+		delay between the left & right channel issue
 
 	v0.9.11.1
 	=========

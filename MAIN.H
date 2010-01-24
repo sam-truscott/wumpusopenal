@@ -1,17 +1,17 @@
 #include <windows.h>
 
-void WAOP_Config(HWND hwndParent);
-void WAOP_About(HWND hwndParent);
-void WAOP_Initialise();
-void WAOP_Quit();
-int WAOP_Open(int samplerate, int numchannels, int bitspersamp, int bufferlenms, int prebufferms);
-void WAOP_Close();
-int WAOP_Write(char *buf, int len);
-int WAOP_CanWrite();
-int WAOP_IsPlaying();
-int WAOP_Pause(int pause);
-void WAOP_SetVolume(int volume);
-void WAOP_SetPan(int pan);
-void WAOP_Flush(int t);
-int WAOP_GetOutputTime();
-int WAOP_GetWrittenTime();
+inline void WAOP_Config(HWND hwndParent);
+inline void WAOP_About(HWND hwndParent);
+inline void WAOP_Initialise();
+inline void WAOP_Quit();
+inline int WAOP_Open(int samplerate, int numchannels, int bitspersamp, int bufferlenms, int prebufferms);
+inline void WAOP_Close();
+inline int WAOP_Write(char *buf, int len);
+inline int WAOP_CanWrite();
+inline int WAOP_IsPlaying();
+inline int WAOP_Pause(int pause);
+inline void WAOP_SetVolume(int volume);
+inline void WAOP_SetPan(int pan);
+inline void WAOP_Flush(int t);
+inline int WAOP_GetOutputTime();
+inline int WAOP_GetWrittenTime();

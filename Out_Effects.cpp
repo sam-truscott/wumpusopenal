@@ -154,7 +154,7 @@ namespace WinampOpenALOut {
 		return retval;
 	}
 
-	void Output_Effects::AddSource(ALuint the_source)
+	void Output_Effects::AddSource(const ALuint the_source)
 	{
 		/*
 		 * keep track of the source and add the source to the list of effects slots
@@ -177,7 +177,7 @@ namespace WinampOpenALOut {
 		this->CleanUp(status);
 	}
 
-	void Output_Effects::CleanUp(eax_load_status close)
+	void Output_Effects::CleanUp(const eax_load_status close)
 	{
 		switch(close)
 		{
@@ -207,7 +207,7 @@ namespace WinampOpenALOut {
 		return effect;
 	}
 
-	void Output_Effects::SetCurrentEffect(effects_list an_effect)
+	void Output_Effects::SetCurrentEffect(const effects_list an_effect)
 	{
 		unsigned char old_channels = channels;
 		
@@ -227,7 +227,7 @@ namespace WinampOpenALOut {
 		return is_on;
 	}
 
-	bool Output_Effects::Enable(bool enable)
+	bool Output_Effects::Enable(const bool enable)
 	{
 		bool retval = false;
 

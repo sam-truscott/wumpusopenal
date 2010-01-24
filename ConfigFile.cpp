@@ -13,21 +13,21 @@ namespace WinampOpenALOut {
 	const static char app_name[] = "Wumpus OpenAL Output";
 	const static char global_name[] = "Winamp";
 
-	void ConfigFile::ReadString(char *name,char *data, int mlen)
+	void ConfigFile::ReadString(const char *name,char *data, const int mlen)
 	{
 		char buf[DEFAULT_SIZE];
 		strcpy_s(buf,DEFAULT_SIZE,data);
 		GetPrivateProfileString(app_name,name,buf,data,mlen,INI_FILE);
 	}
 
-	void ConfigFile::ReadGlobalString(char *name,char *data, int mlen)
+	void ConfigFile::ReadGlobalString(const char *name,char *data, const int mlen)
 	{
 		char buf[DEFAULT_SIZE];
 		strcpy_s(buf,DEFAULT_SIZE,data);
 		GetPrivateProfileString(global_name,name,buf,data,mlen,INI_FILE);
 	}
 
-	int ConfigFile::ReadInteger(char *name)
+	int ConfigFile::ReadInteger(const char *name)
 	{
 		char buf[DEFAULT_SIZE] = {'\0'};
 		ConfigFile::ReadString(name, buf, DEFAULT_SIZE);
@@ -39,7 +39,7 @@ namespace WinampOpenALOut {
 		return retVal;
 	}
 
-	float ConfigFile::ReadFloat(char *name, bool* valid)
+	float ConfigFile::ReadFloat(const char *name, bool* valid)
 	{
 		char buf[10] = {'\0'};
 		ConfigFile::ReadString(name, buf, DEFAULT_SIZE);
@@ -54,14 +54,14 @@ namespace WinampOpenALOut {
 		return retVal;
 	}
 
-	void ConfigFile::WriteFloat(char* name, float f)
+	void ConfigFile::WriteFloat(const char* name, const float f)
 	{
 		char buf[10] = {'\0'};
 		sprintf_s(buf,10,"%3.2f",f);
 		WritePrivateProfileString(app_name,name,buf,INI_FILE);
 	}
 
-	int ConfigFile::ReadGlobalInteger(char *name)
+	int ConfigFile::ReadGlobalInteger(const char *name)
 	{
 		char buf[10] = {'\0'};
 		ConfigFile::ReadGlobalString(name, buf, DEFAULT_SIZE);
@@ -73,7 +73,7 @@ namespace WinampOpenALOut {
 		return retVal;
 	}
 
-	bool ConfigFile::ReadBoolean(char *name)
+	bool ConfigFile::ReadBoolean(const char *name)
 	{
 		char buf[6] = {'\0'};
 		ConfigFile::ReadString(name, buf, 6);
@@ -104,19 +104,19 @@ namespace WinampOpenALOut {
 		}
 	}
 
-	void ConfigFile::WriteString(char *name, char *data)
+	void ConfigFile::WriteString(const char *name, const char *data)
 	{
 		WritePrivateProfileString(app_name,name,data,INI_FILE);
 	}
 
-	void ConfigFile::WriteInteger(char *name, int i)
+	void ConfigFile::WriteInteger(const char *name, const int i)
 	{
 		char buf[DEFAULT_SIZE] = {'\0'};
 		sprintf_s(buf, DEFAULT_SIZE,"%d\0",i);
 		WritePrivateProfileString(app_name,name,buf,INI_FILE);
 	}
 
-	void ConfigFile::WriteBoolean(char *name, bool v)
+	void ConfigFile::WriteBoolean(const char *name, const bool v)
 	{
 		char buf[DEFAULT_SIZE] = {'\0'};
 		if(v) {
