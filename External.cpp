@@ -58,7 +58,7 @@ int main(int argc, char* argv[]) {
 				//printf("We can write %d bytes\n", writeSize);
 				if(writeSize > 0) {
 					delete buffer;
-					buffer = 0;
+					buffer = NULL;
 					buffer = new char[writeSize];
 					//printf("Trying to read %d bytes\n", writeSize);
 					bytes = (int)fread(buffer, sizeof(char), writeSize, file);
@@ -88,7 +88,7 @@ int main(int argc, char* argv[]) {
 	}
 
 	delete buffer;
-	buffer = 0;
+	buffer = NULL;
 
 	m->Close();
 
