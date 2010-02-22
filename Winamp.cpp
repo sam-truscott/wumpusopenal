@@ -3,7 +3,7 @@
 
 HWND Winamp::theMainWindow = 0;
 
-void Winamp::Initialise(HWND hMainWindow)
+void Winamp::Initialise(const HWND hMainWindow)
 {
 	theMainWindow = hMainWindow;
 }

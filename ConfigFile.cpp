@@ -86,7 +86,7 @@ namespace WinampOpenALOut {
 		return retVal;
 	}
 
-	void ConfigFile::Initialise(HWND hMainWindow)
+	void ConfigFile::Initialise(const HWND hMainWindow)
 	{
 		char *p = 0;
 		if (hMainWindow 

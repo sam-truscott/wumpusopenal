@@ -99,7 +99,7 @@ Framework::~Framework()
 	}
 }
 
-ALboolean Framework::ALFWInitOpenAL(int myDevice, ALint attrs[])
+ALboolean Framework::ALFWInitOpenAL(const int myDevice, const ALint attrs[])
 {
 	ALCcontext *pContext = (ALCcontext*)ptrContext;
 	ALCdevice *pDevice = (ALCdevice*)ptrDevice;

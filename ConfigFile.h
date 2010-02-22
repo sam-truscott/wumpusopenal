@@ -31,13 +31,13 @@ namespace WinampOpenALOut {
 	public:
 
 		/* initialise the configuration file */
-		static void Initialise(HWND hMainWindow);
+		static void Initialise(const HWND hMainWindow);
 
 		static void ReadString(const char *name,char *data, const int mlen);
 		static void WriteString(const char *name, const char *data);
 		
 		static int ReadInteger(const char *name);
-		static void WriteInteger(const char *name, int i);
+		static void WriteInteger(const char *name, const int i);
 
 		static float ReadFloat(const char *name, bool* valid);
 		static void WriteFloat(const char* name, const float f);

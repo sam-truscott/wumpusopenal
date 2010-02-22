@@ -23,9 +23,9 @@ namespace WinampOpenALOut
 
 	public:
 		Output_Renderer(
-			unsigned int buffer_len,
-			unsigned char a_channel,
-			class Output_Effects* the_effects);
+			const unsigned int buffer_len,
+			const unsigned char a_channel,
+			const class Output_Effects* the_effects);
 		~Output_Renderer();
 
 		int	Open(

@@ -1,7 +1,7 @@
 Wumpus Out OpenAL is copyright (c) 2010 by Sam Truscott.
 =======================================================
 
-Wumpus Out OpenAL v0.9.11.2
+Wumpus Out OpenAL v1.0.0
 ===========================
 
 	Install
@@ -36,6 +36,10 @@ WA_SDK_DIR			The 'Winamp' folder of the Winamp SDK. This contains some of the st
 
 Change Log
 ==========
+
+	v1.0.0
+	======
+	* Updated - Minor clean-ups
 
 	v0.9.11.2
 	=========

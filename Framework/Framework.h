@@ -22,8 +22,9 @@ class Framework {
 		~Framework();
 
 		// OpenAL initialization and shutdown
-		ALboolean ALFWInitOpenAL(int myDevice) { return ALFWInitOpenAL(myDevice, NULL); };
-		ALboolean ALFWInitOpenAL(int myDevice, ALint attrs[]);
+		ALboolean ALFWInitOpenAL(const int myDevice) 
+			{ return ALFWInitOpenAL(myDevice, NULL); };
+		ALboolean ALFWInitOpenAL(const int myDevice, const ALint attrs[]);
 		ALboolean ALFWShutdownOpenAL();
 
 		static Framework* getInstance() {

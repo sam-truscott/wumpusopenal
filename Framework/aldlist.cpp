@@ -128,7 +128,7 @@ int ALDeviceList::GetNumDevices()
 /* 
  * Returns the device name at an index in the complete device list
  */
-char * ALDeviceList::GetDeviceName(int index)
+char * ALDeviceList::GetDeviceName(const int index)
 {
 	if (index < GetNumDevices())
 		return (char*)vDeviceInfo[index].strDeviceName.c_str();

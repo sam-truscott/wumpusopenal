@@ -26,7 +26,7 @@ public:
 	ALDeviceList ();
 	~ALDeviceList ();
 	int GetNumDevices();
-	char *GetDeviceName(int index);
+	char *GetDeviceName(const int index);
 	int GetDefaultDevice();
 
 private:

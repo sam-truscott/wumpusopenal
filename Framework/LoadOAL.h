@@ -162,5 +162,6 @@ typedef struct
 } OPENALFNTABLE, *LPOPENALFNTABLE;
 #endif
 
-ALboolean LoadOAL10Library(char *szOALFullPathName, LPOPENALFNTABLE lpOALFnTable);
+ALboolean LoadOAL10Library(const char *szOALFullPathName, 
+						   const LPOPENALFNTABLE lpOALFnTable);
 ALvoid UnloadOAL10Library();

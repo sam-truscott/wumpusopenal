@@ -14,15 +14,15 @@
 namespace WinampOpenALOut
 {
 	Output_Renderer::Output_Renderer(
-		unsigned int buffer_len,
-		unsigned char a_channel,
-		Output_Effects* the_effects)
+		const unsigned int buffer_len,
+		const unsigned char a_channel,
+		const Output_Effects* the_effects)
 	{
 		SYNC_START;
 
 		// make sure all the pointers are set to zero
 		conf_buffer_length = buffer_len;
-		effects = the_effects;
+		effects = (Output_Effects*)the_effects;
 		this->channel = a_channel;
 
 		is_playing = false;

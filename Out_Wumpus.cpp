@@ -83,12 +83,16 @@ namespace WinampOpenALOut {
 		return TRUE;
 	}
 
-	int Output_Wumpus::get_current_output_time(__int64 the_current_output_time, unsigned int sample_rate)//this ignores high 32bits of total_written
+	int Output_Wumpus::get_current_output_time(
+		const __int64 the_current_output_time, 
+		const unsigned int sample_rate)
 	{
 		return MulDiv( (int)(the_current_output_time & THIRTY_TWO_BIT_BIT_MASK),ONE_SECOND_IN_MS,sample_rate);
 	}
 
-	int Output_Wumpus::get_current_written_time(__int64 the_current_written_time, unsigned int sample_rate)//this ignores high 32bits of total_written
+	int Output_Wumpus::get_current_written_time(
+		const __int64 the_current_written_time,
+		const unsigned int sample_rate)
 	{
 		return MulDiv( (int)(the_current_written_time & THIRTY_TWO_BIT_BIT_MASK),ONE_SECOND_IN_MS,sample_rate);
 	}
@@ -98,7 +102,7 @@ namespace WinampOpenALOut {
 		this->Close();
 	}
 
-	void Output_Wumpus::SwitchOutputDevice(int device)
+	void Output_Wumpus::SwitchOutputDevice(const int device)
 	{
 		SYNC_START;
 
@@ -107,7 +111,7 @@ namespace WinampOpenALOut {
 		SYNC_END;
 	}
 
-	void Output_Wumpus::SwitchOutputDevice(int device, bool is_split)
+	void Output_Wumpus::SwitchOutputDevice(const int device, const bool is_split)
 	{
 		SYNC_START;
 
@@ -117,7 +121,10 @@ namespace WinampOpenALOut {
 		SYNC_END;
 	}
 
-	void Output_Wumpus::Relocate(int device, int current_position, bool is_split) {
+	void Output_Wumpus::Relocate(
+		const int device, 
+		const int current_position, 
+		const bool is_split) {
 
 		SYNC_START;
 
@@ -212,7 +219,7 @@ namespace WinampOpenALOut {
 
 		this procedure is invoked by winamp when the configure button is clicked
 	*/
-	void Output_Wumpus::Config(HWND hwnd)
+	void Output_Wumpus::Config(const HWND hwnd)
 	{
 #ifndef NATIVE
 		WinampOpenALOut::Config^ config = WinampOpenALOut::Config::GetInstance(this);
@@ -236,7 +243,7 @@ namespace WinampOpenALOut {
 
 		this procedure is invoked by winamp when the about button is clicked
 	*/
-	void Output_Wumpus::About(HWND hwnd)
+	void Output_Wumpus::About(const HWND hwnd)
 	{
 		MessageBoxA(hwnd,"Wumpus OpenAL Output Plug-in "
 			PI_VER "\nCompiled on " __DATE__ " - " __TIME__
@@ -259,7 +266,7 @@ namespace WinampOpenALOut {
 
 		this procedure is called when the plugin is initialised
 	*/
-	void Output_Wumpus::Initialise(HWND window)
+	void Output_Wumpus::Initialise(const HWND window)
 	{
 		InitializeCriticalSection(&critical_section);
 
@@ -617,11 +624,11 @@ namespace WinampOpenALOut {
 		the open al buffers are created and an open al source
 	*/
 	int Output_Wumpus::Open(
-		int samplerate,
-		int numchannels,
-		int bitspersamp, 
-		int bufferlenms,
-		int prebufferms) {
+		const int samplerate,
+		const int numchannels,
+		const int bitspersamp, 
+		const int bufferlenms,
+		const int prebufferms) {
 		
 		SYNC_START;
 
@@ -1202,7 +1209,7 @@ namespace WinampOpenALOut {
 
 		returns the previous pause state
 	*/
-	int Output_Wumpus::Pause(int pause)
+	int Output_Wumpus::Pause(const int pause)
 	{
 		SYNC_START;
 		last_pause = pause;
@@ -1234,7 +1241,7 @@ namespace WinampOpenALOut {
 
 		this procedure is invoked by winamp to set the volume
 	*/
-	void Output_Wumpus::SetVolume(int new_volume)
+	void Output_Wumpus::SetVolume(const int new_volume)
 	{
 		/*
 			work out the % volume (as a float) and set it
@@ -1255,7 +1262,7 @@ namespace WinampOpenALOut {
 		set volume (internal) - used to check the volume range
 		and store the volume for later use
 	*/
-	void Output_Wumpus::SetVolumeInternal(ALfloat new_volume)
+	void Output_Wumpus::SetVolumeInternal(const ALfloat new_volume)
 	{
 		if(new_volume <= VOLUME_MAX && new_volume >= VOLUME_MIN)
 		{
@@ -1278,7 +1285,7 @@ namespace WinampOpenALOut {
 
 		this procedure is invoked by winamp to set the pan
 	*/
-	void Output_Wumpus::SetPan(int new_pan)
+	void Output_Wumpus::SetPan(const int new_pan)
 	{
 		ALfloat f = ((ALfloat)new_pan)/255.0f; 
 		this->speaker_matrix.position.x = -f;
@@ -1291,7 +1298,7 @@ namespace WinampOpenALOut {
 		this procedure is invoked by winamp to flush the buffers
 		and start playing from time (t)ms.
 	*/
-	void Output_Wumpus::Flush(int new_time_in_ms)
+	void Output_Wumpus::Flush(const int new_time_in_ms)
 	{
 		SYNC_START;
 
@@ -1340,7 +1347,7 @@ namespace WinampOpenALOut {
 		}
 	}
 
-	int Output_Wumpus::SetBufferTime(int new_ms)
+	int Output_Wumpus::SetBufferTime(const int new_ms)
 	{
 		// calculate the number of bytes that will have been
 		// processed after (t)ms
@@ -1470,25 +1477,25 @@ namespace WinampOpenALOut {
 		return last_output_time;
 	}
 
-	void Output_Wumpus::SetMonoExpanded(bool expanded)
+	void Output_Wumpus::SetMonoExpanded(const bool expanded)
 	{
 		is_mono_expanded = expanded;
 		ConfigFile::WriteBoolean(CONF_MONO_EXPAND,is_mono_expanded);
 	}
 
-	void Output_Wumpus::SetStereoExpanded(bool expanded)
+	void Output_Wumpus::SetStereoExpanded(const bool expanded)
 	{ 
 		is_stereo_expanded = expanded;
 		ConfigFile::WriteBoolean(CONF_STEREO_EXPAND,is_stereo_expanded);
 	}
 
-	void Output_Wumpus::SetSplit ( bool split )
+	void Output_Wumpus::SetSplit ( const bool split )
 	{
 		ConfigFile::WriteBoolean(CONF_SPLIT,split);
 		SwitchOutputDevice(Framework::getInstance()->GetCurrentDevice(),split);
 	}
 
-	void Output_Wumpus::SetXRAMEnabled( bool enabled )
+	void Output_Wumpus::SetXRAMEnabled( const bool enabled )
 	{
 		xram_enabled = enabled;
 		ConfigFile::WriteBoolean(CONF_XRAM_ENABLED,xram_enabled);

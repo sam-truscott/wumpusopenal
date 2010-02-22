@@ -16,23 +16,28 @@ namespace WinampOpenALOut
 	public:
 		Output_Wumpus();
 		~Output_Wumpus();
-		void Config(HWND hwnd);
-		void About(HWND hwnd);
-		void Initialise(HWND window);
+		void Config(const HWND hwnd);
+		void About(const HWND hwnd);
+		void Initialise(const HWND window);
 		void Quit();
-		int	Open(int samplerate, int numchannels, int bitspersamp, int bufferlenms, int prebufferms);
+		int	Open(
+			const int samplerate, 
+			const int numchannels, 
+			const int bitspersamp, 
+			const int bufferlenms, 
+			const int prebufferms);
 		void Close();
 		int Write(char *buf, int len);
 		int CanWrite();
 		int IsPlaying();
-		int Pause(int pause);
-		void SetVolume(int new_volume);
-		void SetPan(int new_pan);
-		void Flush(int new_time_in_ms);
+		int Pause(const int pause);
+		void SetVolume(const int new_volume);
+		void SetPan(const int new_pan);
+		void Flush(const int new_time_in_ms);
 		int inline	GetOutputTime();
 		int GetWrittenTime();
 
-		void SwitchOutputDevice(int device);
+		void SwitchOutputDevice(const int device);
 		
 		inline bool IsStreamOpen()						{ return stream_open; }
 		inline unsigned int	GetSampleRate()				{ return sample_rate; }
@@ -40,23 +45,24 @@ namespace WinampOpenALOut
 		inline unsigned int GetNumberOfChannels()		{ return number_of_channels; }
 		inline int GetLastOutputTime()					{ return last_output_time; }
 		inline int GetLastWrittenTime()					{ return last_written_time; }
-		inline __int64 GetWrittenBytes() { return total_written; }
-		inline __int64 GetPlayedBytes() { return total_played; }
+		inline __int64 GetWrittenBytes()				{ return total_written; }
+		inline __int64 GetPlayedBytes()					{ return total_played; }
 
-		inline int GetConfBufferLength() { return conf_buffer_length;}
-		inline void SetConfBufferLength( unsigned int i) { conf_buffer_length = i;}
+		inline int GetConfBufferLength()				{ return conf_buffer_length;}
+		inline void SetConfBufferLength( const unsigned int i) 
+			{ conf_buffer_length = i;}
 
 		inline bool IsStereoExpanded() { return is_stereo_expanded;}
-		void SetStereoExpanded(bool expanded);
+		void SetStereoExpanded(const bool expanded);
 
 		inline bool IsMonoExpanded() { return is_mono_expanded;}
-		void SetMonoExpanded(bool expanded);
+		void SetMonoExpanded(const bool expanded);
 
 		inline bool IsXRAMEnabled() { return xram_enabled; }
-		void SetXRAMEnabled( bool enabled );
+		void SetXRAMEnabled( const bool enabled );
 
 		inline bool IsSplit() { return split_out; }
-		void SetSplit ( bool split );
+		void SetSplit ( const bool split );
 
 		inline bool	IsXRAMPresent() { return xram_detected; }
 
@@ -72,12 +78,12 @@ namespace WinampOpenALOut
 
 		inline void OnError();
 
-		void SwitchOutputDevice(int device, bool is_split);
+		void SwitchOutputDevice(const int device, const bool is_split);
 
 		void Relocate(
-			int device, 
-			int current_position, 
-			bool is_split);
+			const int device, 
+			const int current_position, 
+			const bool is_split);
 
 		void CheckProcessedBuffers();
 		void CheckPlayState();
@@ -86,15 +92,19 @@ namespace WinampOpenALOut
 		void ExpandStereoToQuad(char ** pbuf, int * plen);
 		void SplitAudioToMonoChannels(const char * buf, const int len);
 
-		int SetBufferTime(int new_ms);
+		int SetBufferTime(const int new_ms);
 
-		void SetVolumeInternal(ALfloat new_volume);
+		void SetVolumeInternal(const ALfloat new_volume);
 
 			// semaphore for the right access to buffers/open_al api
 		CRITICAL_SECTION critical_section;
 
-		int inline get_current_output_time(__int64 the_current_output_time, unsigned int sample_rate);
-		int inline get_current_written_time(__int64 the_current_written_time, unsigned int sample_rate);
+		int inline get_current_output_time(
+			const __int64 the_current_output_time, 
+			const unsigned int sample_rate);
+		int inline get_current_written_time(
+			const __int64 the_current_written_time, 
+			const unsigned int sample_rate);
 
 		// boolean to store internal playing state
 		bool			is_playing;
@@ -144,7 +154,7 @@ namespace WinampOpenALOut
 		int			temp_size;
 
 		// used to store the configuration buffer length
-		unsigned int	conf_buffer_length;
+		int	conf_buffer_length;
 
 		bool			is_stereo_expanded;
 		bool			is_mono_expanded;

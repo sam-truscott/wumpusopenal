@@ -27,7 +27,8 @@
 
 HINSTANCE g_hOpenALDLL = NULL;
 
-ALboolean LoadOAL10Library(char *szOALFullPathName, LPOPENALFNTABLE lpOALFnTable)
+ALboolean LoadOAL10Library(const char *szOALFullPathName, 
+						   const LPOPENALFNTABLE lpOALFnTable)
 {
 	if (!lpOALFnTable)
 		return AL_FALSE;

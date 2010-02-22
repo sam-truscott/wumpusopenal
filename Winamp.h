@@ -7,7 +7,7 @@
 class Winamp
 {
 public:
-	static void Initialise(HWND hMainWindow);
+	static void Initialise(const HWND hMainWindow);
 	static int GetTrackLength(void);
 	static void Stop(void);
 	static void Next(void);
