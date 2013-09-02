@@ -247,7 +247,7 @@ namespace WinampOpenALOut {
 	{
 		MessageBoxA(hwnd,"Wumpus OpenAL Output Plug-in "
 			PI_VER "\nCompiled on " __DATE__ " - " __TIME__
-			"\n(c) 2009 Sam Truscott\n"
+			"\n(c) 2013 Sam Truscott\n"
 			"\n"
 			"Download latest version and source code (GPL)\n"
 			"https://sourceforge.net/projects/winampopenalout/\n"
