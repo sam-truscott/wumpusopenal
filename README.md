@@ -1,8 +1,5 @@
-Wumpus Out OpenAL is copyright (c) 2013 by Sam Truscott.
-=======================================================
-
-Wumpus Out OpenAL v1.0.1
-===========================
+Wumpus Out OpenAL
+=================
 
         Install
         =======
@@ -27,12 +24,12 @@ Wumpus Out OpenAL v1.0.1
 Development
 ===========
 out_wumpus.sln		The Project to load
-OPENAL_SDK_DIR		Environment variable pointing to the OpenAL SDK installation
-                                                directory. On my system it's:
-                                                C:\Development\OpenAL 1.1 SDK
+
+OPENAL_SDK_DIR		Environment variable pointing to the OpenAL SDK installation directory.
+On my system it's: C:\Development\OpenAL 1.1 SDK
+
 WA_SDK_DIR			The 'Winamp' folder of the Winamp SDK. This contains some of the stuff
-                                                we need to talk to Winamp. On my system it's:
-                                                C:\Program Files\Winamp SDK\Winamp
+we need to talk to Winamp. On my system it's: C:\Program Files\Winamp SDK\Winamp
 
 Change Log
 ==========
