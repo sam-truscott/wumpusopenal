@@ -348,17 +348,17 @@ namespace WinampOpenALOut {
 		split_out = ConfigFile::ReadBoolean(CONF_SPLIT);
 
 		bool efx_enabled = ConfigFile::ReadBoolean(CONF_EFX_ENABLED);
-		effects_list efx_env = EFX_REVERB_PRESET_GENERIC;
+		effects_list efx_env = REVERB_PRESET_GENERIC;
 			
 		efx_env = (effects_list)ConfigFile::ReadInteger(CONF_EFX_ENV);
 
 		/*
 		 *	range check the setting value
 		 */
-		if ( efx_env < EFX_REVERB_PRESET_GENERIC ||
-			 efx_env > EFX_REVERB_PRESET_SMALLWATERROOM )
+		if ( efx_env < REVERB_PRESET_GENERIC ||
+			 efx_env > REVERB_PRESET_SMALLWATERROOM )
 		{
-			efx_env = EFX_REVERB_PRESET_GENERIC;
+			efx_env = REVERB_PRESET_GENERIC;
 		}
 
 		/*
@@ -414,20 +414,6 @@ namespace WinampOpenALOut {
 			alGetEnumValue("AL_STORAGE_ACCESSIBLE"));
 		this->log_debug_msg(dbg, __FILE__, __LINE__);
 #endif
-
-		if ( Framework::getInstance()->ALFWIsXRAMSupported() == AL_TRUE )
-		{
-#ifdef _DEBUGGING
-			sprintf_s(
-				dbg,
-				DEBUG_BUFFER_SIZE,
-				"-> Detect XRAM, Size {%d}MB, Free {%d}MB",
-				alGetInteger(eXRAMSize) / (1024 * 1024),
-				alGetInteger(eXRAMFree) / (1024 * 1024) );
-			this->log_debug_msg(dbg, __FILE__, __LINE__);
-#endif
-			this->xram_detected = true;
-		}
 
 		/*
 		 *	fairly horrible bit of code to read in the speaker

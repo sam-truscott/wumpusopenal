@@ -164,68 +164,6 @@ ALboolean Framework::ALFWShutdownOpenAL()
 
 // Extension Queries
 
-ALboolean Framework::ALFWIsXRAMSupported()
-{
-	ALboolean bXRAM = AL_FALSE;
-
-	eXRAMSize = NULL;
-	eXRAMFree = NULL;
-	eXRAMAuto = NULL;
-	eXRAMHardware = NULL;
-	eXRAMAccessible = NULL;
-	eaxSetBufferMode = NULL;
-	eaxGetBufferMode = NULL;
-	
-	if (alIsExtensionPresent("EAX-RAM") == AL_TRUE)
-	{
-		// Get X-RAM Function pointers
-		eaxSetBufferMode = (EAXSetBufferMode)alGetProcAddress("EAXSetBufferMode");
-		eaxGetBufferMode = (EAXGetBufferMode)alGetProcAddress("EAXGetBufferMode");
-
-		if (eaxSetBufferMode && eaxGetBufferMode)
-		{
-			eXRAMSize = alGetEnumValue("AL_EAX_RAM_SIZE");
-			eXRAMFree = alGetEnumValue("AL_EAX_RAM_FREE");
-			eXRAMAuto = alGetEnumValue("AL_STORAGE_AUTOMATIC");
-			eXRAMHardware = alGetEnumValue("AL_STORAGE_HARDWARE");
-			eXRAMAccessible = alGetEnumValue("AL_STORAGE_ACCESSIBLE");
-
-			if (eXRAMSize && eXRAMFree && eXRAMAuto && eXRAMHardware && eXRAMAccessible)
-			{
-				bXRAM = AL_TRUE;
-			}
-		}
-	}
-
-	return bXRAM;
-}
-
-ALboolean Framework::ALFWIsXRAMSupportedDevice(ALCdevice *device)
-{
-	ALboolean bXRAM = AL_FALSE;
-
-	if (alcIsExtensionPresent(device,"EAX-RAM") == AL_TRUE)
-	{
-		// Get X-RAM Function pointers
-		eaxSetBufferMode = (EAXSetBufferMode)alcGetProcAddress(device,"EAXSetBufferMode");
-		eaxGetBufferMode = (EAXGetBufferMode)alcGetProcAddress(device,"EAXGetBufferMode");
-
-		if (eaxSetBufferMode && eaxGetBufferMode)
-		{
-			eXRAMSize = alcGetEnumValue(device,"AL_EAX_RAM_SIZE");
-			eXRAMFree = alcGetEnumValue(device,"AL_EAX_RAM_FREE");
-			eXRAMAuto = alcGetEnumValue(device,"AL_STORAGE_AUTOMATIC");
-			eXRAMHardware = alcGetEnumValue(device,"AL_STORAGE_HARDWARE");
-			eXRAMAccessible = alcGetEnumValue(device,"AL_STORAGE_ACCESSIBLE");
-
-			if (eXRAMSize && eXRAMFree && eXRAMAuto && eXRAMHardware && eXRAMAccessible)
-				bXRAM = AL_TRUE;
-		}
-	}
-
-	return bXRAM;
-}
-
 ALboolean Framework::ALFWIsEFXSupported()
 {
 	ALCdevice *pDevice = NULL;

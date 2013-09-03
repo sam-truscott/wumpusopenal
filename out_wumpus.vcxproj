@@ -161,7 +161,7 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(OPENAL_SDK_DIR)\include;$(WA_SDK_DIR);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(OPENAL_SDK_DIR)\include\AL;$(WA_SDK_DIR);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_DEBUGGING_off;WIN32;W_DEBUG;_WINDOWS;_USRDLL;OUT_MINISDK_EXPORTS;_CRT_SECURE_NO_DEPRECATEf;CONSOLE;NASM_HACK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <PrecompiledHeaderOutputFile>.\Debug/out_minisdk.pch</PrecompiledHeaderOutputFile>
@@ -177,12 +177,12 @@
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>$(OPENAL_SDK_DIR)\libs\Win32\OpenAL32.lib;$(OPENAL_SDK_DIR)\libs\Win32\EFX-Util_MTDLL\EFX-Util.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>$(PROGRAMFILES)\Winamp\Plugins\out_openal.dll</OutputFile>
+      <AdditionalDependencies>$(OPENAL_SDK_DIR)\lib\Win32\libOpenAL32.dll.a;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>Exports.def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
+      <OutputFile>$(OutDir)\out_openal.dll</OutputFile>
     </Link>
     <Bscmake>
       <SuppressStartupBanner>true</SuppressStartupBanner>

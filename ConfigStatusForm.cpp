@@ -61,10 +61,10 @@ namespace WinampOpenALOut {
 		int efx_env = ConfigFile::ReadInteger(CONF_EFX_ENV);
 
 		// overflow check
-		if ( efx_env < EFX_REVERB_PRESET_GENERIC ||
-			 efx_env > EFX_REVERB_PRESET_SMALLWATERROOM )
+		if ( efx_env < REVERB_PRESET_GENERIC ||
+			 efx_env > REVERB_PRESET_SMALLWATERROOM )
 		{
-			efx_env = EFX_REVERB_PRESET_GENERIC;
+			efx_env = REVERB_PRESET_GENERIC;
 		}
 		this->comboBoxEffect->SelectedIndex = efx_env;
 
@@ -266,62 +266,7 @@ namespace WinampOpenALOut {
 
 		// get the device
 		ALCdevice* pDevice = alcGetContextsDevice(alcGetCurrentContext());
-		
-		if (Framework::getInstance()->ALFWIsXRAMSupported() == AL_TRUE) {
-			listBoxExtensions->Items->Add("Present: EAX-RAM");
-		}else{
-			listBoxExtensions->Items->Add("Absent: EAX-RAM");
-		}
-
-		if ( eXRAMSize != NULL )
-		{
-			listBoxExtensions->Items->Add("XRAM Size: " + alGetInteger(eXRAMSize)/(1024*1024) + "MB" );
-		}
-
-		if ( eXRAMFree != NULL )
-		{
-			listBoxExtensions->Items->Add("XRAM Free: " + alGetInteger(eXRAMFree)/(1024*1024) + "MB" );
-		}
-
-		if ( alIsExtensionPresent("EAX-RAM") == AL_FALSE )
-		{
-			listBoxExtensions->Items->Add("\tDevice(s) missing XRAM Extension - not supported by OpenAL.");
-			listBoxExtensions->Items->Add("\tThis either means it's not supported by your card or OpenAL");
-			listBoxExtensions->Items->Add("\tis out of date. Try the latest version.");
-			listBoxExtensions->Items->Add("\thttp://connect.creativelabs.com/openal/Downloads/oalinst.zip");
-		}
-		else
-		{
-			if ( eaxGetBufferMode == NULL )
-			{
-				listBoxExtensions->Items->Add("\teaxGetBufferMode not found");
-			}
-			if ( eaxSetBufferMode == NULL )
-			{
-				listBoxExtensions->Items->Add("\teaxSetBufferMode not found");
-			}
-			if ( eXRAMAuto == NULL )
-			{
-				listBoxExtensions->Items->Add("\teXRAMAuto not found");
-			}
-			if ( eXRAMHardware == NULL )
-			{
-				listBoxExtensions->Items->Add("\teXRAMHardware not found");
-			}
-			if ( eXRAMAccessible == NULL )
-			{
-				listBoxExtensions->Items->Add("\teXRAMAccessible not found");
-			}
-			if ( eXRAMSize == NULL )
-			{
-				listBoxExtensions->Items->Add("\teXRAMSize not found");
-			}
-			if ( eXRAMFree == NULL )
-			{
-				listBoxExtensions->Items->Add("\teXRAMFree not found");
-			}
-			
-		}
+	
 
 		if (alcIsExtensionPresent(pDevice, "ALC_EXT_EFX") == AL_TRUE) {
 			listBoxExtensions->Items->Add("Present: ALC_EXT_EFX");

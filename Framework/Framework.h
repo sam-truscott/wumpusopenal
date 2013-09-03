@@ -13,7 +13,6 @@
 #include"alc.h"
 #include"efx.h"
 #include"efx-creative.h"
-#include"xram.h"
 
 class Framework {
 	public:
@@ -47,8 +46,6 @@ class Framework {
 		class ALDeviceList* ALFWGetDeviceList() { return pDeviceList; }
 
 		// Extension Queries 
-		ALboolean ALFWIsXRAMSupported();
-		ALboolean ALFWIsXRAMSupportedDevice(ALCdevice *device);
 		ALboolean ALFWIsEFXSupported();
 	protected:
 		class ALDeviceList *pDeviceList;
