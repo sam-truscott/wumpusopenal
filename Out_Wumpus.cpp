@@ -1313,7 +1313,7 @@ namespace WinampOpenALOut {
 		 * if this isn't done, winamp will continue to skip past the end of
 		 * the file.
 		 */
-		if ( stream_open && (new_time_in_ms < (Winamp::GetTrackLength()-conf_buffer_length)) )
+		if ( stream_open )//&& (new_time_in_ms < (Winamp::GetTrackLength()-conf_buffer_length)) )
 		{
 			// calculate the number of bytes that will have been
 			// this will relocate to the current device at a set time
