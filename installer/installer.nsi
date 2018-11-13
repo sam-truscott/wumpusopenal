@@ -2,7 +2,7 @@
 
 ; HM NIS Edit Wizard helper defines
 !define PRODUCT_NAME "Wumpus OpenAL Plugin"
-!define PRODUCT_VERSION "1.0.1"
+!define PRODUCT_VERSION "1.1.0"
 !define PRODUCT_PUBLISHER "wumpus.co.uk"
 !define PRODUCT_WEB_SITE "http://www.wumpus.co.uk"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
@@ -29,7 +29,7 @@ SetCompressor lzma
 ; Instfiles page
 !insertmacro MUI_PAGE_INSTFILES
 ; Finish page
-!define MUI_FINISHPAGE_SHOWREADME "$INSTDIR\Readme.txt"
+!define MUI_FINISHPAGE_SHOWREADME "$INSTDIR\Plugins\Readme.txt"
 !insertmacro MUI_PAGE_FINISH
 
 ; Uninstaller pages
@@ -45,12 +45,13 @@ SetCompressor lzma
 
 Name "${PRODUCT_NAME} ${PRODUCT_VERSION}"
 OutFile "wumpus_openal_out_${PRODUCT_VERSION}.exe"
-InstallDir "$PROGRAMFILES\Winamp\Plugins"
+InstallDir "$PROGRAMFILES32\Winamp"
+InstallDirRegKey HKLM "SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Winamp" "InstallLocation"
 ShowInstDetails show
 ShowUnInstDetails show
 
 Section "Plugin" SEC01
-  SetOutPath "$INSTDIR"
+  SetOutPath "$INSTDIR\Plugins"
   SetOverwrite on
   File "out_openal.dll"
   File "Readme.txt"
@@ -62,11 +63,11 @@ Section "OpenAL Redistributable" OPENAL
     ExecWait "$TEMP\oalinst.exe /S"
 SectionEnd
 
-Section "VC++ 2012 Redistributable" VC2012
+Section "VC++ 2017 Redistributable" VC2017
     SetOutPath $TEMP
-    file "vcredist_x86.exe"
-    ;ExecWait "$TEMP\vcredist_x86.exe /quiet"
-    ExecWait "$TEMP\vcredist_x86.exe /Q"
+    file "vc_redist.x86.exe"
+    ;ExecWait "$TEMP\vc_redist.x86.exe /quiet"
+    ExecWait "$TEMP\vc_redist.x86.exe /Q"
 SectionEnd
 
 Section -AdditionalIcons
@@ -76,7 +77,7 @@ Section -AdditionalIcons
 SectionEnd
 
 Section -Post
-  WriteUninstaller "$INSTDIR\uninst.exe"
+  WriteUninstaller "$INSTDIR\uninst_openal.exe"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayName" "$(^Name)"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "UninstallString" "$INSTDIR\uninst.exe"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayVersion" "${PRODUCT_VERSION}"
@@ -101,9 +102,9 @@ Function un.onInit
 FunctionEnd
 
 Section Uninstall
-  Delete "$INSTDIR\uninst.exe"
-  Delete "$INSTDIR\Readme.txt"
-  Delete "$INSTDIR\out_openal.dll"
+  Delete "$INSTDIR\uninst_openal.exe"
+  Delete "$INSTDIR\Plugins\Readme.txt"
+  Delete "$INSTDIR\Plugins\out_openal.dll"
 
   Delete "$SMPROGRAMS\Wumpus OpenAL Output for Winamp\Uninstall.lnk"
 
