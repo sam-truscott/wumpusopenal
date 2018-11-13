@@ -1,0 +1,10 @@
+﻿  .NETFramework,Version=v4.0.AssemblyAttributes.cpp
+     Creating library .\Release/out_openal.lib and object .\Release/out_openal.exp
+  LINK : /LTCG specified but no code generation required; remove /LTCG from the link command line to improve linker performance
+Framework.obj : warning LNK4248: unresolved typeref token (01000017) for 'ALCdevice_struct'; image may not run
+aldlist.obj : warning LNK4248: unresolved typeref token (01000017) for 'ALCdevice_struct'; image may not run
+ConfigStatusForm.obj : warning LNK4248: unresolved typeref token (0100002D) for 'ALCdevice_struct'; image may not run
+Framework.obj : warning LNK4248: unresolved typeref token (0100001B) for 'ALCcontext_struct'; image may not run
+aldlist.obj : warning LNK4248: unresolved typeref token (01000019) for 'ALCcontext_struct'; image may not run
+ConfigStatusForm.obj : warning LNK4248: unresolved typeref token (01000031) for 'ALCcontext_struct'; image may not run
+  out_wumpus.vcxproj -> C:\Dev\git\wumpusopenal\.\Release\out_openal.dll

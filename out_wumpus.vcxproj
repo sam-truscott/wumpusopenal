@@ -94,7 +94,7 @@
     </ResourceCompile>
     <Link>
       <AdditionalDependencies>$(OPENAL_SDK_DIR)\libs\Win32\OpenAL32.lib;$(OPENAL_SDK_DIR)\libs\Win32\EFX-Util_MTDLL\EFX-Util.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>$(PROGRAMFILES)\Winamp\Plugins\out_openal.dll</OutputFile>
+      <OutputFile>$(OutDir)\out_openal.dll</OutputFile>
       <ModuleDefinitionFile>Exports.def</ModuleDefinitionFile>
       <SubSystem>Windows</SubSystem>
       <LargeAddressAware>true</LargeAddressAware>
