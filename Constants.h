@@ -56,39 +56,6 @@ __FCONSTANT	VOLUME_MAX = 1.0;
 __CONSTANT IS_PLAYING = 1;
 __CONSTANT IS_NOT_PLAYING = 0;
 
-typedef struct
-{
-	float x;
-	float y;
-	float z;
-} speaker_T;
-
-typedef struct 
-{
-	speaker_T position;
-	speaker_T direction;
-	speaker_T speakers[MAX_RENDERERS];
-} speaker_matrix_T;
-
-static const speaker_matrix_T DEFAULT_MATRIX = 
-{
-	/*	 x.x	,y.y ,	z.z	*/
-	{	// position
-		0.0	,0.0,	0.0
-	},
-	{	// direction
-		0.0	,0.0,	0.0
-	},
-	{	// speakers
-		{-12.50	,0.0,	-10.0},		// FL
-		{12.50	,0.0,	-10.0},		// FR
-		{-12.50	,0.0,	10.0},		// RL
-		{12.50	,0.0,	10.0},		// RR
-		{0.0	,0.0,	-10.0},		// C
-		{0.0	,0.0,	0.0}		// S
-	}
-};
-
 #define MATRIX_BUFFER_SIZE 11u
 #define MATRIX_AXIS_POSITION 7u
 #define MATRIX_RENDERER_POSITION 9u

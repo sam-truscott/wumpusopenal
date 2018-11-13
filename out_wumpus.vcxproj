@@ -161,7 +161,7 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(OPENAL_SDK_DIR)\include\AL;$(WA_SDK_DIR);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(OPENAL_SDK_DIR)\include;$(WA_SDK_DIR);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_DEBUGGING_off;WIN32;W_DEBUG;_WINDOWS;_USRDLL;OUT_MINISDK_EXPORTS;_CRT_SECURE_NO_DEPRECATEf;CONSOLE;NASM_HACK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <PrecompiledHeaderOutputFile>.\Debug/out_minisdk.pch</PrecompiledHeaderOutputFile>
@@ -177,7 +177,7 @@
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>$(OPENAL_SDK_DIR)\lib\Win32\libOpenAL32.dll.a;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(OPENAL_SDK_DIR)\libs\Win32\OpenAL32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>Exports.def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
@@ -322,7 +322,6 @@
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</CompileAsManaged>
     </ClCompile>
     <ClCompile Include="Main.cpp" />
-    <ClCompile Include="Out_Effects.cpp" />
     <ClCompile Include="Out_Renderer.cpp" />
     <ClCompile Include="Out_Wumpus.cpp" />
     <ClCompile Include="Winamp.cpp" />
@@ -338,7 +337,6 @@
     <ClInclude Include="ConfigFile.h" />
     <ClInclude Include="Constants.h" />
     <ClInclude Include="Main.h" />
-    <ClInclude Include="Out_Effects.h" />
     <ClInclude Include="Out_Openal.h" />
     <ClInclude Include="Out_Renderer.h" />
     <ClInclude Include="Out_Wumpus.h" />

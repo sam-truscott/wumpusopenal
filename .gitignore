@@ -11,3 +11,6 @@
 *.lai
 *.la
 *.a
+/.vs/out_wumpus/v15
+/Debug
+/out_wumpus.vcxproj.user

@@ -1,5 +1,4 @@
 #include "Out_Renderer.h"
-#include "Out_Effects.h"
 #include "ConfigFile.h"
 
 #define DEBUG_BUFFER_SIZE 255
@@ -15,14 +14,12 @@ namespace WinampOpenALOut
 {
 	Output_Renderer::Output_Renderer(
 		const unsigned int buffer_len,
-		const unsigned char a_channel,
-		const Output_Effects* the_effects)
+		const unsigned char a_channel)
 	{
 		SYNC_START;
 
 		// make sure all the pointers are set to zero
 		conf_buffer_length = buffer_len;
-		effects = (Output_Effects*)the_effects;
 		this->channel = a_channel;
 
 		is_playing = false;
@@ -478,12 +475,6 @@ namespace WinampOpenALOut
 		{
 			this->onError();
 		}
-		
-		/* Effects */
-		if ( effects != NULL )
-		{
-			effects->AddSource(source);
-		}
 
 		// set the volume for the source
 		this->SetVolumeInternal(volume);
@@ -817,20 +808,6 @@ namespace WinampOpenALOut
 	void Output_Renderer::SetXRAMEnabled( const bool enabled )
 	{
 		xram_enabled = enabled;
-	}
-
-	void Output_Renderer::SetMatrix ( const speaker_T speaker )
-	{
-		const ALfloat x = ((float)speaker.x) / 255.0f;
-		const ALfloat y = ((float)speaker.y) / 255.0f;
-		const ALfloat z = ((float)speaker.z) / 255.0f;
-
-		alSource3f(
-			this->source,
-			AL_POSITION,
-			x,
-			y,
-			z);
 	}
 
 }

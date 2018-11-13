@@ -15,8 +15,6 @@ namespace WinampOpenALOut {
 #define CONF_STEREO_EXPAND "StereoExpansion"
 #define CONF_XRAM_ENABLED "UseXRAM"
 #define CONF_VOLUME "volume"
-#define CONF_EFX_ENABLED "EffectsEnabled"
-#define CONF_EFX_ENV "EffectEnvironment"
 #define CONF_PITCH "OpenALPitch"
 #define CONF_SPLIT "Enable3D"
 
