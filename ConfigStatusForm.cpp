@@ -164,14 +164,25 @@ namespace WinampOpenALOut {
 
 		if (alcIsExtensionPresent(NULL, "ALC_ENUMERATION_EXT")) {
 			listBoxExtensions->Items->Add("Present: ALC_ENUMERATION_EXT");
-		}else{
+		} else {
 			listBoxExtensions->Items->Add("Absent: ALC_ENUMERATION_EXT");
 		}
 
 		if (alcIsExtensionPresent(NULL, "ALC_ENUMERATE_ALL_EXT")) {
 			listBoxExtensions->Items->Add("Present: ALC_ENUMERATE_ALL_EXT");
-		}else{
+		} else {
 			listBoxExtensions->Items->Add("Absent: ALC_ENUMERATE_ALL_EXT");
+		}
+
+		if (alcIsExtensionPresent(NULL, "AL_EXT_float32")) {
+			listBoxExtensions->Items->Add("Present: AL_EXT_float32");
+		} else {
+			listBoxExtensions->Items->Add("Absent: AL_EXT_float32");
+		}
+		if (alcIsExtensionPresent(NULL, "AL_EXT_MCFORMATS")) {
+			listBoxExtensions->Items->Add("Present: AL_EXT_MCFORMATS");
+		} else {
+			listBoxExtensions->Items->Add("Absent: AL_EXT_MCFORMATS");
 		}
 
 		// get the device
