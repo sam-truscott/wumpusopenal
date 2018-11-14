@@ -11,3 +11,13 @@
 *.lai
 *.la
 *.a
+/.vs/out_wumpus/v15
+Debug
+Release
+/out_wumpus.vcxproj.user
+Release
+/installer/wumpus_openal_out_1.1.0.exe
+/installer/vc_redist.x86.exe
+/installer/Readme.txt
+/installer/out_openal.dll
+/installer/oalinst.exe

@@ -24,8 +24,7 @@ namespace WinampOpenALOut
 	public:
 		Output_Renderer(
 			const unsigned int buffer_len,
-			const unsigned char a_channel,
-			const class Output_Effects* the_effects);
+			const unsigned char a_channel);
 		~Output_Renderer();
 
 		int	Open(
@@ -67,8 +66,6 @@ namespace WinampOpenALOut
 		{
 			played = t;
 		}
-
-		void SetMatrix ( const speaker_T speaker );
 
 	protected:
 
@@ -113,8 +110,6 @@ namespace WinampOpenALOut
 		ALuint		    source;
 
 		unsigned int	calculated_buffer_size;
-
-		class Output_Effects	*effects;
 
 	private:
 

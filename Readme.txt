@@ -1,7 +1,7 @@
-Wumpus Out OpenAL is copyright (c) 2013 by Sam Truscott.
+Wumpus Out OpenAL is copyright (c) 2018 by Sam Truscott.
 =======================================================
 
-Wumpus Out OpenAL v1.0.1
+Wumpus Out OpenAL v1.1.0
 ===========================
 
 	Install

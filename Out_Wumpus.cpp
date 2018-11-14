@@ -1,6 +1,5 @@
 #include "Out_Wumpus.h"
 #include "Version.h"
-#include "Out_Effects.h"
 #ifndef NATIVE
 #include "ConfigStatusForm.h"
 #endif
@@ -28,7 +27,6 @@ namespace WinampOpenALOut {
 		total_played = ZERO_TIME;
 		current_output_time = ZERO_TIME;
 		current_written_time = ZERO_TIME;
-		effects = NULL;
 
 		no_renderers = 0;
 		for ( char rend=0 ; rend < MAX_RENDERERS ; rend++ )
@@ -272,17 +270,6 @@ namespace WinampOpenALOut {
 
 		SYNC_START;
 
-		effects = new Output_Effects();
-
-		/*
-		 * empty the speaker matrix (values of where the speakers are)
-		 * by zeroing them all
-		 */
-		memset(
-			&speaker_matrix,
-			0,
-			sizeof(speaker_matrix_T));
-
 		/*
 		 *	set up the variables to a default state
 		 */
@@ -347,20 +334,6 @@ namespace WinampOpenALOut {
 		 */
 		split_out = ConfigFile::ReadBoolean(CONF_SPLIT);
 
-		bool efx_enabled = ConfigFile::ReadBoolean(CONF_EFX_ENABLED);
-		effects_list efx_env = REVERB_PRESET_GENERIC;
-			
-		efx_env = (effects_list)ConfigFile::ReadInteger(CONF_EFX_ENV);
-
-		/*
-		 *	range check the setting value
-		 */
-		if ( efx_env < REVERB_PRESET_GENERIC ||
-			 efx_env > REVERB_PRESET_SMALLWATERROOM )
-		{
-			efx_env = REVERB_PRESET_GENERIC;
-		}
-
 		/*
 			initialise openal itself - this has been modified
 			and will also select the default sound card
@@ -369,9 +342,6 @@ namespace WinampOpenALOut {
 		{
 			MessageBoxA(NULL, "Could not initialise OpenAL", "Error", MB_OK);
 		}
-
-		effects->Enable(efx_enabled);
-		effects->SetCurrentEffect(efx_env);
 
 #ifdef _DEBUGGING
 		char dbg[DEBUG_BUFFER_SIZE] = {'\0'};
@@ -428,146 +398,10 @@ namespace WinampOpenALOut {
 		for (char rend=0 ; rend < MAX_RENDERERS ; rend++ )
 		{
 			this->renderers[rend] = NULL;
-
-			LoadSpeakerValues(
-				&speaker_matrix.speakers[rend],
-				&DEFAULT_MATRIX.speakers[rend],
-				setting,
-				rend);
 		}
-
-		LoadSpeakerValues(
-			&speaker_matrix.position,
-			&DEFAULT_MATRIX.position,
-			setting,
-			'P' - '0');
-
-		LoadSpeakerValues(
-			&speaker_matrix.direction,
-			&DEFAULT_MATRIX.direction,
-			setting,
-			'D' - '0');
 
 		SYNC_END;
 
-	}
-
-	void Output_Wumpus::LoadSpeakerValues(
-		speaker_T * speaker, 
-		const speaker_T * default_speaker, 
-		const char * setting, 
-		const int offset)
-	{
-
-		if ( speaker && setting )
-		{
-			char name[11];
-			memset(name, 0, 11);
-
-			// copy the name over for manipulation
-			memcpy_s(name, 11, setting, strlen(setting));
-
-			// offset the ascii value
-			name[MATRIX_RENDERER_POSITION] = (char)offset + '0';
-			bool valid = false;
-			float tempf = 0.0;
-			name[MATRIX_AXIS_POSITION] = 'x';
-			tempf = ConfigFile::ReadFloat(name, &valid);
-			if ( valid )
-			{
-				speaker->x = tempf;
-			} else {
-				speaker->x = default_speaker->x;
-			}
-			name[MATRIX_AXIS_POSITION] = 'y';
-			tempf = ConfigFile::ReadFloat(name, &valid);
-			if ( valid )
-			{
-				speaker->y = tempf;
-			} else {
-				speaker->y = default_speaker->y;
-			}
-			name[MATRIX_AXIS_POSITION] = 'z';
-			tempf = ConfigFile::ReadFloat(name, &valid);
-			if ( valid )
-			{
-				speaker->z = tempf;
-			} else {
-				speaker->z = default_speaker->z;
-			}
-		}
-	}
-
-	void Output_Wumpus::SetMatrix( const speaker_matrix_T m )
-	{
-		speaker_matrix = m;
-
-		// if it's a mono source or single stereo
-		// then leave it in the middle otherwise it'll be
-		// wherever the user configured the left speaker to be
-		if ( no_renderers > 1 && split_out == true)
-		{
-			for( char rend=0 ; rend < no_renderers ; rend++ )
-			{
-				if ( renderers[rend] != NULL )
-				{
-					renderers[rend]->SetMatrix( m.speakers[rend] );
-				}
-			}
-
-			alListener3f(
-				AL_POSITION,
-				speaker_matrix.position.x,
-				speaker_matrix.position.y,
-				speaker_matrix.position.z);
-
-			alListener3f(
-				AL_DIRECTION,
-				speaker_matrix.direction.x,
-				speaker_matrix.direction.y,
-				speaker_matrix.direction.z);
-		}
-
-		char setting[MATRIX_BUFFER_SIZE];
-		memset(setting, '\0', MATRIX_BUFFER_SIZE);
-		strcpy_s(setting,11,"matrix_x_y\0");
-		for (char rend=0 ; rend < MAX_RENDERERS ; rend++ )
-		{
-			SaveSpeakerValues(
-				&speaker_matrix.speakers[rend],
-				setting,
-				rend);
-		}
-
-		SaveSpeakerValues(
-			&speaker_matrix.position,
-			setting,
-			'P' - '0');
-
-		SaveSpeakerValues(
-			&speaker_matrix.direction,
-			setting,
-			'D' - '0');
-	}
-
-	void Output_Wumpus::SaveSpeakerValues(
-			const speaker_T * speaker,
-			const char * setting,
-			const int offset)
-	{
-		char name[11];
-		memset(name, 0, 11);
-
-		memcpy_s(name, 11, setting, strlen(setting));
-
-		name[MATRIX_RENDERER_POSITION] = (char)offset + '0';
-
-		name[MATRIX_AXIS_POSITION] = 'x';
-			ConfigFile::WriteFloat( name, speaker->x );
-		name[MATRIX_AXIS_POSITION] = 'y';	
-			ConfigFile::WriteFloat( name, speaker->y );
-		name[MATRIX_AXIS_POSITION] = 'z';	
-			ConfigFile::WriteFloat( name, speaker->z );
 	}
 
 	/*
@@ -586,9 +420,6 @@ namespace WinampOpenALOut {
 			this->Close();
 			stream_open = false;
 		}
-
-		delete effects;
-		effects = NULL;
 
 		ConfigFile::WriteInteger(CONF_VOLUME, (int)(volume * VOLUME_DIVISOR) );
 
@@ -678,11 +509,6 @@ namespace WinampOpenALOut {
 			use_xram = true;
 		}
 
-		if( effects!= NULL)
-		{
-			effects->Setup();
-		}
-
 		/* stereo and mono expansion 
 		 *	we need to store the original number of channels
 		 *	incase we need to expand them out and need to work
@@ -705,8 +531,7 @@ namespace WinampOpenALOut {
 			{
 				renderers[rend] = new Output_Renderer(
 					conf_buffer_length, 
-					rend, 
-					effects);
+					rend);
 				renderers[rend]->SetXRAMEnabled(use_xram);
 				// if we're splitting out, there will always be '1' channel
 				// because we'll split multiple channels out to many single renderers
@@ -722,8 +547,7 @@ namespace WinampOpenALOut {
 			 */
 			renderers[0] = new Output_Renderer(
 				conf_buffer_length,
-				0,
-				effects);
+				0);
 			renderers[0]->SetXRAMEnabled(use_xram);
 			renderers[0]->Open(samplerate,this->number_of_channels,bitspersamp,0,0);
 			no_renderers++;
@@ -753,9 +577,6 @@ namespace WinampOpenALOut {
 
 		pre_buffer_number = NO_BUFFERS_PROCESSED;
 
-		// reload the speaker positions
-		SetMatrix(speaker_matrix);
-
 		SYNC_END;
 
 		return conf_buffer_length;
@@ -783,15 +604,6 @@ namespace WinampOpenALOut {
 				delete renderers[rend];
 				renderers[rend] = NULL;
 			}
-		}
-
-		/*
-		 * if we're using effects we can remove any sources
-		 * that are attached
-		 */
-		if ( this->effects )
-		{
-			effects->OnClose();
 		}
 
 		// just incase the thread has exitted, assume playing has stopped
@@ -1273,9 +1085,8 @@ namespace WinampOpenALOut {
 	*/
 	void Output_Wumpus::SetPan(const int new_pan)
 	{
-		ALfloat f = ((ALfloat)new_pan)/255.0f; 
-		this->speaker_matrix.position.x = -f;
-		//alListener3f(AL_POSITION, -f ,0.0,0.0);
+		ALfloat f = ((ALfloat)new_pan)/255.0f;
+		alListener3f(AL_POSITION, -f ,0.0,0.0);
 	}
 
 	/*
@@ -1486,11 +1297,6 @@ namespace WinampOpenALOut {
 		xram_enabled = enabled;
 		ConfigFile::WriteBoolean(CONF_XRAM_ENABLED,xram_enabled);
 		SwitchOutputDevice(Framework::getInstance()->GetCurrentDevice(),split_out);
-	}
-
-	Output_Effects* Output_Wumpus::GetEffects()
-	{
-		return this->effects;
 	}
 
 }

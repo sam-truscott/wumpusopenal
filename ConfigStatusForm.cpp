@@ -3,8 +3,6 @@
 
 namespace WinampOpenALOut {
 
-	speaker_matrix_T matrix;
-
 	delegate void UpdateData();
 
 	Config::Config(Output_Wumpus *an_output_plugin)
@@ -52,63 +50,6 @@ namespace WinampOpenALOut {
 		checkBoxExpandStereo->Checked = output_plugin->IsStereoExpanded();
 		checkBoxXRAM->Checked = output_plugin->IsXRAMEnabled();
 
-		int i;
-		for ( i = 0 ; i < NO_OF_EFFECTS ; i++ )
-		{
-			this->comboBoxEffect->Items->Add( gcnew String( REVERB_NAMES_TABLE[i] ));
-		}
-
-		int efx_env = ConfigFile::ReadInteger(CONF_EFX_ENV);
-
-		// overflow check
-		if ( efx_env < REVERB_PRESET_GENERIC ||
-			 efx_env > REVERB_PRESET_SMALLWATERROOM )
-		{
-			efx_env = REVERB_PRESET_GENERIC;
-		}
-		this->comboBoxEffect->SelectedIndex = efx_env;
-
-		this->checkBoxEfxEnabled->Checked = ConfigFile::ReadBoolean(CONF_EFX_ENABLED);
-
-		this->checkBoxSplit->Checked = output_plugin->IsSplit();
-
-		if(this->checkBoxSplit->Checked)
-		{
-			this->checkBoxEfxEnabled->Enabled = true;
-		}
-		else
-		{
-			this->checkBoxEfxEnabled->Enabled = false;
-		}
-
-		speaker_matrix_T matrix = output_plugin->GetMatrix();
-		numFLx->Value = (System::Decimal)matrix.speakers[0].x;
-		numFLy->Value = (System::Decimal)matrix.speakers[0].y;
-		numFLz->Value = (System::Decimal)matrix.speakers[0].z;
-		numFRx->Value = (System::Decimal)matrix.speakers[1].x;
-		numFRy->Value = (System::Decimal)matrix.speakers[1].y;
-		numFRz->Value = (System::Decimal)matrix.speakers[1].z;
-		numRLx->Value = (System::Decimal)matrix.speakers[2].x;
-		numRLy->Value = (System::Decimal)matrix.speakers[2].y;
-		numRLz->Value = (System::Decimal)matrix.speakers[2].z;
-		numRRx->Value = (System::Decimal)matrix.speakers[3].x;
-		numRRy->Value = (System::Decimal)matrix.speakers[3].y;
-		numRRz->Value = (System::Decimal)matrix.speakers[3].z;
-		numCx->Value = (System::Decimal)matrix.speakers[4].x;
-		numCy->Value = (System::Decimal)matrix.speakers[4].y;
-		numCz->Value = (System::Decimal)matrix.speakers[4].z;
-		numSx->Value = (System::Decimal)matrix.speakers[5].x;
-		numSy->Value = (System::Decimal)matrix.speakers[5].y;
-		numSz->Value = (System::Decimal)matrix.speakers[5].z;
-
-		numPosX->Value = (System::Decimal)matrix.position.x;
-		numPosY->Value = (System::Decimal)matrix.position.y;
-		numPosZ->Value = (System::Decimal)matrix.position.z;
-
-		numDirectionX->Value = (System::Decimal)matrix.direction.x;
-		numDirectionY->Value = (System::Decimal)matrix.direction.y;
-		numDirectionZ->Value = (System::Decimal)matrix.direction.z;
-
 		ShowDeviceDetails();
 	}
 
@@ -135,11 +76,6 @@ namespace WinampOpenALOut {
 	void Config::ApplyChanges()
 	{
 		Int32 new_device = comboBoxDevices->SelectedIndex;
-
-		if ( output_plugin->IsSplit() != checkBoxSplit->Checked )
-		{
-			output_plugin->SetSplit( checkBoxSplit->Checked );
-		}
 
 		if(new_device != current_device && new_device != -1) {
 			// if we've changed device switch device and save
@@ -168,35 +104,9 @@ namespace WinampOpenALOut {
 			output_plugin->SetXRAMEnabled(checkBoxXRAM->Checked);
 		}
 
-		if(output_plugin->GetEffects()->GetCurrentEffect() != comboBoxEffect->SelectedIndex)
-		{
-			output_plugin->GetEffects()->SetCurrentEffect((effects_list)comboBoxEffect->SelectedIndex);
-			ConfigFile::WriteInteger(CONF_EFX_ENV, comboBoxEffect->SelectedIndex);
-		}
-
-		if(output_plugin->GetEffects()->IsEnabled() != checkBoxEfxEnabled->Checked)
-		{
-			if ( !output_plugin->GetEffects()->Enable(checkBoxEfxEnabled->Checked) )
-			{
-				checkBoxEfxEnabled->Checked = false;
-				output_plugin->GetEffects()->Enable(false);
-			}
-		}
-
-		matrix.position.x = (float)numPosX->Value;
-		matrix.position.y = (float)numPosY->Value;
-		matrix.position.z = (float)numPosZ->Value;
-
-		matrix.direction.x = (float)numDirectionX->Value;
-		matrix.direction.y = (float)numDirectionY->Value;
-		matrix.direction.z = (float)numDirectionZ->Value;
-
-		output_plugin->SetMatrix(matrix);
-
 		ConfigFile::WriteBoolean(CONF_MONO_EXPAND, checkBoxExpandMono->Checked);
 		ConfigFile::WriteBoolean(CONF_STEREO_EXPAND, checkBoxExpandStereo->Checked);
 		ConfigFile::WriteBoolean(CONF_XRAM_ENABLED, checkBoxXRAM->Checked);
-		ConfigFile::WriteBoolean(CONF_EFX_ENABLED, checkBoxEfxEnabled->Checked);
 		
 		ShowDeviceDetails();
 	}
@@ -254,14 +164,25 @@ namespace WinampOpenALOut {
 
 		if (alcIsExtensionPresent(NULL, "ALC_ENUMERATION_EXT")) {
 			listBoxExtensions->Items->Add("Present: ALC_ENUMERATION_EXT");
-		}else{
+		} else {
 			listBoxExtensions->Items->Add("Absent: ALC_ENUMERATION_EXT");
 		}
 
 		if (alcIsExtensionPresent(NULL, "ALC_ENUMERATE_ALL_EXT")) {
 			listBoxExtensions->Items->Add("Present: ALC_ENUMERATE_ALL_EXT");
-		}else{
+		} else {
 			listBoxExtensions->Items->Add("Absent: ALC_ENUMERATE_ALL_EXT");
+		}
+
+		if (alcIsExtensionPresent(NULL, "AL_EXT_float32")) {
+			listBoxExtensions->Items->Add("Present: AL_EXT_float32");
+		} else {
+			listBoxExtensions->Items->Add("Absent: AL_EXT_float32");
+		}
+		if (alcIsExtensionPresent(NULL, "AL_EXT_MCFORMATS")) {
+			listBoxExtensions->Items->Add("Present: AL_EXT_MCFORMATS");
+		} else {
+			listBoxExtensions->Items->Add("Absent: AL_EXT_MCFORMATS");
 		}
 
 		// get the device
@@ -272,24 +193,6 @@ namespace WinampOpenALOut {
 			listBoxExtensions->Items->Add("Present: ALC_EXT_EFX");
 		}else{
 			listBoxExtensions->Items->Add("Absent: ALC_EXT_EFX");
-		}
-	}
-
-	void Config::UpdateMatrix(char speaker, char xyz, Decimal value)
-	{
-		switch (xyz)
-		{
-			case 0:
-				matrix.speakers[speaker].x = (float)value;
-				break;
-			case 1:
-				matrix.speakers[speaker].y = (float)value;
-				break;
-			case 2:
-				matrix.speakers[speaker].z = (float)value;
-				break;
-			default:
-				break;
 		}
 	}
 }

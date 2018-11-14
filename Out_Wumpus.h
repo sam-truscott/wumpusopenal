@@ -66,14 +66,6 @@ namespace WinampOpenALOut
 
 		inline bool	IsXRAMPresent() { return xram_detected; }
 
-		void SetMatrix( const speaker_matrix_T m );
-		inline speaker_matrix_T GetMatrix(void)
-		{
-			return speaker_matrix;
-		}
-
-		class Output_Effects* GetEffects();
-
 	protected:
 
 		inline void OnError();
@@ -162,24 +154,9 @@ namespace WinampOpenALOut
 		class Output_Renderer* renderers[MAX_RENDERERS];
 		char			no_renderers;
 
-		class Output_Effects	*effects;
-
 		bool split_out;
 
-		speaker_matrix_T speaker_matrix;
-
 	private:
-
-		void LoadSpeakerValues(
-			speaker_T * speaker, 
-			const speaker_T * default_speaker, 
-			const char * setting, 
-			const int offset);
-
-		void SaveSpeakerValues(
-			const speaker_T * speaker,
-			const char * setting,
-			const int offset);
 
 		void log_debug_msg(char* msg, char* file = __FILE__, int line = __LINE__);
 	};

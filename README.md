@@ -1,9 +1,13 @@
 Wumpus Out OpenAL
 =================
 
-Winamp.com and all associated services will stop on Dec 20th, 2013.
+~~Winamp.com and all associated services will stop on Dec 20th, 2013.~~
 
-There will be no further development.
+Winamp is back!
+
+~~There will be no further development.~~
+
+There'll be some development but given the new WASAPI plugin is present in Winamp 5.8 I see little need for this plugin.
 
 Install
 =======
@@ -16,14 +20,11 @@ Features
 * Hardware acceleration support
 * Low CPU utilisation even with software rendering
 * Expand Mono and Stereo to 4.0 (small performance hit)
-* 3D, move your speakers around
-* Reverb effects
 * XRAM support
 
 Known Issues
 ============
-* No 24bit audio support, OpenAL doesn't support it
-* With 3D mode enabled, the streams go out of time
+* No 24bit audio support, OpenAL doesn't support it - this may no longer apply
 
 Development
 ===========
@@ -37,6 +38,13 @@ we need to talk to Winamp. On my system it's: C:\Program Files\Winamp SDK\Winamp
 
 Change Log
 ==========
+
+v1.1.0
+======
+* Rebuilt with Vs2017
+* Upgrade to OpenAL SDK 1.0.1
+* Using Winamp SDK 5.5
+* Removed EAX/EFX & 3D Support
 
 v1.0.1
 ======

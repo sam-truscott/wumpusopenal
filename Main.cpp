@@ -48,10 +48,6 @@ void WAOP_About(HWND hwndParent)
 
 void WAOP_Initialise()
 {
-	//_CrtSetBreakAlloc(452);
-	//_CrtSetBreakAlloc(1915);
-	//_CrtSetBreakAlloc(449);
-
 	if(outputWumpus)
 	{
 		outputWumpus->Quit();
