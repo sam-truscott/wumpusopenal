@@ -1019,7 +1019,7 @@ namespace WinampOpenALOut {
 		// we may start to play data before it's ready
 		// and cause and under-run
 		
-		if ( !this->pre_buffer )
+		if ( !this->pre_buffer || last_pause )
 		{
 			for ( char rend=0 ; rend < no_renderers ; rend++ )
 			{
@@ -1124,13 +1124,25 @@ namespace WinampOpenALOut {
 		 * if this isn't done, winamp will continue to skip past the end of
 		 * the file.
 		 */
-		if ( stream_open && (new_time_in_ms < (Winamp::GetTrackLength()-conf_buffer_length)) )
+		if ( stream_open )//&& (new_time_in_ms < (Winamp::GetTrackLength()-conf_buffer_length)) )
 		{
 			// calculate the number of bytes that will have been
 			// this will relocate to the current device at a set time
 			this->Relocate(Framework::getInstance()->GetCurrentDevice(), new_time_in_ms, split_out);
 
 			CheckPlayState();
+
+			if ( last_pause )
+			{
+				for ( char rend=0 ; rend < no_renderers ; rend++ )
+				{
+					if ( renderers[rend] )
+					{
+						renderers[rend]->Pause(last_pause);
+					}
+				}
+			}
+
 		}else{
 			this->Close();
 			closing = true;
